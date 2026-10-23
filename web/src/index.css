@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Ishara Claymorphism Design Tokens */
+  --clay-bg: #E9EEF7;
+  --clay-surface: #F3F6FC;
+  --clay-primary: #7C9CFF;
+  --clay-primary-dark: #6386F5;
+  --clay-secondary: #FFB59E;
+  --clay-coral: #FF8A8A;
+  --clay-success: #A8E6A1;
+  --clay-purple: #D4A5FF;
+  --clay-text: #2B2D42;
+  --clay-muted: #6E7387;
+  --clay-radius: 28px;
+  
+  /* Dual outer shadow for raised elements (cards & buttons only) */
+  --clay-raised: 8px 8px 16px rgba(150, 165, 195, 0.55), -8px -8px 16px rgba(255, 255, 255, 0.9);
+  --clay-raised-sm: 4px 4px 8px rgba(150, 165, 195, 0.45), -4px -4px 8px rgba(255, 255, 255, 0.9);
+  
+  /* Dual inner shadow for pressed/active elements and inputs */
+  --clay-pressed: inset 4px 4px 8px rgba(150, 165, 195, 0.55), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+  --clay-pressed-sm: inset 2px 2px 4px rgba(150, 165, 195, 0.45), inset -2px -2px 4px rgba(255, 255, 255, 0.9);
+
+  --clay-font: 'Nunito', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--clay-bg);
+  color: var(--clay-text);
+  font-family: var(--clay-font);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Clay Component Utility Classes — Shadows restricted strictly to cards and buttons */
+@layer components {
+  .clay-card {
+    background-color: var(--clay-bg);
+    border-radius: var(--clay-radius);
+    box-shadow: var(--clay-raised);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .clay-card-flat {
+    background-color: #FFFFFF;
+    border-radius: var(--clay-radius);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .clay-button {
+    background-color: var(--clay-primary);
+    color: #FFFFFF;
+    border: 0;
+    border-radius: var(--clay-radius);
+    box-shadow: var(--clay-raised);
+    padding: 12px 24px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .clay-button:hover {
+    filter: brightness(1.03);
+    transform: translateY(-1px);
+  }
+
+  .clay-button:active {
+    box-shadow: var(--clay-pressed);
+    transform: translateY(1px);
+  }
+
+  .clay-button-coral {
+    background-color: var(--clay-secondary);
+    color: var(--clay-text);
+  }
+
+  .clay-button-green {
+    background-color: var(--clay-success);
+    color: var(--clay-text);
+  }
+
+  .clay-button-purple {
+    background-color: var(--clay-purple);
+    color: var(--clay-text);
+  }
+
+  .clay-button-white {
+    background-color: #FFFFFF;
+    color: var(--clay-text);
+  }
+
+  .clay-input {
+    background-color: var(--clay-bg);
+    border: 0;
+    border-radius: var(--clay-radius);
+    box-shadow: var(--clay-pressed);
+    padding: 14px 22px;
+    color: var(--clay-text);
+    outline: none;
+    transition: box-shadow 0.15s ease;
+  }
+
+  .clay-input:focus {
+    box-shadow: inset 4px 4px 8px rgba(130, 145, 185, 0.65), inset -4px -4px 8px rgba(255, 255, 255, 0.95), 0 0 0 2px var(--clay-primary);
+  }
+
+  /* Mandatory visible keyboard focus ring (WCAG AA) */
+  .clay-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#7C9CFF];
+  }
+}
