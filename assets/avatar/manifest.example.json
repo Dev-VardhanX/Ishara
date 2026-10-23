@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "clips": [
+    { "gloss": "HELLO", "language": "ISL", "file": "ISL_HELLO.glb", "duration_ms": 1200 },
+    { "gloss": "HELLO", "language": "ASL", "file": "ASL_HELLO.glb", "duration_ms": 1000 }
+  ]
+}

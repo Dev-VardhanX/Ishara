@@ -1,0 +1,15 @@
+:root {
+  --clay-bg: #E9EEF7;
+  --clay-primary: #7C9CFF;
+  --clay-secondary: #FFB59E;
+  --clay-success: #A8E6A1;
+  --clay-text: #2B2D42;
+  --clay-radius: 28px;
+  --clay-raised: 8px 8px 16px rgba(150,165,195,0.55), -8px -8px 16px rgba(255,255,255,0.9);
+  --clay-pressed: inset 4px 4px 8px rgba(150,165,195,0.55), inset -4px -4px 8px rgba(255,255,255,0.9);
+  --clay-font: 'Nunito', system-ui, sans-serif;
+}
+.clay-card   { background: var(--clay-bg); border-radius: var(--clay-radius); box-shadow: var(--clay-raised); color: var(--clay-text); font-family: var(--clay-font); }
+.clay-button { background: var(--clay-primary); color: var(--clay-text); border: 0; border-radius: var(--clay-radius); box-shadow: var(--clay-raised); padding: 12px 24px; font-family: var(--clay-font); font-weight: 700; }
+.clay-button:active, .clay-input { box-shadow: var(--clay-pressed); }
+.clay-input  { background: var(--clay-bg); border: 0; border-radius: var(--clay-radius); padding: 12px 20px; color: var(--clay-text); }

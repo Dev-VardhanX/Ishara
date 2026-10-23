@@ -1,0 +1,8 @@
+# Replace the usernames with your real GitHub usernames
+/ml/        @username-a
+/android/   @username-b
+/backend/   @username-b
+/web/       @username-c
+/assets/    @username-c
+/design/    @username-c
+/docs/contracts/ @username-a @username-b @username-c

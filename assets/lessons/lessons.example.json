@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "isl-greetings-1",
+      "language": "ISL",
+      "title": "Greetings",
+      "signs": ["HELLO", "THANK_YOU", "PLEASE"],
+      "quiz": [
+        { "question": "Which sign is this?", "gloss": "HELLO", "options": ["HELLO", "SORRY", "YES"], "answer": "HELLO" }
+      ]
+    }
+  ]
+}

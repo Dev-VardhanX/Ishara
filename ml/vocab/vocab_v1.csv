@@ -1,0 +1,12 @@
+gloss,category,in_isl,in_asl,notes
+HELLO,greetings,yes,yes,
+THANK_YOU,greetings,yes,yes,
+PLEASE,greetings,yes,yes,
+SORRY,greetings,yes,yes,
+YES,basic,yes,yes,
+NO,basic,yes,yes,
+HELP,emergency,yes,yes,
+WATER,food,yes,yes,
+FOOD,food,yes,yes,
+MOTHER,family,yes,yes,
+FATHER,family,yes,yes,
