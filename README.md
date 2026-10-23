@@ -9,9 +9,9 @@ Design theme: claymorphism.
 
 | Member | Role | Folders they own | GitHub |
 |---|---|---|---|
-| Member A | AI / ML | `ml/` | @username-a |
-| Member B | Android app + backend | `android/`, `backend/` | @username-b |
-| Member C | Website + 3D avatar + design | `web/`, `assets/`, `design/` | @username-c |
+| Member A | AI / ML | `ml/` | @lucky|
+| Member B | Android app + backend | `android/`, `backend/` | @dev vardhan|
+| Member C | Website + 3D avatar + design | `web/`, `assets/`, `design/` | @khushi|
 
 `docs/` and `docs/contracts/` are shared. Change a contract only after telling the other two.
 
