@@ -263,19 +263,9 @@ export const SignToVoicePage: React.FC = () => {
         ctx.restore();
 
         // 2. Classify with active Recognizer (passes all detected hands)
-        const result = recognizerRef.current.recognize(hands, startTimeMs);
-
-        if (result) {
-          setLiveCandidate(result.gloss);
-          setHoldProgress(recognizerRef.current.getHoldProgress());
-        } else {
-          setLiveCandidate(null);
-          setHoldProgress(0);
-        }
+        recognizerRef.current.recognize(hands, startTimeMs);
       } else {
         recognizerRef.current.recognize([], performance.now());
-        setLiveCandidate(null);
-        setHoldProgress(0);
       }
     }
 

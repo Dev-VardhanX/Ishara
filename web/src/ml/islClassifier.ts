@@ -516,10 +516,10 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   const nDist3D = (i: number, j: number) => dist3D(landmarks[i], landmarks[j]) / palmSize3D;
 
   // Finger 3D extension tests (scale normalized, depth-invariant to camera foreshortening)
-  const indexExtended3D = nDist3D(INDEX_TIP, INDEX_MCP) > 0.48 || nDist3D(INDEX_TIP, WRIST) > 0.85;
-  const middleExtended3D = nDist3D(MIDDLE_TIP, MIDDLE_MCP) > 0.48 || nDist3D(MIDDLE_TIP, WRIST) > 0.85;
-  const ringExtended3D = nDist3D(RING_TIP, RING_MCP) > 0.48 || nDist3D(RING_TIP, WRIST) > 0.85;
-  const pinkyExtended3D = nDist3D(PINKY_TIP, PINKY_MCP) > 0.44 || nDist3D(PINKY_TIP, WRIST) > 0.80;
+  const indexExtended3D = nDist3D(INDEX_TIP, INDEX_MCP) > 0.50 || nDist3D(INDEX_TIP, WRIST) > 1.20;
+  const middleExtended3D = nDist3D(MIDDLE_TIP, MIDDLE_MCP) > 0.50 || nDist3D(MIDDLE_TIP, WRIST) > 1.20;
+  const ringExtended3D = nDist3D(RING_TIP, RING_MCP) > 0.50 || nDist3D(RING_TIP, WRIST) > 1.20;
+  const pinkyExtended3D = nDist3D(PINKY_TIP, PINKY_MCP) > 0.45 || nDist3D(PINKY_TIP, WRIST) > 1.15;
 
   // Finger 3D curls (joints folded inward toward palm)
   const indexCurled3D = nDist3D(INDEX_TIP, INDEX_MCP) < 0.38;
@@ -551,7 +551,6 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   const thumbDown = thumbExtended && landmarks[THUMB_TIP].y > landmarks[THUMB_MCP].y + 0.04 && indexCurled && middleCurled;
 
   // Compound Shapes
-  const openPalm = indexExtended && middleExtended && ringExtended && pinkyExtended;
   const fist = indexCurled && middleCurled && ringCurled && pinkyCurled && !thumbUp && !thumbDown;
 
   // Bunched fingertips: all 5 tips close together (eating/food handshape)
@@ -560,6 +559,13 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     nDist2D(THUMB_TIP, MIDDLE_TIP) < 0.45 &&
     nDist2D(THUMB_TIP, RING_TIP) < 0.50 &&
     nDist2D(THUMB_TIP, PINKY_TIP) < 0.55;
+
+  const extendedFingerCount =
+    (indexExtended ? 1 : 0) +
+    (middleExtended ? 1 : 0) +
+    (ringExtended ? 1 : 0) +
+    (pinkyExtended ? 1 : 0);
+  const openPalm = extendedFingerCount >= 3 && !fist && !bunchedTips;
 
   // C-handshape: curved hand as if holding a glass
   const cHandshape =
@@ -588,8 +594,8 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     pinkyCurled &&
     nDist2D(INDEX_TIP, MIDDLE_TIP) < 0.35;
 
-  // Pointing: only index extended, other 3 fingers curled, thumb not interfering
-  const pointing = indexExtended && middleCurled && ringCurled && pinkyCurled && !thumbUp && !thumbDown;
+  // Pointing: only index clearly extended, middle/ring/pinky not extended
+  const pointing = indexExtended && !middleExtended && !ringExtended && !pinkyExtended;
 
   // 3D Pointing Direction vectors
   const indexTipZ = landmarks[INDEX_TIP].z ?? 0;
@@ -598,21 +604,30 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   const deltaX = landmarks[INDEX_TIP].x - landmarks[INDEX_MCP].x;
   const deltaY = landmarks[INDEX_TIP].y - landmarks[INDEX_MCP].y;
 
-  // Pointing laterally sideways (third person reference: HE / SHE / THEY)
-  const pointingToSide = pointing && Math.abs(deltaX) >= 0.12;
+  // Chest target zone: fingertip in front of the signer's torso
+  const tipInTorso =
+    landmarks[INDEX_TIP].x >= 0.25 &&
+    landmarks[INDEX_TIP].x <= 0.75 &&
+    landmarks[INDEX_TIP].y >= 0.30 &&
+    landmarks[INDEX_TIP].y <= 0.82;
 
-  // Pointing towards camera (tip extended forward towards viewer in depth)
+  // Pointing towards camera (YOU: tip extended forward towards viewer in depth)
   // Negative deltaZ means tip is closer to the camera than the MCP knuckle
-  const pointingToCamera = pointing && !pointingToSide && deltaZ < -0.015 && deltaY < 0.12 && Math.abs(deltaX) < 0.14;
+  const pointingToCamera = pointing && deltaZ < -0.012 && deltaY < 0.15 && Math.abs(deltaX) < 0.16;
 
-  // Pointing towards chest / self (tip directed backward/inward toward body or downwards at sternum)
-  // Positive or near-zero deltaZ, or index finger directed down/inward towards torso
+  // Pointing laterally sideways (HE/SHE/THEY: pointing outward away from torso center into room)
+  const pointingToSide =
+    pointing &&
+    !pointingToCamera &&
+    ((wrist.x >= 0.50 && deltaX > 0.08) || (wrist.x < 0.50 && deltaX < -0.08) || Math.abs(deltaX) >= 0.16) &&
+    (landmarks[INDEX_TIP].x < 0.30 || landmarks[INDEX_TIP].x > 0.70);
+
+  // Pointing towards chest / self (I/ME: fingertip targeting own chest/sternum)
   const pointingToChest =
     pointing &&
-    !pointingToSide &&
     !pointingToCamera &&
-    (deltaZ >= -0.015 || deltaY > -0.02 || landmarks[INDEX_TIP].y > 0.40) &&
-    Math.abs(deltaX) < 0.14;
+    !pointingToSide &&
+    (tipInTorso || deltaZ >= -0.012 || deltaY > -0.04);
 
   // T-handshape (ASL Bathroom): thumb tucked between index and middle
   const tHandshape =
@@ -977,11 +992,11 @@ export class MultiLanguageClassifier {
       return formatResult('SLEEP', 0.92);
     }
 
-    // 2.4 HELLO (Open palm raised near temple/brow/face, whether waving or held steady)
-    // Note: GOODBYE is removed per user request so all open-palm wave or salute gestures classify cleanly as HELLO.
+    // 2.4 HELLO (Open palm raised high near temple/brow/face, whether waving or held steady)
+    // Note: Raised high in face/temple zone or waving beside head/upper body
     if (
       f0.openPalm &&
-      (hands[0][MIDDLE_TIP].y < 0.48 || f0.isFaceZone || hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.02)
+      (hands[0][MIDDLE_TIP].y < 0.42 || f0.isFaceZone || (isWaving && hands[0][MIDDLE_TIP].y < 0.52))
     ) {
       return formatResult('HELLO', 0.95);
     }
@@ -1170,13 +1185,13 @@ export class MultiLanguageClassifier {
       f0.pointingToCamera &&
       !f0.pointingToSide &&
       tipOscillationsX < 2 &&
-      Math.abs(dx) < 0.05
+      Math.abs(dx) < 0.06
     ) {
       return formatResult('YOU', 0.95);
     }
 
     // 2.28 ME (Index finger pointing to chest with distinct tapping motion on sternum)
-    const isTappingChest = oscillationsY >= 1 || Math.abs(dy) > 0.025;
+    const isTappingChest = oscillationsY >= 1 || Math.abs(dy) >= 0.015;
     if (
       f0.pointing &&
       f0.isChestZone &&
@@ -1190,7 +1205,7 @@ export class MultiLanguageClassifier {
     // 2.29 I (Index finger pointing steadily to chest, OR ASL pinky-I shape on chest)
     if (
       (f0.pointing && f0.isChestZone && f0.pointingToChest && !f0.pointingToSide && !isTappingChest) ||
-      (f0.pinkyExtended && f0.indexCurled && f0.middleCurled && f0.ringCurled && f0.isChestZone)
+      (f0.pinkyExtended && !f0.indexExtended && !f0.middleExtended && !f0.ringExtended && f0.isChestZone)
     ) {
       return formatResult('I', 0.95);
     }
@@ -1280,7 +1295,7 @@ export class ISLRecognizer implements Recognizer {
   private candidateGloss: string | null = null;
   private candidateConfidence: number = 0;
   private candidateStableFrames: number = 0;
-  private readonly requiredStableFrames: number = 5; // ~160ms stability threshold
+  private readonly requiredStableFrames: number = 3; // ~100ms snappy response threshold
 
   // Cooldown to avoid duplicate continuous triggers of the same sign
   private lastConfirmedGloss: string | null = null;
@@ -1410,9 +1425,13 @@ export class ISLRecognizer implements Recognizer {
         this.candidateStableFrames++;
       }
     } else {
-      this.candidateGloss = result.gloss;
-      this.candidateConfidence = result.confidence;
-      this.candidateStableFrames = isSameAsLastConfirmed ? 0 : 1;
+      if (this.candidateStableFrames > 2) {
+        this.candidateStableFrames--;
+      } else {
+        this.candidateGloss = result.gloss;
+        this.candidateConfidence = result.confidence;
+        this.candidateStableFrames = isSameAsLastConfirmed ? 0 : 1;
+      }
     }
 
     const progress = Math.min(1.0, this.candidateStableFrames / this.requiredStableFrames);
