@@ -81,37 +81,40 @@ export class RuleBasedRecognizer implements Recognizer {
     // Thumb pointing up check: thumb tip significantly higher than thumb MCP
     const thumbPointingUp = landmarks[THUMB_TIP].y < landmarks[THUMB_MCP].y - 0.05;
 
-    // 1. OK Sign: thumb and index tips touch while middle, ring, pinky are extended
-    if (isThumbIndexTouching && middleExtended && ringExtended && pinkyExtended) {
-      return {
-        gloss: 'OK',
-        confidence: 0.94,
-        landmarksDetected: landmarks.length,
-      };
-    }
+    // Thumb pointing down check
+    const thumbPointingDown = landmarks[THUMB_TIP].y > landmarks[THUMB_MCP].y + 0.05;
 
-    // 2. Thumbs Up = YES: thumb up, all 4 other fingers curled
+    // 1. Thumbs Up = GOOD: thumb up, all 4 other fingers curled
     if (thumbPointingUp && !indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
       return {
-        gloss: 'YES',
+        gloss: 'GOOD',
         confidence: 0.96,
         landmarksDetected: landmarks.length,
       };
     }
 
-    // 3. Fist = NO: all 4 fingers curled, thumb folded across fingers
-    if (!thumbPointingUp && !indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
+    // 2. Thumbs Down = BAD
+    if (thumbPointingDown && !indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
       return {
-        gloss: 'NO',
-        confidence: 0.91,
+        gloss: 'BAD',
+        confidence: 0.95,
         landmarksDetected: landmarks.length,
       };
     }
 
-    // 4. Pointing Index = YOU: index extended, other 3 fingers curled
-    if (indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
+    // 3. Fist = NO: all 4 fingers curled, thumb folded across fingers
+    if (!thumbPointingUp && !thumbPointingDown && !indexExtended && !middleExtended && !ringExtended && !pinkyExtended) {
       return {
-        gloss: 'YOU',
+        gloss: 'NO',
+        confidence: 0.92,
+        landmarksDetected: landmarks.length,
+      };
+    }
+
+    // 4. ILY Sign = LOVE: thumb, index, pinky extended while middle and ring are curled
+    if (indexExtended && pinkyExtended && !middleExtended && !ringExtended) {
+      return {
+        gloss: 'LOVE',
         confidence: 0.95,
         landmarksDetected: landmarks.length,
       };

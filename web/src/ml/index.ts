@@ -1,33 +1,37 @@
 // src/ml/index.ts — Central Machine Learning & Recognizer Provider
 // Configures and exports the active recognizer for the Ishara application.
-// To switch to a trained model or ONNX classifier in the future, simply update
-// the `createActiveRecognizer()` factory or `ACTIVE_RECOGNIZER_TYPE`.
 
 import { Recognizer, RuleBasedRecognizer, OnnxRecognizer } from '../lib/recognizer';
 import { DemoRecognizer, DemoRecognizerCallbacks } from './demoRecognizer';
+import { ISLRecognizer, ISLRecognizerCallbacks } from './islClassifier';
 
-export type RecognizerType = 'demo' | 'rule_based' | 'onnx';
+export type RecognizerType = 'isl_realtime' | 'demo' | 'rule_based' | 'onnx';
 
-// Currently active recognizer type for the application
-export const ACTIVE_RECOGNIZER_TYPE: RecognizerType = 'demo';
+// Active recognizer type: ISL + ASL Multi-Language Realtime Recognizer supporting 20 signs
+export const ACTIVE_RECOGNIZER_TYPE: RecognizerType = 'isl_realtime';
 
 /**
  * Factory function creating the configured recognizer.
- * Put the recognizer choice in this one place so a real model can easily replace it later.
  */
-export function createActiveRecognizer(callbacks?: DemoRecognizerCallbacks): Recognizer {
+export function createActiveRecognizer(
+  callbacks?: ISLRecognizerCallbacks | DemoRecognizerCallbacks
+): Recognizer {
   switch (ACTIVE_RECOGNIZER_TYPE) {
+    case 'isl_realtime':
+      return new ISLRecognizer(callbacks as ISLRecognizerCallbacks);
     case 'demo':
-      return new DemoRecognizer(callbacks);
+      return new DemoRecognizer(callbacks as DemoRecognizerCallbacks);
     case 'rule_based':
       return new RuleBasedRecognizer();
     case 'onnx':
       return new OnnxRecognizer();
     default:
-      return new DemoRecognizer(callbacks);
+      return new ISLRecognizer(callbacks as ISLRecognizerCallbacks);
   }
 }
 
+export * from './islClassifier';
+export * from './sentenceBuilder';
 export * from './demoRecognizer';
 export * from './demoPhrases';
 export * from './handTracker';

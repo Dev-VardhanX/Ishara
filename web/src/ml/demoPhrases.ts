@@ -1,6 +1,5 @@
 // src/ml/demoPhrases.ts — Scripted Demo Phrases for ISL and ASL
-// Each phrase contains human text, gloss sequence, confidence score (0.82-0.96),
-// and optional gesture binding for live presentation demos.
+// Restricts vocabulary strictly to the 20 target vocabulary words.
 
 export interface DemoPhrase {
   id: string;
@@ -16,91 +15,89 @@ export const DEMO_PHRASES: DemoPhrase[] = [
     id: 'phrase_1',
     text: 'Hello, how are you?',
     words: ['Hello,', 'how', 'are', 'you?'],
-    glossSequence: ['HELLO', 'HOW', 'YOU'],
+    glossSequence: ['HELLO', 'HOW_ARE_YOU'],
     confidence: 0.95,
     triggerGesture: 'open_palm',
   },
   {
     id: 'phrase_2',
-    text: 'Nice to meet you.',
-    words: ['Nice', 'to', 'meet', 'you.'],
-    glossSequence: ['NICE', 'MEET', 'YOU'],
-    confidence: 0.92,
+    text: 'Thank you, my friend!',
+    words: ['Thank', 'you,', 'my', 'friend!'],
+    glossSequence: ['THANK_YOU', 'FRIEND'],
+    confidence: 0.96,
   },
   {
     id: 'phrase_3',
-    text: 'I am happy to meet you today.',
-    words: ['I', 'am', 'happy', 'to', 'meet', 'you', 'today.'],
-    glossSequence: ['I', 'HAPPY', 'MEET', 'YOU', 'TODAY'],
-    confidence: 0.89,
-  },
-  {
-    id: 'phrase_4',
-    text: 'Thank you very much.',
-    words: ['Thank', 'you', 'very', 'much.'],
-    glossSequence: ['THANK_YOU', 'VERY', 'MUCH'],
-    confidence: 0.96,
-    triggerGesture: 'ok_sign',
-  },
-  {
-    id: 'phrase_5',
-    text: 'Please help me.',
-    words: ['Please', 'help', 'me.'],
-    glossSequence: ['PLEASE', 'HELP', 'ME'],
-    confidence: 0.93,
+    text: 'Please help me!',
+    words: ['Please', 'help', 'me!'],
+    glossSequence: ['PLEASE', 'HELP'],
+    confidence: 0.94,
     triggerGesture: 'pointing',
   },
   {
-    id: 'phrase_6',
-    text: 'Sorry, I did not understand.',
-    words: ['Sorry,', 'I', 'did', 'not', 'understand.'],
-    glossSequence: ['SORRY', 'I', 'NOT', 'UNDERSTAND'],
-    confidence: 0.86,
+    id: 'phrase_4',
+    text: 'Sorry, please forgive me.',
+    words: ['Sorry,', 'please', 'forgive', 'me.'],
+    glossSequence: ['SORRY', 'PLEASE'],
+    confidence: 0.92,
   },
   {
-    id: 'phrase_7',
-    text: 'Good morning.',
-    words: ['Good', 'morning.'],
-    glossSequence: ['GOOD', 'MORNING'],
-    confidence: 0.94,
-  },
-  {
-    id: 'phrase_8',
-    text: 'Where is the nearest metro station?',
-    words: ['Where', 'is', 'the', 'nearest', 'metro', 'station?'],
-    glossSequence: ['WHERE', 'NEAREST', 'METRO', 'STATION'],
-    confidence: 0.83,
-  },
-  {
-    id: 'phrase_9',
-    text: 'I need a doctor.',
-    words: ['I', 'need', 'a', 'doctor.'],
-    glossSequence: ['I', 'NEED', 'DOCTOR'],
-    confidence: 0.88,
-  },
-  {
-    id: 'phrase_10',
-    text: 'Yes, I understand.',
-    words: ['Yes,', 'I', 'understand.'],
-    glossSequence: ['YES', 'I', 'UNDERSTAND'],
+    id: 'phrase_5',
+    text: 'Yes, that is good.',
+    words: ['Yes,', 'that', 'is', 'good.'],
+    glossSequence: ['YES', 'GOOD'],
     confidence: 0.95,
     triggerGesture: 'thumbs_up',
   },
   {
-    id: 'phrase_11',
+    id: 'phrase_6',
     text: 'No, thank you.',
     words: ['No,', 'thank', 'you.'],
     glossSequence: ['NO', 'THANK_YOU'],
-    confidence: 0.91,
+    confidence: 0.93,
     triggerGesture: 'fist',
+  },
+  {
+    id: 'phrase_7',
+    text: 'Goodbye, my friend!',
+    words: ['Goodbye,', 'my', 'friend!'],
+    glossSequence: ['GOODBYE', 'FRIEND'],
+    confidence: 0.95,
+  },
+  {
+    id: 'phrase_8',
+    text: 'Please, I need water.',
+    words: ['Please,', 'I', 'need', 'water.'],
+    glossSequence: ['PLEASE', 'WATER'],
+    confidence: 0.92,
+  },
+  {
+    id: 'phrase_9',
+    text: 'Eat food.',
+    words: ['Eat', 'food.'],
+    glossSequence: ['EAT', 'FOOD'],
+    confidence: 0.94,
+  },
+  {
+    id: 'phrase_10',
+    text: 'Drink water.',
+    words: ['Drink', 'water.'],
+    glossSequence: ['DRINK', 'WATER'],
+    confidence: 0.95,
+  },
+  {
+    id: 'phrase_11',
+    text: 'I love home.',
+    words: ['I', 'love', 'home.'],
+    glossSequence: ['LOVE', 'HOME'],
+    confidence: 0.93,
   },
 ];
 
-// Mapping from detected gesture type to preferred phrase ID
+// Mapping from detected gesture type to preferred phrase index
 export const GESTURE_TO_PHRASE_INDEX: Record<string, number> = {
   open_palm: 0,   // "Hello, how are you?"
-  ok_sign: 3,     // "Thank you very much."
-  pointing: 4,    // "Please help me."
-  thumbs_up: 9,   // "Yes, I understand."
-  fist: 10,       // "No, thank you."
+  pointing: 2,    // "Please help me!"
+  thumbs_up: 4,   // "Yes, that is good."
+  fist: 5,        // "No, thank you."
 };

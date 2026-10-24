@@ -1,5 +1,6 @@
 // src/lib/textToGloss.ts — Text to Sign Language Gloss Parsing Engine
 // Normalizes natural speech/text into standard UPPERCASE_UNDERSCORE Gloss IDs
+// Restricts vocabulary strictly to the exact 20 target words.
 
 export interface GlossToken {
   originalText: string;
@@ -23,184 +24,99 @@ export const normalizeText = (text: string): string => {
 /**
  * Full Sentence Phrase Table
  * Checked BEFORE word-by-word lookup (case and punctuation insensitive).
- * Full sentences map to natural sign language gloss sequences.
+ * Full sentences map to natural sign language gloss sequences within the 20-word vocabulary.
  */
 interface PhraseDefinition {
   tokens: { word: string; gloss: string }[];
 }
 
 export const FULL_PHRASE_TABLE: Record<string, PhraseDefinition> = {
-  // "hello how are you" -> HELLO HOW YOU
+  // "hello how are you" -> HELLO HOW_ARE_YOU
   'hello how are you': {
     tokens: [
       { word: 'Hello', gloss: 'HELLO' },
-      { word: 'how', gloss: 'HOW' },
-      { word: 'you', gloss: 'YOU' },
+      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
     ],
   },
   'hello how r you': {
     tokens: [
       { word: 'Hello', gloss: 'HELLO' },
-      { word: 'how', gloss: 'HOW' },
-      { word: 'you', gloss: 'YOU' },
-    ],
-  },
-  'hello how are you today': {
-    tokens: [
-      { word: 'Hello', gloss: 'HELLO' },
-      { word: 'how', gloss: 'HOW' },
-      { word: 'you', gloss: 'YOU' },
-      { word: 'today', gloss: 'TODAY' },
+      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
     ],
   },
   'hi how are you': {
     tokens: [
       { word: 'Hi', gloss: 'HELLO' },
-      { word: 'how', gloss: 'HOW' },
-      { word: 'you', gloss: 'YOU' },
+      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
     ],
   },
   'how are you': {
-    tokens: [
-      { word: 'How', gloss: 'HOW' },
-      { word: 'you', gloss: 'YOU' },
-    ],
+    tokens: [{ word: 'How are you', gloss: 'HOW_ARE_YOU' }],
+  },
+  'how r u': {
+    tokens: [{ word: 'How are you', gloss: 'HOW_ARE_YOU' }],
   },
 
-  // "nice to meet you" -> NICE MEET YOU
-  'nice to meet you': {
-    tokens: [
-      { word: 'Nice', gloss: 'NICE' },
-      { word: 'meet', gloss: 'MEET' },
-      { word: 'you', gloss: 'YOU' },
-    ],
-  },
-  'nice to meet you today': {
-    tokens: [
-      { word: 'Nice', gloss: 'NICE' },
-      { word: 'meet', gloss: 'MEET' },
-      { word: 'you', gloss: 'YOU' },
-      { word: 'today', gloss: 'TODAY' },
-    ],
-  },
-  'nice meeting you': {
-    tokens: [
-      { word: 'Nice', gloss: 'NICE' },
-      { word: 'meet', gloss: 'MEET' },
-      { word: 'you', gloss: 'YOU' },
-    ],
-  },
-
-  // "thank you very much" -> THANK_YOU VERY MUCH
-  'thank you very much': {
-    tokens: [
-      { word: 'Thank you', gloss: 'THANK_YOU' },
-      { word: 'very', gloss: 'VERY' },
-      { word: 'much', gloss: 'MUCH' },
-    ],
-  },
-  'thanks very much': {
-    tokens: [
-      { word: 'Thanks', gloss: 'THANK_YOU' },
-      { word: 'very', gloss: 'VERY' },
-      { word: 'much', gloss: 'MUCH' },
-    ],
-  },
+  // "thank you"
   'thank you': {
     tokens: [{ word: 'Thank you', gloss: 'THANK_YOU' }],
   },
+  'thank you very much': {
+    tokens: [{ word: 'Thank you', gloss: 'THANK_YOU' }],
+  },
   'thanks a lot': {
+    tokens: [{ word: 'Thanks', gloss: 'THANK_YOU' }],
+  },
+
+  // "goodbye"
+  'goodbye': {
+    tokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
+  },
+  'good bye': {
+    tokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
+  },
+  'bye bye': {
+    tokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
+  },
+  'bye': {
+    tokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
+  },
+  'goodbye friend': {
     tokens: [
-      { word: 'Thanks', gloss: 'THANK_YOU' },
-      { word: 'much', gloss: 'MUCH' },
+      { word: 'Goodbye', gloss: 'GOODBYE' },
+      { word: 'friend', gloss: 'FRIEND' },
     ],
   },
 
-  // "good morning" -> GOOD_MORNING
-  'good morning': {
-    tokens: [{ word: 'Good morning', gloss: 'GOOD_MORNING' }],
-  },
-  'good afternoon': {
-    tokens: [{ word: 'Good afternoon', gloss: 'GOOD_AFTERNOON' }],
-  },
-  'good evening': {
-    tokens: [{ word: 'Good evening', gloss: 'GOOD_EVENING' }],
-  },
-  'good night': {
-    tokens: [{ word: 'Good night', gloss: 'GOOD_NIGHT' }],
+  // "hello friend"
+  'hello friend': {
+    tokens: [
+      { word: 'Hello', gloss: 'HELLO' },
+      { word: 'friend', gloss: 'FRIEND' },
+    ],
   },
 
-  // "how can I help you today" -> HOW CAN HELP YOU TODAY
-  'how can i help you today': {
+  // "please help"
+  'please help': {
     tokens: [
-      { word: 'How', gloss: 'HOW' },
-      { word: 'can', gloss: 'CAN' },
+      { word: 'Please', gloss: 'PLEASE' },
       { word: 'help', gloss: 'HELP' },
-      { word: 'you', gloss: 'YOU' },
-      { word: 'today', gloss: 'TODAY' },
     ],
   },
-  'how can i help you': {
-    tokens: [
-      { word: 'How', gloss: 'HOW' },
-      { word: 'can', gloss: 'CAN' },
-      { word: 'help', gloss: 'HELP' },
-      { word: 'you', gloss: 'YOU' },
-    ],
-  },
-
-  // "where is the metro station" -> WHERE METRO STATION
-  'where is the metro station': {
-    tokens: [
-      { word: 'Where', gloss: 'WHERE' },
-      { word: 'metro', gloss: 'METRO' },
-      { word: 'station', gloss: 'STATION' },
-    ],
-  },
-  'where is metro station': {
-    tokens: [
-      { word: 'Where', gloss: 'WHERE' },
-      { word: 'metro', gloss: 'METRO' },
-      { word: 'station', gloss: 'STATION' },
-    ],
-  },
-  'where is the nearest metro station': {
-    tokens: [
-      { word: 'Where', gloss: 'WHERE' },
-      { word: 'metro', gloss: 'METRO' },
-      { word: 'station', gloss: 'STATION' },
-    ],
-  },
-
-  // "I need a doctor" -> I NEED DOCTOR
-  'i need a doctor': {
-    tokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'need', gloss: 'NEED' },
-      { word: 'doctor', gloss: 'DOCTOR' },
-    ],
-  },
-  'need a doctor': {
-    tokens: [
-      { word: 'Need', gloss: 'NEED' },
-      { word: 'doctor', gloss: 'DOCTOR' },
-    ],
-  },
-
-  // "please help me"
   'please help me': {
     tokens: [
       { word: 'Please', gloss: 'PLEASE' },
       { word: 'help', gloss: 'HELP' },
-      { word: 'me', gloss: 'ME' },
     ],
   },
   'help me please': {
     tokens: [
       { word: 'Help', gloss: 'HELP' },
-      { word: 'me', gloss: 'ME' },
       { word: 'please', gloss: 'PLEASE' },
     ],
+  },
+  'help me': {
+    tokens: [{ word: 'Help', gloss: 'HELP' }],
   },
 
   // "sorry"
@@ -210,24 +126,15 @@ export const FULL_PHRASE_TABLE: Record<string, PhraseDefinition> = {
   'i am sorry': {
     tokens: [{ word: 'Sorry', gloss: 'SORRY' }],
   },
-  'sorry i did not understand': {
-    tokens: [
-      { word: 'Sorry', gloss: 'SORRY' },
-      { word: 'I', gloss: 'I' },
-      { word: 'not', gloss: 'NOT' },
-      { word: 'understand', gloss: 'UNDERSTAND' },
-    ],
-  },
 
   // "yes"
   'yes': {
     tokens: [{ word: 'Yes', gloss: 'YES' }],
   },
-  'yes i understand': {
+  'yes please': {
     tokens: [
       { word: 'Yes', gloss: 'YES' },
-      { word: 'I', gloss: 'I' },
-      { word: 'understand', gloss: 'UNDERSTAND' },
+      { word: 'please', gloss: 'PLEASE' },
     ],
   },
 
@@ -241,113 +148,116 @@ export const FULL_PHRASE_TABLE: Record<string, PhraseDefinition> = {
       { word: 'thank you', gloss: 'THANK_YOU' },
     ],
   },
-
-  // "what is your name"
-  'what is your name': {
+  'no thanks': {
     tokens: [
-      { word: 'What', gloss: 'WHAT' },
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
+      { word: 'No', gloss: 'NO' },
+      { word: 'thanks', gloss: 'THANK_YOU' },
     ],
   },
-  'what is ur name': {
+
+  // Needs
+  'i want water': {
     tokens: [
-      { word: 'What', gloss: 'WHAT' },
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
+      { word: 'Please', gloss: 'PLEASE' },
+      { word: 'water', gloss: 'WATER' },
+    ],
+  },
+  'i need water': {
+    tokens: [{ word: 'Water', gloss: 'WATER' }],
+  },
+  'drink water': {
+    tokens: [
+      { word: 'Drink', gloss: 'DRINK' },
+      { word: 'water', gloss: 'WATER' },
+    ],
+  },
+  'eat food': {
+    tokens: [
+      { word: 'Eat', gloss: 'EAT' },
+      { word: 'food', gloss: 'FOOD' },
+    ],
+  },
+  'i want food': {
+    tokens: [{ word: 'Food', gloss: 'FOOD' }],
+  },
+
+  // Stop
+  'please stop': {
+    tokens: [
+      { word: 'Please', gloss: 'PLEASE' },
+      { word: 'stop', gloss: 'STOP' },
+    ],
+  },
+  'stop please': {
+    tokens: [
+      { word: 'Stop', gloss: 'STOP' },
+      { word: 'please', gloss: 'PLEASE' },
     ],
   },
 };
 
 // Filler words to drop in word-by-word fallback
-export const FILLER_WORDS = new Set(['is', 'the', 'a', 'to', 'are']);
+export const FILLER_WORDS = new Set(['is', 'the', 'a', 'an', 'to', 'are', 'am', 'was', 'were', 'do', 'did', 'does', 'i', 'me', 'you', 'my', 'your', 'very', 'much', 'a', 'lot', 'of']);
 
 // Multi-word phrase mapping for fallback chunking
 const SUB_PHRASE_DICTIONARY: Record<string, string> = {
   'thank you': 'THANK_YOU',
   'thanks a lot': 'THANK_YOU',
-  'good morning': 'GOOD_MORNING',
-  'good afternoon': 'GOOD_AFTERNOON',
-  'good evening': 'GOOD_EVENING',
-  'good night': 'GOOD_NIGHT',
-  'metro station': 'METRO',
-  'excuse me': 'PLEASE',
+  'how are you': 'HOW_ARE_YOU',
+  'good bye': 'GOODBYE',
+  'bye bye': 'GOODBYE',
+  'drink water': 'WATER',
+  'eat food': 'FOOD',
+  'my name': 'NAME',
 };
 
-// Single-word gloss dictionary for word-by-word fallback
+// Single-word gloss dictionary for word-by-word fallback (20-word restricted)
 const WORD_GLOSS_DICTIONARY: Record<string, string> = {
   hello: 'HELLO',
   hi: 'HELLO',
   hey: 'HELLO',
   namaste: 'HELLO',
-  how: 'HOW',
-  you: 'YOU',
-  your: 'YOUR',
-  nice: 'NICE',
-  meet: 'MEET',
-  meeting: 'MEET',
   thanks: 'THANK_YOU',
   thank: 'THANK_YOU',
-  very: 'VERY',
-  much: 'MUCH',
-  good: 'GOOD_MORNING',
-  morning: 'GOOD_MORNING',
-  afternoon: 'GOOD_AFTERNOON',
-  evening: 'GOOD_EVENING',
-  night: 'GOOD_NIGHT',
-  can: 'CAN',
-  help: 'HELP',
-  helping: 'HELP',
-  today: 'TODAY',
-  where: 'WHERE',
-  metro: 'METRO',
-  station: 'STATION',
-  train: 'METRO',
-  i: 'I',
-  me: 'ME',
-  my: 'MY',
-  need: 'NEED',
-  doctor: 'DOCTOR',
-  hospital: 'HOSPITAL',
   please: 'PLEASE',
   sorry: 'SORRY',
   apologies: 'SORRY',
+  apologize: 'SORRY',
   yes: 'YES',
   yeah: 'YES',
   yep: 'YES',
   no: 'NO',
   nope: 'NO',
-  not: 'NOT',
-  what: 'WHAT',
-  name: 'NAME',
-  welcome: 'WELCOME',
-  friend: 'FRIEND',
-  friends: 'FRIEND',
-  love: 'LOVE',
-  family: 'FAMILY',
+  goodbye: 'GOODBYE',
+  bye: 'GOODBYE',
+  farewell: 'GOODBYE',
+  good: 'GOOD',
+  well: 'GOOD',
+  bad: 'BAD',
+  poor: 'BAD',
+  help: 'HELP',
+  helping: 'HELP',
+  stop: 'STOP',
+  halt: 'STOP',
+  eat: 'EAT',
+  eating: 'EAT',
+  drink: 'DRINK',
+  drinking: 'DRINK',
+  water: 'WATER',
+  food: 'FOOD',
+  meal: 'FOOD',
   home: 'HOME',
   house: 'HOME',
-  food: 'FOOD',
-  eat: 'FOOD',
-  water: 'WATER',
-  drink: 'WATER',
-  stop: 'STOP',
-  learn: 'LEARN',
-  sign: 'SIGN',
-  signing: 'SIGN',
-  happy: 'HAPPY',
-  sad: 'SAD',
-  understand: 'UNDERSTAND',
-  we: 'WE',
-  us: 'WE',
+  friend: 'FRIEND',
+  friends: 'FRIEND',
+  name: 'NAME',
+  love: 'LOVE',
+  caring: 'LOVE',
 };
 
 /**
- * Parses a plain text input into an array of sequential gloss tokens.
- * 1. Checks the full phrase table first (case and punctuation insensitive).
- * 2. Checks "my name is ..." with name fingerspelled letter-by-letter.
- * 3. Falls back to word-by-word with filler words (is, the, a, to, are) dropped,
- *    and unknown words preserved as "(no sign yet)".
+ * Parses a plain text input into an array of sequential gloss tokens strictly mapped
+ * to the 20-word vocabulary.
  */
 export const parseTextToGlosses = (inputText: string): GlossToken[] => {
   if (!inputText || !inputText.trim()) {
@@ -367,38 +277,7 @@ export const parseTextToGlosses = (inputText: string): GlossToken[] => {
     }));
   }
 
-  // 2. Check "my name is ..." pattern (name stays fingerspelled)
-  const myNameMatch = normalized.match(/^my name is(?:\s+(.*))?$/);
-  if (myNameMatch) {
-    const tokens: GlossToken[] = [
-      { originalText: 'My', gloss: 'MY', displayText: 'MY', hasSign: true },
-      { originalText: 'name', gloss: 'NAME', displayText: 'NAME', hasSign: true },
-    ];
-
-    const rawWords = rawTrimmed.split(/\s+/);
-    // Find words after "is"
-    const isIndex = rawWords.findIndex((w) => w.toLowerCase().replace(/[^a-z]/g, '') === 'is');
-    const nameWords = isIndex !== -1 ? rawWords.slice(isIndex + 1) : [];
-
-    if (nameWords.length > 0) {
-      nameWords.forEach((word) => {
-        const letters = word.replace(/[^a-zA-Z]/g, '').split('');
-        letters.forEach((letter) => {
-          tokens.push({
-            originalText: letter,
-            gloss: letter.toUpperCase(),
-            displayText: `${letter.toUpperCase()} (fingerspelled)`,
-            hasSign: true,
-            isFingerspelled: true,
-          });
-        });
-      });
-    }
-
-    return tokens;
-  }
-
-  // 3. Fallback: Word-by-word with filler words dropped and unknown words as "(no sign yet)"
+  // 2. Fallback: Word-by-word with filler words dropped and unknown words as "(no sign yet)"
   const rawWords = rawTrimmed.split(/\s+/);
   const tokens: GlossToken[] = [];
   let i = 0;
@@ -433,7 +312,7 @@ export const parseTextToGlosses = (inputText: string): GlossToken[] => {
       continue;
     }
 
-    // Drop filler words (is, the, a, to, are) in word-by-word fallback
+    // Drop filler words
     if (FILLER_WORDS.has(normalizedWord)) {
       i++;
       continue;

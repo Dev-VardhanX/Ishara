@@ -1,12 +1,21 @@
 gloss,category,in_isl,in_asl,notes
-HELLO,greetings,yes,yes,
-THANK_YOU,greetings,yes,yes,
-PLEASE,greetings,yes,yes,
-SORRY,greetings,yes,yes,
-YES,basic,yes,yes,
-NO,basic,yes,yes,
-HELP,emergency,yes,yes,
-WATER,food,yes,yes,
-FOOD,food,yes,yes,
-MOTHER,family,yes,yes,
-FATHER,family,yes,yes,
+HELLO,greetings,yes,yes,Salute or open palm wave
+THANK_YOU,greetings,yes,yes,Hand from chin moving forward
+PLEASE,greetings,yes,yes,Two-hand Namaste or flat hand on chest
+SORRY,greetings,yes,yes,Circular fist rubbing chest
+YES,basic,yes,yes,Nodding fist or thumbs up
+NO,basic,yes,yes,Side-to-side wagging index or snapping fingers
+GOODBYE,greetings,yes,yes,Open palm waving horizontally
+GOOD,basic,yes,yes,Upright steady thumbs up
+BAD,basic,yes,yes,Downward thumbs down
+HOW_ARE_YOU,greetings,yes,yes,Two cupped upward palms questioning
+HELP,basic,yes,yes,Fist lifted by flat upward palm
+STOP,basic,yes,yes,Vertical open palm barrier
+EAT,needs,yes,yes,Bunched fingertips brought to mouth
+DRINK,needs,yes,yes,C-hand tilted toward mouth
+WATER,needs,yes,yes,W-shape tapped on chin
+FOOD,needs,yes,yes,Bunched fingertips tapping mouth
+HOME,social,yes,yes,Roof gable inverted V with fingertips touching
+FRIEND,social,yes,yes,Clasped hands or hooked index fingers
+NAME,social,yes,yes,H/U shape tapping chest
+LOVE,social,yes,yes,Two wrists crossed over chest or ILY sign
