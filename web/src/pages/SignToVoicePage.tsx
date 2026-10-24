@@ -15,6 +15,7 @@ import {
   ISLRecognizer,
   SIGN_VOCABULARY,
   SentenceTranslationResult,
+  AlternativeCandidate,
 } from '../ml';
 import { addRecentConversation } from '../data/store';
 import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS, recordUserInteraction } from '../lib/speech';
@@ -90,6 +91,7 @@ export const SignToVoicePage: React.FC = () => {
   const [rawGlosses, setRawGlosses] = useState<string[]>([]);
   const [distinctGlosses, setDistinctGlosses] = useState<string[]>([]);
   const [naturalSentence, setNaturalSentence] = useState<string>('');
+  const [similarGlosses, setSimilarGlosses] = useState<AlternativeCandidate[]>([]);
   const [simCategory, setSimCategory] = useState<'all' | 'pronouns' | 'communication' | 'needs'>('all');
   const [currentEmotion, setCurrentEmotion] = useState<EmotionType>('happy');
   const [selectedVoice, setSelectedVoice] = useState<string>('Standard Natural');
@@ -321,9 +323,15 @@ export const SignToVoicePage: React.FC = () => {
           console.warn('Failed to save to history', err);
         }
       },
-      onCandidateUpdate: (gloss: string | null, progress: number) => {
+      onCandidateUpdate: (gloss: string | null, progress: number, similar?: AlternativeCandidate[]) => {
         setLiveCandidate(gloss);
         setHoldProgress(progress);
+        if (similar) {
+          setSimilarGlosses(similar);
+        }
+      },
+      onSimilarGlossesUpdated: (candidates: AlternativeCandidate[]) => {
+        setSimilarGlosses(candidates);
       },
       onProgressUpdated: (progress: number) => {
         setHoldProgress(progress);
@@ -408,6 +416,7 @@ export const SignToVoicePage: React.FC = () => {
     setRawGlosses([]);
     setDistinctGlosses([]);
     setNaturalSentence('');
+    setSimilarGlosses([]);
     recognizerRef.current.clearSentence();
     setLiveCandidate(null);
     setHoldProgress(0);
@@ -660,7 +669,7 @@ export const SignToVoicePage: React.FC = () => {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <span className="text-[11px] font-black uppercase text-[#6E7387]">
-                    Gesture Simulator ({language} — 43 Signs)
+                    Gesture Simulator ({language} — 42 Signs)
                   </span>
                   <p className="text-[10px] text-[#6E7387] mt-0.5">Click signs to test recognition & natural sentence builder</p>
                 </div>
@@ -750,7 +759,7 @@ export const SignToVoicePage: React.FC = () => {
             {liveCandidate && (
               <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-[10px] font-black text-[#6E7387]">
-                  <span>Hold Stability (1.2s Steady Detection)</span>
+                  <span>Hold Stability (Snappy 100ms Detection)</span>
                   <span>{Math.round(holdProgress * 100)}%</span>
                 </div>
                 <div className="h-2 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
@@ -759,6 +768,60 @@ export const SignToVoicePage: React.FC = () => {
                     style={{ width: `${holdProgress * 100}%` }}
                   ></div>
                 </div>
+              </div>
+            )}
+          </div>
+
+          {/* Similar Glosses Card (Alternative Candidate Predictions) */}
+          <div className="clay-card p-4 space-y-2.5 bg-white/90">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
+                <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
+                  Similar Glosses (Alternative Candidates)
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-[#6E7387]/80">
+                {language} Vocabulary
+              </span>
+            </div>
+
+            {similarGlosses.length > 0 ? (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {similarGlosses.map((cand) => (
+                  <div
+                    key={cand.signId}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-[#7C9CFF]/50 transition-all"
+                  >
+                    {/* Language metadata badge */}
+                    <span className="px-1.5 py-0.5 rounded-md bg-[#7C9CFF]/15 text-[#7C9CFF] font-mono text-[10px] font-black">
+                      {cand.language}
+                    </span>
+                    {/* User-facing gloss label */}
+                    <span className="text-xs font-black text-[#2B2D42]">
+                      {cand.gloss}
+                    </span>
+                    {/* Human readable label if different */}
+                    {cand.label.toUpperCase() !== cand.gloss && (
+                      <span className="text-[11px] text-[#6E7387] font-semibold">
+                        ({cand.label})
+                      </span>
+                    )}
+                    {/* Confidence percentage chip */}
+                    <span className="px-1.5 py-0.5 rounded-full bg-slate-100 text-[#6E7387] font-mono text-[10px] font-bold">
+                      {Math.round(cand.confidence * 100)}% match
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-2.5 px-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center">
+                <p className="text-xs font-bold text-[#6E7387]">
+                  No close alternative gestures detected
+                </p>
+                <p className="text-[10px] text-slate-400 mt-0.5">
+                  Hold gesture steady in camera view to display alternative candidate rankings
+                </p>
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 // src/ml/islClassifier.ts — Real-time Multi-Language ISL & ASL Sign Recognizer
-// Supports 43 signs across Pronouns, Everyday Communication, and Basic Needs.
+// Supports 42 signs across Pronouns, Everyday Communication, and Basic Needs.
 // Treats ISL and ASL separately with language prefixes ("ISL_...", "ASL_..."),
 // geometric landmark feature extraction, 2-hand relation checks, kinematics,
 // and grammatical sentence formation.
@@ -684,6 +684,14 @@ interface FrameRecord {
   handCount: number;
 }
 
+export interface AlternativeCandidate {
+  signId: string;
+  gloss: string;
+  label: string;
+  confidence: number;
+  language: SupportedLanguage;
+}
+
 export interface ClassificationResult {
   signId: string;
   gloss: string;
@@ -691,6 +699,7 @@ export interface ClassificationResult {
   text: string;
   confidence: number;
   category: string;
+  similarGlosses?: AlternativeCandidate[];
 }
 
 export class MultiLanguageClassifier {
@@ -810,6 +819,7 @@ export class MultiLanguageClassifier {
     const formatResult = (signId: string, confidence: number): ClassificationResult => {
       const def = SIGN_VOCABULARY[signId];
       const gloss = lang === 'ISL' ? def.islGloss : def.aslGloss;
+      const similarGlosses = this.calculateSimilarGlosses(signId, f0, f1, hands, lang);
       return {
         signId,
         gloss,
@@ -817,6 +827,7 @@ export class MultiLanguageClassifier {
         text: def.text,
         confidence,
         category: def.category,
+        similarGlosses,
       };
     };
 
@@ -979,24 +990,27 @@ export class MultiLanguageClassifier {
       return formatResult('BATHROOM', 0.94);
     }
 
-    // 2.3 SLEEP (Hand tilted against cheek / face, steady without waving)
-    const isWaving = tipOscillationsX >= 2 || (tipOscillationsX >= 1 && tipSpanX > 0.055);
+    // Detect horizontal waving or lateral oscillation
+    const isWaving = tipOscillationsX >= 1 || tipSpanX > 0.035 || Math.abs(dx) > 0.035;
     if (
       (f0.openPalm || f0.bunchedTips) &&
       f0.isFaceZone &&
       Math.abs(hands[0][INDEX_TIP].x - f0.wrist.x) > 0.08 &&
       !isWaving &&
-      tipSpanX < 0.045 &&
+      tipSpanX < 0.035 &&
       Math.abs(dx) < 0.03
     ) {
       return formatResult('SLEEP', 0.92);
     }
 
-    // 2.4 HELLO (Open palm raised high near temple/brow/face, whether waving or held steady)
-    // Note: Raised high in face/temple zone or waving beside head/upper body
+    // 2.4 HELLO (Open palm raised high near temple/brow/face salute)
+    // Note: Must be held steady near face/brow. Waving gestures must NOT trigger HELLO.
     if (
       f0.openPalm &&
-      (hands[0][MIDDLE_TIP].y < 0.42 || f0.isFaceZone || (isWaving && hands[0][MIDDLE_TIP].y < 0.52))
+      !isWaving &&
+      tipSpanX < 0.035 &&
+      Math.abs(dx) < 0.035 &&
+      (hands[0][MIDDLE_TIP].y < 0.32 || f0.isFaceZone)
     ) {
       return formatResult('HELLO', 0.95);
     }
@@ -1262,6 +1276,94 @@ export class MultiLanguageClassifier {
     return null;
   }
 
+  private calculateSimilarGlosses(
+    activeSignId: string,
+    f0: ReturnType<typeof extractHandFeatures>,
+    f1: ReturnType<typeof extractHandFeatures> | null,
+    hands: Landmark[][],
+    lang: SupportedLanguage
+  ): AlternativeCandidate[] {
+    if (!f0) return [];
+    const candidates: Array<{ signId: string; score: number }> = [];
+
+    // Pointing family
+    if (f0.pointing) {
+      if (activeSignId !== 'I') candidates.push({ signId: 'I', score: f0.pointingToChest ? 0.85 : 0.60 });
+      if (activeSignId !== 'ME') candidates.push({ signId: 'ME', score: f0.pointingToChest ? 0.82 : 0.58 });
+      if (activeSignId !== 'YOU') candidates.push({ signId: 'YOU', score: f0.pointingToCamera ? 0.84 : 0.55 });
+      if (activeSignId !== 'THEY') candidates.push({ signId: 'THEY', score: f0.pointingToSide ? 0.78 : 0.50 });
+      if (activeSignId !== 'HE') candidates.push({ signId: 'HE', score: f0.isFaceZone ? 0.74 : 0.48 });
+      if (activeSignId !== 'SHE') candidates.push({ signId: 'SHE', score: f0.isChestZone ? 0.72 : 0.48 });
+      if (activeSignId !== 'UNDERSTAND') candidates.push({ signId: 'UNDERSTAND', score: f0.isFaceZone ? 0.70 : 0.45 });
+      if (activeSignId !== 'DONT_UNDERSTAND') candidates.push({ signId: 'DONT_UNDERSTAND', score: f0.isFaceZone ? 0.68 : 0.45 });
+      if (activeSignId !== 'GO') candidates.push({ signId: 'GO', score: f0.isChestZone ? 0.65 : 0.45 });
+      if (activeSignId !== 'COME') candidates.push({ signId: 'COME', score: f0.isChestZone ? 0.65 : 0.45 });
+      if (activeSignId !== 'NO') candidates.push({ signId: 'NO', score: 0.52 });
+    }
+
+    // Open palm family
+    if (f0.openPalm) {
+      if (activeSignId !== 'HELLO') candidates.push({ signId: 'HELLO', score: f0.isFaceZone ? 0.82 : 0.55 });
+      if (activeSignId !== 'STOP') candidates.push({ signId: 'STOP', score: f0.isChestZone ? 0.78 : 0.52 });
+      if (activeSignId !== 'WAIT') candidates.push({ signId: 'WAIT', score: f0.isChestZone ? 0.74 : 0.50 });
+      if (activeSignId !== 'THANK_YOU') candidates.push({ signId: 'THANK_YOU', score: f0.isFaceZone || (hands[0] && hands[0][INDEX_TIP]?.y < 0.44) ? 0.76 : 0.48 });
+      if (activeSignId !== 'MY') candidates.push({ signId: 'MY', score: f0.isChestZone ? 0.75 : 0.50 });
+      if (activeSignId !== 'YOUR') candidates.push({ signId: 'YOUR', score: f0.isChestZone ? 0.72 : 0.48 });
+      if (activeSignId !== 'HAPPY') candidates.push({ signId: 'HAPPY', score: f0.isChestZone ? 0.65 : 0.45 });
+      if (activeSignId !== 'SAD') candidates.push({ signId: 'SAD', score: f0.isFaceZone ? 0.65 : 0.45 });
+    }
+
+    // Fist and thumb family
+    if (f0.fist || f0.thumbUp || f0.thumbDown) {
+      if (activeSignId !== 'YES') candidates.push({ signId: 'YES', score: 0.78 });
+      if (activeSignId !== 'GOOD') candidates.push({ signId: 'GOOD', score: f0.thumbUp ? 0.85 : 0.50 });
+      if (activeSignId !== 'BAD') candidates.push({ signId: 'BAD', score: f0.thumbDown ? 0.85 : 0.50 });
+      if (activeSignId !== 'SORRY') candidates.push({ signId: 'SORRY', score: f0.isChestZone ? 0.72 : 0.48 });
+      if (activeSignId !== 'HELP') candidates.push({ signId: 'HELP', score: 0.60 });
+    }
+
+    // Bunched and curved handshapes
+    if (f0.bunchedTips || f0.cHandshape || f0.wHandshape) {
+      if (activeSignId !== 'EAT') candidates.push({ signId: 'EAT', score: f0.isFaceZone ? 0.80 : 0.50 });
+      if (activeSignId !== 'FOOD') candidates.push({ signId: 'FOOD', score: f0.isFaceZone ? 0.78 : 0.48 });
+      if (activeSignId !== 'DRINK') candidates.push({ signId: 'DRINK', score: f0.cHandshape ? 0.82 : 0.50 });
+      if (activeSignId !== 'WATER') candidates.push({ signId: 'WATER', score: f0.wHandshape ? 0.85 : 0.48 });
+    }
+
+    // Two-handed signs
+    if (hands.length >= 2 && f1) {
+      if (activeSignId !== 'PLEASE') candidates.push({ signId: 'PLEASE', score: 0.78 });
+      if (activeSignId !== 'BOOK') candidates.push({ signId: 'BOOK', score: 0.75 });
+      if (activeSignId !== 'READ') candidates.push({ signId: 'READ', score: 0.70 });
+      if (activeSignId !== 'FRIEND') candidates.push({ signId: 'FRIEND', score: 0.70 });
+      if (activeSignId !== 'WELCOME') candidates.push({ signId: 'WELCOME', score: 0.68 });
+    }
+
+    // Filter, validate, sort, deduplicate and format
+    const results: AlternativeCandidate[] = [];
+    const seen = new Set<string>();
+
+    const sorted = candidates
+      .filter((c) => c.signId !== activeSignId && SIGN_VOCABULARY[c.signId] && c.score >= 0.48)
+      .sort((a, b) => b.score - a.score);
+
+    for (const item of sorted) {
+      if (seen.has(item.signId)) continue;
+      seen.add(item.signId);
+      const def = SIGN_VOCABULARY[item.signId];
+      results.push({
+        signId: item.signId,
+        gloss: item.signId,
+        label: def.label,
+        confidence: Math.round(item.score * 100) / 100,
+        language: lang,
+      });
+      if (results.length >= 3) break;
+    }
+
+    return results;
+  }
+
   public reset(): void {
     this.history = [];
   }
@@ -1270,7 +1372,8 @@ export class MultiLanguageClassifier {
 export interface ISLRecognizerCallbacks {
   onWordRecognized?: (gloss: string, text: string, confidence: number) => void;
   onSentenceUpdated?: (fullSentence: string, words: string[], translation: SentenceTranslationResult) => void;
-  onCandidateUpdate?: (gloss: string | null, progress: number) => void;
+  onCandidateUpdate?: (gloss: string | null, progress: number, similarGlosses?: AlternativeCandidate[]) => void;
+  onSimilarGlossesUpdated?: (candidates: AlternativeCandidate[]) => void;
   onProgressUpdated?: (progress: number) => void;
   onWordRevealed?: (word: string, currentText: string) => void;
   onPhraseCompleted?: (phrase: any, fullText: string) => void;
@@ -1393,7 +1496,8 @@ export class ISLRecognizer implements Recognizer {
       } else {
         this.candidateGloss = null;
       }
-      this.callbacks.onCandidateUpdate?.(null, 0);
+      this.callbacks.onCandidateUpdate?.(null, 0, []);
+      this.callbacks.onSimilarGlossesUpdated?.([]);
       this.callbacks.onProgressUpdated?.(0);
       return null;
     }
@@ -1411,7 +1515,8 @@ export class ISLRecognizer implements Recognizer {
         this.candidateGloss = null;
       }
       const progress = this.candidateStableFrames / this.requiredStableFrames;
-      this.callbacks.onCandidateUpdate?.(this.candidateGloss, progress);
+      this.callbacks.onCandidateUpdate?.(this.candidateGloss, progress, []);
+      this.callbacks.onSimilarGlossesUpdated?.([]);
       this.callbacks.onProgressUpdated?.(progress);
       return null;
     }
@@ -1435,7 +1540,8 @@ export class ISLRecognizer implements Recognizer {
     }
 
     const progress = Math.min(1.0, this.candidateStableFrames / this.requiredStableFrames);
-    this.callbacks.onCandidateUpdate?.(result.gloss, progress);
+    this.callbacks.onCandidateUpdate?.(result.gloss, progress, result.similarGlosses || []);
+    this.callbacks.onSimilarGlossesUpdated?.(result.similarGlosses || []);
     this.callbacks.onProgressUpdated?.(progress);
 
     // If held stable for required frames, commit word to sentence!
@@ -1468,7 +1574,8 @@ export class ISLRecognizer implements Recognizer {
     this.callbacks.onSentenceUpdated?.(translation.naturalSentence, [...this.sentenceWords], translation);
     this.callbacks.onWordRevealed?.(text, translation.naturalSentence);
     this.callbacks.onPhraseCompleted?.({ text: translation.naturalSentence }, translation.naturalSentence);
-    this.callbacks.onCandidateUpdate?.(gloss, 1.0);
+    this.callbacks.onCandidateUpdate?.(gloss, 1.0, []);
+    this.callbacks.onSimilarGlossesUpdated?.([]);
     this.callbacks.onProgressUpdated?.(0);
   }
 
@@ -1501,7 +1608,8 @@ export class ISLRecognizer implements Recognizer {
     this.lastConfirmedTime = 0;
     const emptyTranslation = buildSentenceFromGlosses([], this.classifier.getLanguage());
     this.callbacks.onSentenceUpdated?.('', [], emptyTranslation);
-    this.callbacks.onCandidateUpdate?.(null, 0);
+    this.callbacks.onCandidateUpdate?.(null, 0, []);
+    this.callbacks.onSimilarGlossesUpdated?.([]);
     this.callbacks.onProgressUpdated?.(0);
   }
 

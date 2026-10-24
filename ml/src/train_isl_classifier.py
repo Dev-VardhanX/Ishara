@@ -27,7 +27,6 @@ TARGET_ISL_SIGNS = [
     "ISL_NAME",
     # Everyday Communication
     "ISL_HELLO",
-    "ISL_GOODBYE",
     "ISL_THANK_YOU",
     "ISL_PLEASE",
     "ISL_SORRY",
@@ -88,9 +87,6 @@ def generate_isl_samples(sign: str, num_samples: int = 50, seed: int = 42) -> np
         if base_sign == "HELLO":
             h0[WRIST, 1] = 0.35 + rng.normal(0, 0.02)
             h0[MIDDLE_TIP, 1] = 0.14 + rng.normal(0, 0.02)
-        elif base_sign == "GOODBYE":
-            h0[WRIST] = [0.55 + rng.normal(0, 0.05), 0.40 + rng.normal(0, 0.02), 0.0]
-            h0[MIDDLE_TIP, 1] = 0.22 + rng.normal(0, 0.02)
         elif base_sign == "THANK_YOU":
             h0[WRIST, 1] = 0.40 + rng.normal(0, 0.02)
             h0[MIDDLE_TIP] = [0.50, 0.28, -0.08] + rng.normal(0, 0.02, 3)

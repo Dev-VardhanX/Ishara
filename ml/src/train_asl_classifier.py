@@ -27,7 +27,6 @@ TARGET_ASL_SIGNS = [
     "ASL_NAME",
     # Everyday Communication
     "ASL_HELLO",
-    "ASL_GOODBYE",
     "ASL_THANK_YOU",
     "ASL_PLEASE",
     "ASL_SORRY",
@@ -88,9 +87,6 @@ def generate_asl_samples(sign: str, num_samples: int = 50, seed: int = 42) -> np
         if base_sign == "HELLO":  # ASL: formal forehead B-hand salute
             h0[WRIST, 1] = 0.30 + rng.normal(0, 0.02)
             h0[MIDDLE_TIP, 1] = 0.12 + rng.normal(0, 0.02)
-        elif base_sign == "GOODBYE":
-            h0[WRIST] = [0.55 + rng.normal(0, 0.05), 0.40 + rng.normal(0, 0.02), 0.0]
-            h0[MIDDLE_TIP, 1] = 0.22 + rng.normal(0, 0.02)
         elif base_sign == "THANK_YOU":
             h0[WRIST, 1] = 0.38 + rng.normal(0, 0.02)
             h0[MIDDLE_TIP] = [0.50, 0.26, -0.06] + rng.normal(0, 0.02, 3)
