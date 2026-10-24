@@ -1,21 +1,44 @@
 gloss,category,in_isl,in_asl,notes
-HELLO,greetings,yes,yes,Salute or open palm wave
-THANK_YOU,greetings,yes,yes,Hand from chin moving forward
-PLEASE,greetings,yes,yes,Two-hand Namaste or flat hand on chest
-SORRY,greetings,yes,yes,Circular fist rubbing chest
-YES,basic,yes,yes,Nodding fist or thumbs up
-NO,basic,yes,yes,Side-to-side wagging index or snapping fingers
-GOODBYE,greetings,yes,yes,Open palm waving horizontally
-GOOD,basic,yes,yes,Upright steady thumbs up
-BAD,basic,yes,yes,Downward thumbs down
-HOW_ARE_YOU,greetings,yes,yes,Two cupped upward palms questioning
-HELP,emergency,yes,yes,Fist lifted by flat upward palm
-STOP,basic,yes,yes,Vertical open palm barrier
-EAT,food,yes,yes,Bunched fingertips brought to mouth
-DRINK,food,yes,yes,C-hand tilted toward mouth
-WATER,food,yes,yes,W-shape tapped on chin
-FOOD,food,yes,yes,Bunched fingertips tapping mouth
-HOME,social,yes,yes,Roof gable inverted V with fingertips touching
-FRIEND,social,yes,yes,Clasped hands or hooked index fingers
-NAME,social,yes,yes,H/U shape tapping chest
-LOVE,social,yes,yes,Two wrists crossed over chest or ILY sign
+I,pronouns,yes,yes,Index pointing to chest (ISL) / I-handshape to chest (ASL)
+ME,pronouns,yes,yes,Index pointing to chest
+YOU,pronouns,yes,yes,Index pointing forward towards conversational partner
+WE,pronouns,yes,yes,Index/W-shape sweeping from right to left shoulder
+THEY,pronouns,yes,yes,Index pointing to side in horizontal arc
+HE,pronouns,yes,yes,Index pointing slightly to side (male reference)
+SHE,pronouns,yes,yes,Index pointing slightly to side (female reference)
+MY,pronouns,yes,yes,Flat open palm placed against center of chest
+YOUR,pronouns,yes,yes,Flat open palm pushed forward towards other person
+FRIEND,pronouns,yes,yes,Clasped hands (ISL) / interlocking index hooks (ASL)
+NAME,pronouns,yes,yes,H/U shape tapping chest (ISL) / crossed H-fingers tapping (ASL)
+HELLO,communication,yes,yes,Open palm brow salute (ISL) / formal forehead salute (ASL)
+GOODBYE,communication,yes,yes,Open palm waving side-to-side horizontally
+THANK_YOU,communication,yes,yes,Flat hand moving outward and down from chin
+PLEASE,communication,yes,yes,Two-hand Namaste (ISL) / flat circular chest rub (ASL)
+SORRY,communication,yes,yes,Closed fist moving in a circular motion on chest
+WELCOME,communication,yes,yes,Both hands open sweeping inward (ISL) / one hand sweep (ASL)
+HELP,communication,yes,yes,Closed fist on flat upward palm lifting together
+STOP,communication,yes,yes,Vertical flat barrier (ISL) / dominant hand chopping palm (ASL)
+WAIT,communication,yes,yes,Open palms hovering/fluttering at chest level
+COME,communication,yes,yes,Beckoning hands moving inward toward body
+GO,communication,yes,yes,Index fingers pointing and moving abruptly outward
+UNDERSTAND,communication,yes,yes,Index tapping temple (ISL) / index flick from fist at temple (ASL)
+DONT_UNDERSTAND,communication,yes,yes,Index near temple with hand/head shaking no
+GOOD,communication,yes,yes,Upright thumbs up (ISL) / chin to palm drop (ASL)
+BAD,communication,yes,yes,Thumbs down (ISL) / chin outward flip down (ASL)
+HOW_ARE_YOU,communication,yes,yes,Two cupped palms opening outward (ISL) / how + you (ASL)
+YES,needs,yes,yes,Closed fist nodding up and down vertically
+NO,needs,yes,yes,Index wagging (ISL) / index+middle snapping shut (ASL)
+EAT,needs,yes,yes,Bunched fingertips brought to mouth
+DRINK,needs,yes,yes,C-hand tilted toward mouth like drinking
+WATER,needs,yes,yes,W-shape tapped on chin / cupped hand
+FOOD,needs,yes,yes,Bunched fingertips tapping mouth repeatedly
+LOVE,needs,yes,yes,Crossed arms/wrists over chest or ILY sign
+READ,needs,yes,yes,V-fingers scanning down open palm like reading text
+WRITE,needs,yes,yes,Pinching pen grip writing across flat palm
+HOME,needs,yes,yes,Roof gable inverted V (ISL) / cheek mouth to ear (ASL)
+SCHOOL,needs,yes,yes,Book opening to roof (ISL) / clapping palms horizontally (ASL)
+BOOK,needs,yes,yes,Two flat hands opening like a book
+BATHROOM,needs,yes,yes,Pinky finger upright shaken (ISL) / T-handshape shaken (ASL)
+SLEEP,needs,yes,yes,Hands against tilted cheek / head resting
+HAPPY,needs,yes,yes,Open flat hands brushing upward repeatedly against chest
+SAD,needs,yes,yes,Open hands with fingers drooping downward in front of face

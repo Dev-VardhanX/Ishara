@@ -7,7 +7,7 @@ import { ISLRecognizer, ISLRecognizerCallbacks } from './islClassifier';
 
 export type RecognizerType = 'isl_realtime' | 'demo' | 'rule_based' | 'onnx';
 
-// Active recognizer type: ISL Realtime Recognizer supporting 20 common ISL signs
+// Active recognizer type: ISL + ASL Multi-Language Realtime Recognizer supporting 43 signs
 export const ACTIVE_RECOGNIZER_TYPE: RecognizerType = 'isl_realtime';
 
 /**
@@ -31,6 +31,7 @@ export function createActiveRecognizer(
 }
 
 export * from './islClassifier';
+export * from './sentenceBuilder';
 export * from './demoRecognizer';
 export * from './demoPhrases';
 export * from './handTracker';

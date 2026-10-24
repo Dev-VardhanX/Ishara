@@ -13,7 +13,8 @@ import {
   handTracker,
   createActiveRecognizer,
   ISLRecognizer,
-  ISL_VOCABULARY,
+  SIGN_VOCABULARY,
+  SentenceTranslationResult,
 } from '../ml';
 import { addRecentConversation } from '../data/store';
 import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS } from '../lib/speech';
@@ -86,6 +87,9 @@ export const SignToVoicePage: React.FC = () => {
   const [liveCandidate, setLiveCandidate] = useState<string | null>(null);
   const [holdProgress, setHoldProgress] = useState<number>(0);
   const [acceptedWords, setAcceptedWords] = useState<string[]>([]);
+  const [rawGlosses, setRawGlosses] = useState<string[]>([]);
+  const [naturalSentence, setNaturalSentence] = useState<string>('');
+  const [simCategory, setSimCategory] = useState<'all' | 'pronouns' | 'communication' | 'needs'>('all');
   const [currentEmotion, setCurrentEmotion] = useState<EmotionType>('happy');
   const [selectedVoice, setSelectedVoice] = useState<string>('Standard Natural');
   const [copied, setCopied] = useState<boolean>(false);
@@ -125,6 +129,11 @@ export const SignToVoicePage: React.FC = () => {
       recognizerRef.current.destroy();
     };
   }, [loadModel]);
+
+  // Synchronize language (ISL / ASL) with active recognizer
+  useEffect(() => {
+    recognizerRef.current.setLanguage(language);
+  }, [language]);
 
   // Start Camera
   const startCamera = async () => {
@@ -283,32 +292,35 @@ export const SignToVoicePage: React.FC = () => {
           });
         }
       },
-      onSentenceUpdated: (fullText: string, words: string[]) => {
+      onSentenceUpdated: (fullText: string, words: string[], translation?: SentenceTranslationResult) => {
         setAcceptedWords(words);
+        setRawGlosses(translation?.rawGlosses || []);
+        const finalSentence = translation?.naturalSentence || fullText;
+        setNaturalSentence(finalSentence);
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const newEntry = {
           id: String(Date.now()),
           time: timeStr,
-          text: fullText,
+          text: finalSentence,
         };
         setTranscripts((prev) => [newEntry, ...prev.slice(0, 4)]);
 
         try {
           addRecentConversation(
             {
-              title: `Sign: "${fullText.slice(0, 24)}${fullText.length > 24 ? '...' : ''}"`,
+              title: `Sign: "${finalSentence.slice(0, 24)}${finalSentence.length > 24 ? '...' : ''}"`,
               mode: `Sign to Voice (${language})`,
               timestamp: 'Just now',
-              snippet: fullText,
+              snippet: finalSentence,
               language,
               iconEmoji: '🤟',
               direction: 'sign_to_voice',
             },
             {
               direction: 'sign_to_voice',
-              text: fullText,
-              translatedText: fullText,
+              text: finalSentence,
+              translatedText: finalSentence,
               emotion: currentEmotion,
             }
           );
@@ -343,11 +355,12 @@ export const SignToVoicePage: React.FC = () => {
     recognizerRef.current.triggerManualSign(gloss);
   };
 
-  // Full translated sentence
+  // Full translated sentence with natural grammar synthesis
   const translatedSentence =
-    acceptedWords.length > 0
+    naturalSentence ||
+    (acceptedWords.length > 0
       ? acceptedWords.join(' ')
-      : 'Frame your hands in front of the camera and begin signing...';
+      : 'Frame your hands in front of the camera and begin signing...');
 
   // Speak with Emotion Modulation via shared speech helper
   const handleSpeak = () => {
@@ -391,10 +404,12 @@ export const SignToVoicePage: React.FC = () => {
     }
   };
 
-  // Reset words
+  // Reset words and sentence builder
   const handleResetWords = () => {
     setAcceptedWords([]);
-    recognizerRef.current.reset();
+    setRawGlosses([]);
+    setNaturalSentence('');
+    recognizerRef.current.clearSentence();
     setLiveCandidate(null);
     setHoldProgress(0);
   };
@@ -406,8 +421,11 @@ export const SignToVoicePage: React.FC = () => {
         title="Live Translator"
         subtitle="Real-time in-browser sign language classification into speech and subtitles"
         badge={
-          <Badge tooltip="Real-time ISL 20-sign geometric and kinematic recognition." variant="blue">
-            ISL 20 Signs
+          <Badge
+            tooltip={`Real-time ${language} 43-sign geometric & kinematic recognition with natural sentence formation.`}
+            variant="blue"
+          >
+            {language} • 43 Signs
           </Badge>
         }
       />
@@ -639,45 +657,50 @@ export const SignToVoicePage: React.FC = () => {
 
           {/* Gesture Simulator Quick Test Strip (if camera offline or requested) */}
           {(!cameraActive || useSimulation) && (
-            <div className="clay-card p-4 bg-white/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-black uppercase text-[#6E7387]">
-                  Gesture Simulator (20 Common ISL Signs)
-                </span>
-                <span className="text-[10px] text-[#7C9CFF] font-bold">Click to Test Sign</span>
+            <div className="clay-card p-4 bg-white/80 space-y-3">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div>
+                  <span className="text-[11px] font-black uppercase text-[#6E7387]">
+                    Gesture Simulator ({language} — 43 Signs)
+                  </span>
+                  <p className="text-[10px] text-[#6E7387] mt-0.5">Click signs to test recognition & natural sentence builder</p>
+                </div>
+                {/* Category filters */}
+                <div className="flex gap-1">
+                  {(['all', 'pronouns', 'communication', 'needs'] as const).map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setSimCategory(cat)}
+                      className={`px-2 py-0.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                        simCategory === cat
+                          ? 'bg-[#7C9CFF] text-white shadow-xs'
+                          : 'bg-slate-100 hover:bg-slate-200 text-[#6E7387]'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-                {[
-                  { gloss: 'HELLO', label: '👋 Hello' },
-                  { gloss: 'THANK_YOU', label: '🙏 Thank You' },
-                  { gloss: 'PLEASE', label: '🤲 Please' },
-                  { gloss: 'SORRY', label: '✊ Sorry' },
-                  { gloss: 'YES', label: '👍 Yes' },
-                  { gloss: 'NO', label: '☝️ No' },
-                  { gloss: 'GOODBYE', label: '👋 Goodbye' },
-                  { gloss: 'GOOD', label: '👍 Good' },
-                  { gloss: 'BAD', label: '👎 Bad' },
-                  { gloss: 'HOW_ARE_YOU', label: '👐 How Are You' },
-                  { gloss: 'HELP', label: '🆘 Help' },
-                  { gloss: 'STOP', label: '✋ Stop' },
-                  { gloss: 'EAT', label: '🍽️ Eat' },
-                  { gloss: 'DRINK', label: '🥤 Drink' },
-                  { gloss: 'WATER', label: '💧 Water' },
-                  { gloss: 'FOOD', label: '🍲 Food' },
-                  { gloss: 'HOME', label: '🏠 Home' },
-                  { gloss: 'FRIEND', label: '🤝 Friend' },
-                  { gloss: 'NAME', label: '🏷️ Name' },
-                  { gloss: 'LOVE', label: '❤️ Love' },
-                ].map((item) => (
-                  <button
-                    key={item.gloss}
-                    type="button"
-                    onClick={() => triggerSimulatedSign(item.gloss)}
-                    className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black text-[#2B2D42] shadow-sm hover:scale-102 transition-all"
-                  >
-                    {item.label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap gap-1.5 max-h-52 overflow-y-auto pr-1">
+                {Object.values(SIGN_VOCABULARY)
+                  .filter((item) => simCategory === 'all' || item.category === simCategory)
+                  .map((item) => {
+                    const gloss = language === 'ISL' ? item.islGloss : item.aslGloss;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => triggerSimulatedSign(item.id)}
+                        className="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black text-[#2B2D42] shadow-xs hover:scale-102 transition-all flex items-center gap-1.5"
+                        title={item.description}
+                      >
+                        <span className="text-[10px] font-bold text-[#7C9CFF] font-mono">{gloss}</span>
+                        <span>{item.label}</span>
+                      </button>
+                    );
+                  })}
               </div>
             </div>
           )}
@@ -793,11 +816,34 @@ export const SignToVoicePage: React.FC = () => {
               </div>
             )}
 
-            {/* Sentence quote box */}
-            <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 shadow-sm min-h-[90px] flex items-center">
-              <h2 className="text-xl sm:text-2xl font-black text-[#2B2D42] leading-snug">
-                "{translatedSentence}"
-              </h2>
+            {/* Sign Gloss Tokens & Sentence Quote Box */}
+            <div className="space-y-2">
+              {/* Live Gloss Sequence badge strip */}
+              {rawGlosses.length > 0 && (
+                <div className="flex items-center gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-100/90 border border-slate-200/80 text-[11px] font-bold text-[#6E7387]">
+                  <span className="text-[10px] uppercase font-black text-[#7C9CFF] tracking-wider">
+                    Sign Glosses:
+                  </span>
+                  {rawGlosses.map((g, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2 py-0.5 rounded-lg bg-white shadow-xs text-[#2B2D42] border border-slate-200/60 font-mono text-[10px] font-black"
+                    >
+                      {g}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Sentence quote box */}
+              <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 shadow-sm min-h-[90px] flex flex-col justify-center">
+                <span className="text-[10px] uppercase font-black text-[#6E7387] mb-1 tracking-wider">
+                  Natural English Translation
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-[#2B2D42] leading-snug">
+                  "{translatedSentence}"
+                </h2>
+              </div>
             </div>
 
             {/* Voice player preview with Waveform and Emotion Tuning */}

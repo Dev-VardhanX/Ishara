@@ -1,202 +1,477 @@
-// src/ml/islClassifier.ts — Real-time ISL 20-Sign Landmark & Kinematic Recognizer
-// Provides accurate geometric feature extraction, 2-hand relation checks,
-// motion buffer kinematics, candidate debouncing, and sentence-building logic.
+// src/ml/islClassifier.ts — Real-time Multi-Language ISL & ASL Sign Recognizer
+// Supports 43 signs across Pronouns, Everyday Communication, and Basic Needs.
+// Treats ISL and ASL separately with language prefixes ("ISL_...", "ASL_..."),
+// geometric landmark feature extraction, 2-hand relation checks, kinematics,
+// and grammatical sentence formation.
 
 import { Landmark, RecognitionResult, Recognizer } from '../lib/recognizer';
+import { buildSentenceFromGlosses, SentenceTranslationResult, normalizeGloss } from './sentenceBuilder';
 
-export interface ISLSignDefinition {
-  gloss: string;
+export type SupportedLanguage = 'ISL' | 'ASL';
+
+export interface SignDefinition {
+  id: string;
+  islGloss: string;
+  aslGloss: string;
   label: string;
   text: string;
-  description: string;
-  category: 'greetings' | 'basic' | 'needs' | 'emergency' | 'social';
+  category: 'pronouns' | 'communication' | 'needs';
   twoHanded: boolean;
+  description: string;
 }
 
-export const ISL_VOCABULARY: Record<string, ISLSignDefinition> = {
-  HELLO: {
-    gloss: 'HELLO',
-    label: 'Hello',
-    text: 'Hello',
-    description: 'Open palm raised near temple/brow or saluting forward',
-    category: 'greetings',
+export const SIGN_VOCABULARY: Record<string, SignDefinition> = {
+  // --- Pronouns & People ---
+  I: {
+    id: 'I',
+    islGloss: 'ISL_I',
+    aslGloss: 'ASL_I',
+    label: 'I',
+    text: 'I',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index pointing to chest (ISL) / I-handshape to chest (ASL)',
   },
-  THANK_YOU: {
-    gloss: 'THANK_YOU',
-    label: 'Thank You',
-    text: 'Thank you',
-    description: 'Flat open hand moving outward and down from chin',
-    category: 'greetings',
+  ME: {
+    id: 'ME',
+    islGloss: 'ISL_ME',
+    aslGloss: 'ASL_ME',
+    label: 'Me',
+    text: 'me',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index finger pointing to center of chest',
   },
-  PLEASE: {
-    gloss: 'PLEASE',
-    label: 'Please',
-    text: 'Please',
-    description: 'Two hands pressed together in Namaste or flat hand on chest',
-    category: 'greetings',
-    twoHanded: true,
-  },
-  SORRY: {
-    gloss: 'SORRY',
-    label: 'Sorry',
-    text: 'Sorry',
-    description: 'Fist rubbing chest/heart in circular motion',
-    category: 'greetings',
+  YOU: {
+    id: 'YOU',
+    islGloss: 'ISL_YOU',
+    aslGloss: 'ASL_YOU',
+    label: 'You',
+    text: 'you',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index finger pointing forward towards conversational partner',
   },
-  YES: {
-    gloss: 'YES',
-    label: 'Yes',
-    text: 'Yes',
-    description: 'Closed fist or thumbs-up nodding up and down',
-    category: 'basic',
+  WE: {
+    id: 'WE',
+    islGloss: 'ISL_WE',
+    aslGloss: 'ASL_WE',
+    label: 'We',
+    text: 'we',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index/W-shape sweeping from right to left shoulder',
   },
-  NO: {
-    gloss: 'NO',
-    label: 'No',
-    text: 'No',
-    description: 'Index finger wagging side-to-side or index+middle snapping shut',
-    category: 'basic',
+  THEY: {
+    id: 'THEY',
+    islGloss: 'ISL_THEY',
+    aslGloss: 'ASL_THEY',
+    label: 'They',
+    text: 'they',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index pointing to side and sweeping in horizontal arc',
   },
-  GOODBYE: {
-    gloss: 'GOODBYE',
-    label: 'Goodbye',
-    text: 'Goodbye',
-    description: 'Open palm facing camera waving horizontally side-to-side',
-    category: 'greetings',
+  HE: {
+    id: 'HE',
+    islGloss: 'ISL_HE',
+    aslGloss: 'ASL_HE',
+    label: 'He',
+    text: 'he',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index finger pointing slightly to the side (male reference)',
   },
-  GOOD: {
-    gloss: 'GOOD',
-    label: 'Good',
-    text: 'Good',
-    description: 'Clear upright thumbs-up held steady',
-    category: 'basic',
+  SHE: {
+    id: 'SHE',
+    islGloss: 'ISL_SHE',
+    aslGloss: 'ASL_SHE',
+    label: 'She',
+    text: 'she',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Index finger pointing slightly to the side (female reference)',
   },
-  BAD: {
-    gloss: 'BAD',
-    label: 'Bad',
-    text: 'Bad',
-    description: 'Thumbs-down pointing downwards',
-    category: 'basic',
+  MY: {
+    id: 'MY',
+    islGloss: 'ISL_MY',
+    aslGloss: 'ASL_MY',
+    label: 'My',
+    text: 'my',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'Flat open palm placed against center of chest',
   },
-  HOW_ARE_YOU: {
-    gloss: 'HOW_ARE_YOU',
-    label: 'How Are You',
-    text: 'How are you?',
-    description: 'Two open palms cupped upward at chest opening outward',
-    category: 'greetings',
-    twoHanded: true,
-  },
-  HELP: {
-    gloss: 'HELP',
-    label: 'Help',
-    text: 'Help',
-    description: 'Closed fist resting on flat upward-facing palm, lifting together',
-    category: 'emergency',
-    twoHanded: true,
-  },
-  STOP: {
-    gloss: 'STOP',
-    label: 'Stop',
-    text: 'Stop',
-    description: 'Vertical open palm facing straight forward barrier',
-    category: 'basic',
+  YOUR: {
+    id: 'YOUR',
+    islGloss: 'ISL_YOUR',
+    aslGloss: 'ASL_YOUR',
+    label: 'Your',
+    text: 'your',
+    category: 'pronouns',
     twoHanded: false,
-  },
-  EAT: {
-    gloss: 'EAT',
-    label: 'Eat',
-    text: 'Eat',
-    description: 'Bunched fingertips (all 5 touching) brought toward mouth',
-    category: 'needs',
-    twoHanded: false,
-  },
-  DRINK: {
-    gloss: 'DRINK',
-    label: 'Drink',
-    text: 'Drink',
-    description: 'C-handshape cupped hand tilted towards mouth like drinking',
-    category: 'needs',
-    twoHanded: false,
-  },
-  WATER: {
-    gloss: 'WATER',
-    label: 'Water',
-    text: 'Water',
-    description: 'W-handshape (3 middle fingers extended) tapped against chin',
-    category: 'needs',
-    twoHanded: false,
-  },
-  FOOD: {
-    gloss: 'FOOD',
-    label: 'Food',
-    text: 'Food',
-    description: 'Bunched fingertips tapping mouth/chin repeatedly',
-    category: 'needs',
-    twoHanded: false,
-  },
-  HOME: {
-    gloss: 'HOME',
-    label: 'Home',
-    text: 'Home',
-    description: 'Two hands open with fingertips touching to form a roof gable',
-    category: 'social',
-    twoHanded: true,
+    description: 'Flat open palm pushed forward towards other person',
   },
   FRIEND: {
-    gloss: 'FRIEND',
+    id: 'FRIEND',
+    islGloss: 'ISL_FRIEND',
+    aslGloss: 'ASL_FRIEND',
     label: 'Friend',
-    text: 'Friend',
-    description: 'Two hands clasping or index fingers hooked together in front of chest',
-    category: 'social',
+    text: 'friend',
+    category: 'pronouns',
     twoHanded: true,
+    description: 'Clasped hands (ISL) / interlocking index finger hooks (ASL)',
   },
   NAME: {
-    gloss: 'NAME',
+    id: 'NAME',
+    islGloss: 'ISL_NAME',
+    aslGloss: 'ASL_NAME',
     label: 'Name',
-    text: 'Name',
-    description: 'Index and middle fingers extended together (H/U shape) tapping',
-    category: 'social',
+    text: 'name',
+    category: 'pronouns',
     twoHanded: false,
+    description: 'H/U shape tapping chest (ISL) / crossed H-fingers tapping (ASL)',
+  },
+
+  // --- Everyday Communication ---
+  HELLO: {
+    id: 'HELLO',
+    islGloss: 'ISL_HELLO',
+    aslGloss: 'ASL_HELLO',
+    label: 'Hello',
+    text: 'Hello',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Open palm brow salute (ISL) / formal forehead salute (ASL)',
+  },
+  GOODBYE: {
+    id: 'GOODBYE',
+    islGloss: 'ISL_GOODBYE',
+    aslGloss: 'ASL_GOODBYE',
+    label: 'Goodbye',
+    text: 'Goodbye',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Open palm facing camera waving side-to-side horizontally',
+  },
+  THANK_YOU: {
+    id: 'THANK_YOU',
+    islGloss: 'ISL_THANK_YOU',
+    aslGloss: 'ASL_THANK_YOU',
+    label: 'Thank You',
+    text: 'thank you',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Flat hand moving outward and down from chin',
+  },
+  PLEASE: {
+    id: 'PLEASE',
+    islGloss: 'ISL_PLEASE',
+    aslGloss: 'ASL_PLEASE',
+    label: 'Please',
+    text: 'please',
+    category: 'communication',
+    twoHanded: true,
+    description: 'Two-hand Namaste (ISL) / flat hand circular chest rub (ASL)',
+  },
+  SORRY: {
+    id: 'SORRY',
+    islGloss: 'ISL_SORRY',
+    aslGloss: 'ASL_SORRY',
+    label: 'Sorry',
+    text: 'sorry',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Closed fist moving in a circular motion on chest',
+  },
+  WELCOME: {
+    id: 'WELCOME',
+    islGloss: 'ISL_WELCOME',
+    aslGloss: 'ASL_WELCOME',
+    label: 'Welcome',
+    text: 'welcome',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Both hands sweeping inward (ISL) / one-hand inward sweep (ASL)',
+  },
+  HELP: {
+    id: 'HELP',
+    islGloss: 'ISL_HELP',
+    aslGloss: 'ASL_HELP',
+    label: 'Help',
+    text: 'help',
+    category: 'communication',
+    twoHanded: true,
+    description: 'Closed fist on flat upward palm lifting together',
+  },
+  STOP: {
+    id: 'STOP',
+    islGloss: 'ISL_STOP',
+    aslGloss: 'ASL_STOP',
+    label: 'Stop',
+    text: 'stop',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Vertical flat palm barrier (ISL) / chopping onto palm (ASL)',
+  },
+  WAIT: {
+    id: 'WAIT',
+    islGloss: 'ISL_WAIT',
+    aslGloss: 'ASL_WAIT',
+    label: 'Wait',
+    text: 'wait',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Open palms hovering/fluttering at chest level',
+  },
+  COME: {
+    id: 'COME',
+    islGloss: 'ISL_COME',
+    aslGloss: 'ASL_COME',
+    label: 'Come',
+    text: 'come',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Beckoning hands moving inward toward body',
+  },
+  GO: {
+    id: 'GO',
+    islGloss: 'ISL_GO',
+    aslGloss: 'ASL_GO',
+    label: 'Go',
+    text: 'go',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Index fingers pointing and moving abruptly outward',
+  },
+  UNDERSTAND: {
+    id: 'UNDERSTAND',
+    islGloss: 'ISL_UNDERSTAND',
+    aslGloss: 'ASL_UNDERSTAND',
+    label: 'Understand',
+    text: 'understand',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Index tapping temple (ISL) / index flick from fist at temple (ASL)',
+  },
+  DONT_UNDERSTAND: {
+    id: 'DONT_UNDERSTAND',
+    islGloss: 'ISL_DONT_UNDERSTAND',
+    aslGloss: 'ASL_DONT_UNDERSTAND',
+    label: "Don't Understand",
+    text: "don't understand",
+    category: 'communication',
+    twoHanded: false,
+    description: 'Index near temple with hand/head shaking no',
+  },
+  GOOD: {
+    id: 'GOOD',
+    islGloss: 'ISL_GOOD',
+    aslGloss: 'ASL_GOOD',
+    label: 'Good',
+    text: 'good',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Upright thumbs up (ISL) / chin to palm drop (ASL)',
+  },
+  BAD: {
+    id: 'BAD',
+    islGloss: 'ISL_BAD',
+    aslGloss: 'ASL_BAD',
+    label: 'Bad',
+    text: 'bad',
+    category: 'communication',
+    twoHanded: false,
+    description: 'Thumbs down (ISL) / chin outward flip down (ASL)',
+  },
+  HOW_ARE_YOU: {
+    id: 'HOW_ARE_YOU',
+    islGloss: 'ISL_HOW_ARE_YOU',
+    aslGloss: 'ASL_HOW_ARE_YOU',
+    label: 'How Are You',
+    text: 'how are you',
+    category: 'communication',
+    twoHanded: true,
+    description: 'Two cupped palms opening outward (ISL) / how + you (ASL)',
+  },
+
+  // --- Basic Needs ---
+  YES: {
+    id: 'YES',
+    islGloss: 'ISL_YES',
+    aslGloss: 'ASL_YES',
+    label: 'Yes',
+    text: 'yes',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Closed fist nodding up and down vertically',
+  },
+  NO: {
+    id: 'NO',
+    islGloss: 'ISL_NO',
+    aslGloss: 'ASL_NO',
+    label: 'No',
+    text: 'no',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Index wagging (ISL) / index+middle snapping shut (ASL)',
+  },
+  EAT: {
+    id: 'EAT',
+    islGloss: 'ISL_EAT',
+    aslGloss: 'ASL_EAT',
+    label: 'Eat',
+    text: 'eat',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Bunched fingertips brought toward mouth',
+  },
+  DRINK: {
+    id: 'DRINK',
+    islGloss: 'ISL_DRINK',
+    aslGloss: 'ASL_DRINK',
+    label: 'Drink',
+    text: 'drink',
+    category: 'needs',
+    twoHanded: false,
+    description: 'C-hand tilted toward mouth like drinking',
+  },
+  WATER: {
+    id: 'WATER',
+    islGloss: 'ISL_WATER',
+    aslGloss: 'ASL_WATER',
+    label: 'Water',
+    text: 'water',
+    category: 'needs',
+    twoHanded: false,
+    description: 'W-shape tapped on chin / cupped hand',
+  },
+  FOOD: {
+    id: 'FOOD',
+    islGloss: 'ISL_FOOD',
+    aslGloss: 'ASL_FOOD',
+    label: 'Food',
+    text: 'food',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Bunched fingertips tapping mouth repeatedly',
   },
   LOVE: {
-    gloss: 'LOVE',
+    id: 'LOVE',
+    islGloss: 'ISL_LOVE',
+    aslGloss: 'ASL_LOVE',
     label: 'Love',
-    text: 'Love',
-    description: 'Two wrists crossed over chest OR ILY handshape (thumb, index, pinky)',
-    category: 'social',
+    text: 'love',
+    category: 'needs',
     twoHanded: false,
+    description: 'Crossed arms/wrists over chest or ILY sign',
+  },
+  READ: {
+    id: 'READ',
+    islGloss: 'ISL_READ',
+    aslGloss: 'ASL_READ',
+    label: 'Read',
+    text: 'read',
+    category: 'needs',
+    twoHanded: true,
+    description: 'V-fingers scanning down open palm like reading text',
+  },
+  WRITE: {
+    id: 'WRITE',
+    islGloss: 'ISL_WRITE',
+    aslGloss: 'ASL_WRITE',
+    label: 'Write',
+    text: 'write',
+    category: 'needs',
+    twoHanded: true,
+    description: 'Pinching pen grip writing across flat palm',
+  },
+  HOME: {
+    id: 'HOME',
+    islGloss: 'ISL_HOME',
+    aslGloss: 'ASL_HOME',
+    label: 'Home',
+    text: 'home',
+    category: 'needs',
+    twoHanded: true,
+    description: 'Roof gable inverted V (ISL) / cheek mouth to ear (ASL)',
+  },
+  SCHOOL: {
+    id: 'SCHOOL',
+    islGloss: 'ISL_SCHOOL',
+    aslGloss: 'ASL_SCHOOL',
+    label: 'School',
+    text: 'school',
+    category: 'needs',
+    twoHanded: true,
+    description: 'Book opening to roof (ISL) / clapping palms horizontally (ASL)',
+  },
+  BOOK: {
+    id: 'BOOK',
+    islGloss: 'ISL_BOOK',
+    aslGloss: 'ASL_BOOK',
+    label: 'Book',
+    text: 'book',
+    category: 'needs',
+    twoHanded: true,
+    description: 'Two flat hands opening like a book',
+  },
+  BATHROOM: {
+    id: 'BATHROOM',
+    islGloss: 'ISL_BATHROOM',
+    aslGloss: 'ASL_BATHROOM',
+    label: 'Bathroom',
+    text: 'bathroom',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Pinky finger upright shaken (ISL) / T-handshape shaken (ASL)',
+  },
+  SLEEP: {
+    id: 'SLEEP',
+    islGloss: 'ISL_SLEEP',
+    aslGloss: 'ASL_SLEEP',
+    label: 'Sleep',
+    text: 'sleep',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Hands against tilted cheek / head resting',
+  },
+  HAPPY: {
+    id: 'HAPPY',
+    islGloss: 'ISL_HAPPY',
+    aslGloss: 'ASL_HAPPY',
+    label: 'Happy',
+    text: 'happy',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Open flat hands brushing upward repeatedly against chest',
+  },
+  SAD: {
+    id: 'SAD',
+    islGloss: 'ISL_SAD',
+    aslGloss: 'ASL_SAD',
+    label: 'Sad',
+    text: 'sad',
+    category: 'needs',
+    twoHanded: false,
+    description: 'Open hands with fingers drooping downward in front of face',
   },
 };
 
+// Backward-compatible alias for existing imports
+export const ISL_VOCABULARY = SIGN_VOCABULARY;
+
 // 21 MediaPipe Landmark indices
 const WRIST = 0;
-const THUMB_CMC = 1;
 const THUMB_MCP = 2;
-const THUMB_IP = 3;
 const THUMB_TIP = 4;
 const INDEX_MCP = 5;
-const INDEX_PIP = 6;
-const INDEX_DIP = 7;
 const INDEX_TIP = 8;
 const MIDDLE_MCP = 9;
-const MIDDLE_PIP = 10;
-const MIDDLE_DIP = 11;
 const MIDDLE_TIP = 12;
 const RING_MCP = 13;
-const RING_PIP = 14;
-const RING_DIP = 15;
 const RING_TIP = 16;
 const PINKY_MCP = 17;
-const PINKY_PIP = 18;
-const PINKY_DIP = 19;
 const PINKY_TIP = 20;
 
 const dist2D = (a: Landmark, b: Landmark): number => {
@@ -225,6 +500,7 @@ interface HandFeatures {
   ilySign: boolean;
   nameShape: boolean;
   pointing: boolean;
+  tHandshape: boolean; // ASL Bathroom
   isFaceZone: boolean;
   isChestZone: boolean;
   isLowerZone: boolean;
@@ -295,6 +571,14 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   // Pointing: only index extended
   const pointing = indexExtended && middleCurled && ringCurled && pinkyCurled && !thumbExtended;
 
+  // T-handshape (ASL Bathroom): thumb tucked between index and middle
+  const tHandshape =
+    indexCurled &&
+    middleCurled &&
+    ringCurled &&
+    pinkyCurled &&
+    nDist(THUMB_TIP, INDEX_MCP) < 0.45;
+
   // Hand height zones in frame
   const avgY = (wrist.y + landmarks[MIDDLE_MCP].y) / 2;
   const isFaceZone = avgY < 0.42;
@@ -323,6 +607,7 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     ilySign,
     nameShape,
     pointing,
+    tHandshape,
     isFaceZone,
     isChestZone,
     isLowerZone,
@@ -338,7 +623,8 @@ interface FrameRecord {
   handCount: number;
 }
 
-export interface ISLClassificationResult {
+export interface ClassificationResult {
+  signId: string;
   gloss: string;
   label: string;
   text: string;
@@ -346,9 +632,18 @@ export interface ISLClassificationResult {
   category: string;
 }
 
-export class ISLClassifier {
+export class MultiLanguageClassifier {
   private history: FrameRecord[] = [];
   private readonly maxHistoryLength = 25; // ~0.8s at 30fps
+  private activeLanguage: SupportedLanguage = 'ISL';
+
+  public setLanguage(lang: SupportedLanguage): void {
+    this.activeLanguage = lang;
+  }
+
+  public getLanguage(): SupportedLanguage {
+    return this.activeLanguage;
+  }
 
   public recordFrame(hands: Landmark[][], timestamp: number = performance.now()): void {
     if (!hands || hands.length === 0 || !hands[0] || hands[0].length < 21) {
@@ -369,13 +664,14 @@ export class ISLClassifier {
     }
   }
 
-  public classify(hands: Landmark[][]): ISLClassificationResult | null {
+  public classify(hands: Landmark[][]): ClassificationResult | null {
     if (!hands || hands.length === 0) return null;
 
     const f0 = extractHandFeatures(hands[0]);
     if (!f0) return null;
 
     const f1 = hands.length > 1 && hands[1] ? extractHandFeatures(hands[1]) : null;
+    const lang = this.activeLanguage;
 
     // Movement analysis from history window
     let dx = 0;
@@ -390,7 +686,7 @@ export class ISLClassifier {
       dx = last.wristX - first.wristX;
       dy = last.wristY - first.wristY;
 
-      // Count horizontal direction reversals for waving
+      // Count horizontal direction reversals for waving/wagging
       let prevDirX = 0;
       for (let i = 1; i < recent.length; i++) {
         const step = recent[i].wristX - recent[i - 1].wristX;
@@ -403,7 +699,7 @@ export class ISLClassifier {
         }
       }
 
-      // Count vertical direction reversals for nodding
+      // Count vertical direction reversals for nodding/tapping
       let prevDirY = 0;
       for (let i = 1; i < recent.length; i++) {
         const step = recent[i].wristY - recent[i - 1].wristY;
@@ -417,18 +713,70 @@ export class ISLClassifier {
       }
     }
 
+    const formatResult = (signId: string, confidence: number): ClassificationResult => {
+      const def = SIGN_VOCABULARY[signId];
+      const gloss = lang === 'ISL' ? def.islGloss : def.aslGloss;
+      return {
+        signId,
+        gloss,
+        label: def.label,
+        text: def.text,
+        confidence,
+        category: def.category,
+      };
+    };
+
     // ==========================================
-    // 1. TWO-HANDED ISL SIGNS (when hands.length >= 2)
+    // 1. TWO-HANDED SIGNS (when hands.length >= 2)
     // ==========================================
     if (f1 && hands.length >= 2) {
       const wristDist = dist2D(f0.wrist, f1.wrist);
       const tipDist = dist2D(hands[0][MIDDLE_TIP], hands[1][MIDDLE_TIP]);
       const indexTipDist = dist2D(hands[0][INDEX_TIP], hands[1][INDEX_TIP]);
-
-      // 1.1 PLEASE (Namaste / Folded prayer hands in front of chest)
       const fingersUp0 = hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.08;
       const fingersUp1 = hands[1][MIDDLE_TIP].y < f1.wrist.y - 0.08;
+
+      // 1.1 BOOK (Two flat hands open side-by-side like an open book)
       if (
+        f0.openPalm &&
+        f1.openPalm &&
+        wristDist < 0.22 &&
+        dist2D(hands[0][PINKY_TIP], hands[1][PINKY_TIP]) < 0.20 &&
+        f0.isChestZone
+      ) {
+        return formatResult('BOOK', 0.95);
+      }
+
+      // 1.2 READ (V-fingers scanning down open non-dominant flat palm)
+      if (
+        ((f0.nameShape && f1.openPalm) || (f1.nameShape && f0.openPalm)) &&
+        wristDist < 0.26
+      ) {
+        return formatResult('READ', 0.94);
+      }
+
+      // 1.3 WRITE (Pinching pen grip writing across flat non-dominant palm)
+      if (
+        ((f0.bunchedTips && f1.openPalm) || (f1.bunchedTips && f0.openPalm)) &&
+        wristDist < 0.25
+      ) {
+        return formatResult('WRITE', 0.94);
+      }
+
+      // 1.4 SCHOOL (ISL: book to roof; ASL: clapping flat palms horizontally)
+      if (
+        f0.openPalm &&
+        f1.openPalm &&
+        wristDist < 0.24 &&
+        oscillationsY >= 1 &&
+        f0.isChestZone
+      ) {
+        return formatResult('SCHOOL', 0.93);
+      }
+
+      // 1.5 PLEASE in ISL (Namaste / Folded prayer hands in front of chest)
+      if (
+        lang === 'ISL' &&
         (f0.openPalm || (f0.indexExtended && f0.middleExtended)) &&
         (f1.openPalm || (f1.indexExtended && f1.middleExtended)) &&
         fingersUp0 &&
@@ -437,17 +785,12 @@ export class ISLClassifier {
         wristDist < 0.28 &&
         (f0.isChestZone || f0.isFaceZone)
       ) {
-        return {
-          gloss: 'PLEASE',
-          label: 'Please',
-          text: 'Please',
-          confidence: 0.96,
-          category: 'greetings',
-        };
+        return formatResult('PLEASE', 0.96);
       }
 
-      // 1.2 HOME (Roof / Inverted V: tips touching at top, wrists spread wider apart)
+      // 1.6 HOME in ISL (Roof / Inverted V: tips touching at apex, wrists spread apart)
       if (
+        lang === 'ISL' &&
         (f0.openPalm || (f0.indexExtended && f0.middleExtended)) &&
         (f1.openPalm || (f1.indexExtended && f1.middleExtended)) &&
         tipDist < 0.14 &&
@@ -455,16 +798,10 @@ export class ISLClassifier {
         wristDist > 0.15 &&
         f0.isChestZone
       ) {
-        return {
-          gloss: 'HOME',
-          label: 'Home',
-          text: 'Home',
-          confidence: 0.95,
-          category: 'social',
-        };
+        return formatResult('HOME', 0.95);
       }
 
-      // 1.3 HELP (Base horizontal flat palm supporting a fist/thumbs-up)
+      // 1.7 HELP (Base horizontal flat palm supporting a fist/thumbs-up)
       const f0IsFist = f0.fist || f0.thumbUp;
       const f1IsFist = f1.fist || f1.thumbUp;
       const f0IsPalm = f0.openPalm;
@@ -473,33 +810,21 @@ export class ISLClassifier {
         ((f0IsFist && f1IsPalm) || (f1IsFist && f0IsPalm)) &&
         wristDist < 0.24
       ) {
-        return {
-          gloss: 'HELP',
-          label: 'Help',
-          text: 'Help',
-          confidence: 0.94,
-          category: 'emergency',
-        };
+        return formatResult('HELP', 0.94);
       }
 
-      // 1.4 FRIEND (Hands clasped or index fingers hooked together in front of body)
+      // 1.8 FRIEND (Clasped hands in ISL / interlocking index hooks in ASL)
       if (
-        (indexTipDist < 0.14 || tipDist < 0.14) &&
+        (indexTipDist < 0.15 || tipDist < 0.15) &&
         wristDist < 0.30 &&
         !fingersUp0 &&
         !fingersUp1 &&
         f0.isChestZone
       ) {
-        return {
-          gloss: 'FRIEND',
-          label: 'Friend',
-          text: 'Friend',
-          confidence: 0.92,
-          category: 'social',
-        };
+        return formatResult('FRIEND', 0.92);
       }
 
-      // 1.5 HOW_ARE_YOU (Two cupped / open palms facing upward in front of chest)
+      // 1.9 HOW_ARE_YOU (Two cupped / open palms facing upward opening outward)
       if (
         f0.openPalm &&
         f1.openPalm &&
@@ -509,225 +834,282 @@ export class ISLClassifier {
         f0.isChestZone &&
         f1.isChestZone
       ) {
-        return {
-          gloss: 'HOW_ARE_YOU',
-          label: 'How Are You',
-          text: 'How are you?',
-          confidence: 0.93,
-          category: 'greetings',
-        };
+        return formatResult('HOW_ARE_YOU', 0.93);
       }
 
-      // 1.6 LOVE (Two hands crossed at wrists over chest)
+      // 1.10 WELCOME in ISL (Both open hands sweeping inward toward chest)
+      if (
+        lang === 'ISL' &&
+        f0.openPalm &&
+        f1.openPalm &&
+        (dy > 0.02 || dx > 0.02) &&
+        wristDist < 0.45 &&
+        f0.isChestZone
+      ) {
+        return formatResult('WELCOME', 0.91);
+      }
+
+      // 1.11 LOVE (Two hands crossed at wrists over chest)
       if (wristDist < 0.16 && f0.isChestZone && f1.isChestZone) {
-        return {
-          gloss: 'LOVE',
-          label: 'Love',
-          text: 'Love',
-          confidence: 0.92,
-          category: 'social',
-        };
+        return formatResult('LOVE', 0.92);
       }
     }
 
     // ==========================================
-    // 2. SINGLE-HANDED / PRIMARY HAND ISL SIGNS
+    // 2. SINGLE-HANDED / PRIMARY HAND SIGNS
     // ==========================================
 
     // 2.1 LOVE (ILY handshape: thumb, index, pinky extended)
     if (f0.ilySign) {
-      return {
-        gloss: 'LOVE',
-        label: 'Love',
-        text: 'Love',
-        confidence: 0.96,
-        category: 'social',
-      };
+      return formatResult('LOVE', 0.96);
     }
 
-    // 2.2 GOODBYE (Open palm waving horizontally side-to-side)
+    // 2.2 BATHROOM
+    // In ISL: Pinky extended upright shaken side-to-side (traditional Indian sign)
+    if (
+      lang === 'ISL' &&
+      f0.pinkyExtended &&
+      f0.indexCurled &&
+      f0.middleCurled &&
+      f0.ringCurled &&
+      oscillationsX >= 1
+    ) {
+      return formatResult('BATHROOM', 0.95);
+    }
+    // In ASL: T-handshape (thumb under index) shaken side-to-side
+    if (
+      lang === 'ASL' &&
+      f0.tHandshape &&
+      oscillationsX >= 1
+    ) {
+      return formatResult('BATHROOM', 0.94);
+    }
+
+    // 2.3 SLEEP (Hand tilted against cheek / face)
+    if (
+      (f0.openPalm || f0.bunchedTips) &&
+      f0.isFaceZone &&
+      Math.abs(hands[0][INDEX_TIP].x - f0.wrist.x) > 0.08 &&
+      Math.abs(dx) < 0.03
+    ) {
+      return formatResult('SLEEP', 0.92);
+    }
+
+    // 2.4 HAPPY (Open flat hand brushing upward repeatedly on chest)
+    if (
+      f0.openPalm &&
+      f0.isChestZone &&
+      oscillationsY >= 1 &&
+      dy < 0
+    ) {
+      return formatResult('HAPPY', 0.93);
+    }
+
+    // 2.5 SAD (Open hand in front of face with drooping fingers moving downward)
+    if (
+      f0.openPalm &&
+      f0.isFaceZone &&
+      dy > 0.02
+    ) {
+      return formatResult('SAD', 0.93);
+    }
+
+    // 2.6 GOODBYE (Open palm waving horizontally side-to-side)
     if (f0.openPalm && oscillationsX >= 2 && hands[0][MIDDLE_TIP].y < f0.wrist.y) {
-      return {
-        gloss: 'GOODBYE',
-        label: 'Goodbye',
-        text: 'Goodbye',
-        confidence: 0.94,
-        category: 'greetings',
-      };
+      return formatResult('GOODBYE', 0.94);
     }
 
-    // 2.3 HELLO (Open palm raised high near temple/brow)
+    // 2.7 HELLO (Open palm raised high near temple/brow)
     if (
       f0.openPalm &&
       hands[0][MIDDLE_TIP].y < 0.35 &&
       f0.wrist.y < 0.55 &&
       oscillationsX < 2
     ) {
-      return {
-        gloss: 'HELLO',
-        label: 'Hello',
-        text: 'Hello',
-        confidence: 0.93,
-        category: 'greetings',
-      };
+      return formatResult('HELLO', 0.93);
     }
 
-    // 2.4 THANK_YOU (Open flat hand near chin/mouth moving forward/down)
+    // 2.8 THANK_YOU (Open flat hand near chin/mouth moving forward/down)
     if (
       f0.openPalm &&
       hands[0][INDEX_TIP].y < 0.44 &&
       (dy > 0.015 || hands[0][INDEX_TIP].y > 0.32)
     ) {
-      return {
-        gloss: 'THANK_YOU',
-        label: 'Thank You',
-        text: 'Thank you',
-        confidence: 0.92,
-        category: 'greetings',
-      };
+      return formatResult('THANK_YOU', 0.92);
     }
 
-    // 2.5 STOP (Open vertical palm held steady facing camera like a barrier)
+    // 2.9 STOP (Open vertical palm held steady facing camera like a barrier)
     if (
       f0.openPalm &&
       hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.12 &&
       f0.isChestZone &&
       oscillationsX < 2
     ) {
-      return {
-        gloss: 'STOP',
-        label: 'Stop',
-        text: 'Stop',
-        confidence: 0.91,
-        category: 'basic',
-      };
+      return formatResult('STOP', 0.92);
     }
 
-    // 2.6 EAT (Bunched fingertips brought toward mouth)
+    // 2.10 WAIT (Open palm hovering at chest level with low movement)
+    if (
+      f0.openPalm &&
+      f0.isChestZone &&
+      Math.abs(dx) < 0.03 &&
+      Math.abs(dy) < 0.03 &&
+      hands[0][MIDDLE_TIP].y > f0.wrist.y - 0.10
+    ) {
+      return formatResult('WAIT', 0.90);
+    }
+
+    // 2.11 COME (Beckoning inward toward body)
+    if (
+      (f0.pointing || f0.openPalm) &&
+      dy < -0.02 &&
+      f0.isChestZone
+    ) {
+      return formatResult('COME', 0.91);
+    }
+
+    // 2.12 GO (Pointing forward and moving outward abruptly)
+    if (
+      f0.pointing &&
+      (dy > 0.03 || Math.abs(dx) > 0.04) &&
+      f0.isChestZone
+    ) {
+      return formatResult('GO', 0.92);
+    }
+
+    // 2.13 UNDERSTAND (Index finger tapping temple / flicking near forehead)
+    if (
+      f0.pointing &&
+      f0.isFaceZone &&
+      hands[0][INDEX_TIP].y < 0.32 &&
+      oscillationsX < 2
+    ) {
+      return formatResult('UNDERSTAND', 0.93);
+    }
+
+    // 2.14 DONT_UNDERSTAND (Index finger near temple with wagging or head shake)
+    if (
+      f0.pointing &&
+      f0.isFaceZone &&
+      hands[0][INDEX_TIP].y < 0.34 &&
+      oscillationsX >= 2
+    ) {
+      return formatResult('DONT_UNDERSTAND', 0.92);
+    }
+
+    // 2.15 EAT (Bunched fingertips brought toward mouth)
     if (f0.bunchedTips && f0.isFaceZone) {
-      return {
-        gloss: 'EAT',
-        label: 'Eat',
-        text: 'Eat',
-        confidence: 0.94,
-        category: 'needs',
-      };
+      return formatResult('EAT', 0.94);
     }
 
-    // 2.7 FOOD (Bunched fingertips tapping near mouth or flat hand at mouth)
+    // 2.16 FOOD (Bunched fingertips tapping near mouth repeatedly)
     if (f0.bunchedTips && f0.isFaceZone && oscillationsY >= 1) {
-      return {
-        gloss: 'FOOD',
-        label: 'Food',
-        text: 'Food',
-        confidence: 0.93,
-        category: 'needs',
-      };
+      return formatResult('FOOD', 0.93);
     }
 
-    // 2.8 DRINK (C-handshape held like a cup tilted toward mouth)
+    // 2.17 DRINK (C-handshape held like a cup tilted toward mouth)
     if (f0.cHandshape && f0.isFaceZone) {
-      return {
-        gloss: 'DRINK',
-        label: 'Drink',
-        text: 'Drink',
-        confidence: 0.93,
-        category: 'needs',
-      };
+      return formatResult('DRINK', 0.93);
     }
 
-    // 2.9 WATER (W-handshape tapped against chin)
+    // 2.18 WATER (W-handshape tapped against chin)
     if (f0.wHandshape && (f0.isFaceZone || hands[0][INDEX_TIP].y < 0.45)) {
-      return {
-        gloss: 'WATER',
-        label: 'Water',
-        text: 'Water',
-        confidence: 0.95,
-        category: 'needs',
-      };
+      return formatResult('WATER', 0.95);
     }
 
-    // 2.10 YES (Closed fist or thumbs-up nodding up and down vertically)
+    // 2.19 YES (Closed fist or thumbs-up nodding up and down vertically)
     if ((f0.fist || f0.thumbUp) && oscillationsY >= 1) {
-      return {
-        gloss: 'YES',
-        label: 'Yes',
-        text: 'Yes',
-        confidence: 0.94,
-        category: 'basic',
-      };
+      return formatResult('YES', 0.94);
     }
 
-    // 2.11 GOOD (Clear steady upright thumbs-up)
+    // 2.20 GOOD (Clear steady upright thumbs-up)
     if (f0.thumbUp && f0.indexCurled && f0.middleCurled && f0.ringCurled && f0.pinkyCurled) {
-      return {
-        gloss: 'GOOD',
-        label: 'Good',
-        text: 'Good',
-        confidence: 0.95,
-        category: 'basic',
-      };
+      return formatResult('GOOD', 0.95);
     }
 
-    // 2.12 BAD (Clear steady thumbs-down)
+    // 2.21 BAD (Clear steady thumbs-down)
     if (f0.thumbDown && f0.indexCurled && f0.middleCurled && f0.ringCurled && f0.pinkyCurled) {
-      return {
-        gloss: 'BAD',
-        label: 'Bad',
-        text: 'Bad',
-        confidence: 0.95,
-        category: 'basic',
-      };
+      return formatResult('BAD', 0.95);
     }
 
-    // 2.13 NO (Index finger wagging side to side OR index+middle snapping shut)
+    // 2.22 NO (Index finger wagging side to side OR index+middle snapping shut)
     if (
       (f0.pointing && oscillationsX >= 2) ||
       (f0.nameShape && oscillationsX >= 2)
     ) {
-      return {
-        gloss: 'NO',
-        label: 'No',
-        text: 'No',
-        confidence: 0.92,
-        category: 'basic',
-      };
+      return formatResult('NO', 0.92);
     }
 
-    // 2.14 NAME (Index + Middle extended together like H/U shape held near chest)
+    // 2.23 I / ME (Index finger pointing directly to chest)
+    if (
+      f0.pointing &&
+      f0.isChestZone &&
+      hands[0][INDEX_TIP].y > 0.38 &&
+      oscillationsX < 2
+    ) {
+      return formatResult('I', 0.93);
+    }
+
+    // 2.24 YOU (Index finger pointing forward towards camera at chest level)
+    if (
+      f0.pointing &&
+      f0.isChestZone &&
+      hands[0][INDEX_TIP].y <= 0.55 &&
+      Math.abs(dx) < 0.04
+    ) {
+      return formatResult('YOU', 0.93);
+    }
+
+    // 2.25 THEY (Index finger pointing laterally with sweeping arc)
+    if (
+      f0.pointing &&
+      f0.isChestZone &&
+      Math.abs(dx) > 0.06
+    ) {
+      return formatResult('THEY', 0.91);
+    }
+
+    // 2.26 MY (Flat open palm resting on center of chest)
+    if (
+      f0.openPalm &&
+      f0.isChestZone &&
+      Math.abs(dx) < 0.04 &&
+      Math.abs(dy) < 0.04
+    ) {
+      return formatResult('MY', 0.92);
+    }
+
+    // 2.27 YOUR (Flat open palm pushed forward towards other person)
+    if (
+      f0.openPalm &&
+      f0.isChestZone &&
+      hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.08 &&
+      Math.abs(dx) < 0.04
+    ) {
+      return formatResult('YOUR', 0.91);
+    }
+
+    // 2.28 NAME (Index + Middle extended together held or tapped near chest)
     if (f0.nameShape && f0.isChestZone) {
-      return {
-        gloss: 'NAME',
-        label: 'Name',
-        text: 'Name',
-        confidence: 0.91,
-        category: 'social',
-      };
+      return formatResult('NAME', 0.91);
     }
 
-    // 2.15 SORRY (Fist held against chest/heart area)
+    // 2.29 SORRY (Closed fist moving in a circular motion on chest)
     if (f0.fist && f0.isChestZone) {
-      return {
-        gloss: 'SORRY',
-        label: 'Sorry',
-        text: 'Sorry',
-        confidence: 0.90,
-        category: 'greetings',
-      };
+      return formatResult('SORRY', 0.90);
     }
 
-    // 2.16 PLEASE (Single-hand fallback: flat open palm gently placed over chest/heart)
-    if (f0.openPalm && f0.isChestZone && Math.abs(dx) < 0.05 && Math.abs(dy) < 0.05) {
-      return {
-        gloss: 'PLEASE',
-        label: 'Please',
-        text: 'Please',
-        confidence: 0.84,
-        category: 'greetings',
-      };
+    // 2.30 PLEASE in ASL (Flat open hand rubbing chest in circular motion)
+    if (
+      lang === 'ASL' &&
+      f0.openPalm &&
+      f0.isChestZone &&
+      (Math.abs(dx) > 0.02 || Math.abs(dy) > 0.02)
+    ) {
+      return formatResult('PLEASE', 0.92);
     }
 
-    // Unknown or low-confidence gesture -> Return null (don't display random words)
+    // Unknown or low-confidence gesture -> Return null
     return null;
   }
 
@@ -738,7 +1120,7 @@ export class ISLClassifier {
 
 export interface ISLRecognizerCallbacks {
   onWordRecognized?: (gloss: string, text: string, confidence: number) => void;
-  onSentenceUpdated?: (fullSentence: string, words: string[]) => void;
+  onSentenceUpdated?: (fullSentence: string, words: string[], translation: SentenceTranslationResult) => void;
   onCandidateUpdate?: (gloss: string | null, progress: number) => void;
   onProgressUpdated?: (progress: number) => void;
   onWordRevealed?: (word: string, currentText: string) => void;
@@ -748,17 +1130,19 @@ export interface ISLRecognizerCallbacks {
 /**
  * ISLRecognizer
  * Main recognizer engine for the Ishara application.
- * Manages real-time multi-hand classification, candidate stability debouncing,
- * cooldown prevention, and continuous sentence building.
+ * Supports both ISL and ASL with separate language profiles,
+ * candidate debouncing, duplicate cooldown, and sentence builder integration.
  */
 export class ISLRecognizer implements Recognizer {
-  public name = 'Ishara ISL 20-Sign Realtime Recognizer (v1)';
+  public name = 'Ishara ISL + ASL Realtime Recognizer (v2)';
 
-  private classifier = new ISLClassifier();
+  private classifier = new MultiLanguageClassifier();
   private callbacks: ISLRecognizerCallbacks = {};
 
-  // Sentence & word accumulation state
+  // Accumulated raw sign glosses (e.g. ['ISL_I', 'ISL_WANT', 'ISL_WATER'])
+  private rawGlosses: string[] = [];
   private sentenceWords: string[] = [];
+
   private candidateGloss: string | null = null;
   private candidateConfidence: number = 0;
   private candidateStableFrames: number = 0;
@@ -767,7 +1151,7 @@ export class ISLRecognizer implements Recognizer {
   // Cooldown to avoid duplicate continuous triggers of the same sign
   private lastConfirmedGloss: string | null = null;
   private lastConfirmedTime: number = 0;
-  private readonly wordCooldownMs: number = 1400; // 1.4s cooldown for identical word
+  private readonly wordCooldownMs: number = 1400; // 1.4s cooldown for identical sign
 
   private keydownHandler: ((e: KeyboardEvent) => void) | null = null;
 
@@ -778,13 +1162,18 @@ export class ISLRecognizer implements Recognizer {
     this.setupShortcuts();
   }
 
+  public setLanguage(lang: SupportedLanguage): void {
+    this.classifier.setLanguage(lang);
+  }
+
+  public getLanguage(): SupportedLanguage {
+    return this.classifier.getLanguage();
+  }
+
   public setCallbacks(callbacks: ISLRecognizerCallbacks): void {
     this.callbacks = { ...this.callbacks, ...callbacks };
   }
 
-  /**
-   * Hidden presenter/testing shortcuts: Keys '1' to '9' trigger the corresponding sign directly.
-   */
   private setupShortcuts(): void {
     if (typeof window === 'undefined') return;
 
@@ -794,23 +1183,23 @@ export class ISLRecognizer implements Recognizer {
         return;
       }
 
-      const quickGlosses = [
+      const quickKeys = [
         'HELLO',
         'THANK_YOU',
         'PLEASE',
-        'SORRY',
+        'HELP',
         'YES',
         'NO',
-        'HOW_ARE_YOU',
-        'HELP',
-        'FRIEND',
+        'I',
+        'YOU',
+        'WATER',
       ];
 
       if (e.key >= '1' && e.key <= '9') {
         const index = parseInt(e.key, 10) - 1;
-        const gloss = quickGlosses[index];
-        if (gloss && ISL_VOCABULARY[gloss]) {
-          this.triggerManualSign(gloss);
+        const signId = quickKeys[index];
+        if (signId && SIGN_VOCABULARY[signId]) {
+          this.triggerManualSign(signId);
         }
       }
     };
@@ -821,11 +1210,14 @@ export class ISLRecognizer implements Recognizer {
   /**
    * Trigger a sign manually (used by gesture simulator chips or presenter shortcuts).
    */
-  public triggerManualSign(gloss: string): void {
-    const def = ISL_VOCABULARY[gloss];
+  public triggerManualSign(signIdOrGloss: string): void {
+    const cleanId = normalizeGloss(signIdOrGloss);
+    const def = SIGN_VOCABULARY[cleanId];
     if (!def) return;
 
-    this.confirmWord(def.gloss, def.text, 0.95);
+    const lang = this.classifier.getLanguage();
+    const gloss = lang === 'ISL' ? def.islGloss : def.aslGloss;
+    this.confirmWord(gloss, def.text, 0.95);
   }
 
   /**
@@ -847,7 +1239,6 @@ export class ISLRecognizer implements Recognizer {
     }
 
     if (hands.length === 0 || !hands[0] || hands[0].length < 21) {
-      // No hands in frame: reset candidate
       if (this.candidateStableFrames > 0) {
         this.candidateStableFrames--;
       } else {
@@ -865,7 +1256,6 @@ export class ISLRecognizer implements Recognizer {
     const result = this.classifier.classify(hands);
 
     if (!result) {
-      // Unknown gesture: decrease stability counter
       if (this.candidateStableFrames > 0) {
         this.candidateStableFrames--;
       } else {
@@ -877,7 +1267,6 @@ export class ISLRecognizer implements Recognizer {
       return null;
     }
 
-    // Hand held with active candidate
     const isSameAsLastConfirmed =
       result.gloss === this.lastConfirmedGloss &&
       timestamp - this.lastConfirmedTime < this.wordCooldownMs;
@@ -914,17 +1303,18 @@ export class ISLRecognizer implements Recognizer {
     confidence: number,
     timestamp: number = performance.now()
   ): void {
+    this.rawGlosses.push(gloss);
     this.sentenceWords.push(text);
     this.lastConfirmedGloss = gloss;
     this.lastConfirmedTime = timestamp;
     this.candidateStableFrames = 0;
 
-    const fullSentence = this.sentenceWords.join(' ');
+    const translation = buildSentenceFromGlosses(this.rawGlosses);
 
     this.callbacks.onWordRecognized?.(gloss, text, confidence);
-    this.callbacks.onSentenceUpdated?.(fullSentence, [...this.sentenceWords]);
-    this.callbacks.onWordRevealed?.(text, fullSentence);
-    this.callbacks.onPhraseCompleted?.({ text: fullSentence }, fullSentence);
+    this.callbacks.onSentenceUpdated?.(translation.naturalSentence, [...this.sentenceWords], translation);
+    this.callbacks.onWordRevealed?.(text, translation.naturalSentence);
+    this.callbacks.onPhraseCompleted?.({ text: translation.naturalSentence }, translation.naturalSentence);
     this.callbacks.onCandidateUpdate?.(gloss, 1.0);
     this.callbacks.onProgressUpdated?.(0);
   }
@@ -933,21 +1323,31 @@ export class ISLRecognizer implements Recognizer {
     return Math.min(1.0, this.candidateStableFrames / this.requiredStableFrames);
   }
 
+  public getRawGlosses(): string[] {
+    return [...this.rawGlosses];
+  }
+
   public getSentenceWords(): string[] {
     return [...this.sentenceWords];
   }
 
+  public getSentenceTranslation(): SentenceTranslationResult {
+    return buildSentenceFromGlosses(this.rawGlosses);
+  }
+
   public getFullSentence(): string {
-    return this.sentenceWords.join(' ');
+    return buildSentenceFromGlosses(this.rawGlosses).naturalSentence;
   }
 
   public clearSentence(): void {
+    this.rawGlosses = [];
     this.sentenceWords = [];
     this.candidateGloss = null;
     this.candidateStableFrames = 0;
     this.lastConfirmedGloss = null;
     this.lastConfirmedTime = 0;
-    this.callbacks.onSentenceUpdated?.('', []);
+    const emptyTranslation = buildSentenceFromGlosses([]);
+    this.callbacks.onSentenceUpdated?.('', [], emptyTranslation);
     this.callbacks.onCandidateUpdate?.(null, 0);
     this.callbacks.onProgressUpdated?.(0);
   }
@@ -962,21 +1362,10 @@ export class ISLRecognizer implements Recognizer {
   }
 
   public triggerPhraseByIndex(index: number): void {
-    const quickGlosses = [
-      'HELLO',
-      'THANK_YOU',
-      'PLEASE',
-      'SORRY',
-      'YES',
-      'NO',
-      'HOW_ARE_YOU',
-      'HELP',
-      'FRIEND',
-      'WATER',
-    ];
-    const gloss = quickGlosses[index % quickGlosses.length];
-    if (gloss) {
-      this.triggerManualSign(gloss);
+    const keys = Object.keys(SIGN_VOCABULARY);
+    const key = keys[index % keys.length];
+    if (key) {
+      this.triggerManualSign(key);
     }
   }
 
