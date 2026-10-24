@@ -4,6 +4,8 @@
 export interface SentenceTranslationResult {
   rawGlosses: string[];
   cleanGlosses: string[];
+  distinctGlosses: string[];
+  language: 'ISL' | 'ASL';
   glossDisplay: string;
   naturalSentence: string;
   ruleApplied: string;
@@ -12,6 +14,13 @@ export interface SentenceTranslationResult {
 // Strip language prefixes like "ISL_" or "ASL_"
 export function normalizeGloss(gloss: string): string {
   return gloss.replace(/^(ISL_|ASL_)/, '').toUpperCase().trim();
+}
+
+// Extract language indicator from gloss
+export function extractLanguage(gloss: string, fallback: 'ISL' | 'ASL' = 'ISL'): 'ISL' | 'ASL' {
+  if (gloss.startsWith('ASL_')) return 'ASL';
+  if (gloss.startsWith('ISL_')) return 'ISL';
+  return fallback;
 }
 
 // Convert gloss ID to human readable word
@@ -34,6 +43,39 @@ export function glossToWord(gloss: string): string {
  * Matched against normalized gloss keys (e.g. "I WANT WATER").
  */
 const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
+  // Single Signs (standalone confirmations)
+  'HELLO': 'Hello!',
+  'GOODBYE': 'Goodbye!',
+  'YES': 'Yes.',
+  'NO': 'No.',
+  'I': 'I.',
+  'ME': 'Me.',
+  'YOU': 'You.',
+  'WE': 'We.',
+  'THEY': 'They.',
+  'HE': 'He.',
+  'SHE': 'She.',
+  'MY': 'My.',
+  'YOUR': 'Your.',
+  'THANK_YOU': 'Thank you!',
+  'PLEASE': 'Please.',
+  'SORRY': 'Sorry.',
+  'WELCOME': 'Welcome!',
+  'HELP': 'Help!',
+  'WATER': 'Water.',
+  'FOOD': 'Food.',
+  'EAT': 'Eat.',
+  'DRINK': 'Drink.',
+  'BATHROOM': 'Bathroom.',
+  'BOOK': 'Book.',
+  'HOME': 'Home.',
+  'SCHOOL': 'School.',
+  'SLEEP': 'Sleep.',
+  'HAPPY': 'Happy.',
+  'SAD': 'Sad.',
+  'GOOD': 'Good.',
+  'BAD': 'Bad.',
+
   // Needs & Requests
   'I WANT WATER': 'I want water.',
   'I NEED WATER': 'I need water.',
@@ -89,13 +131,18 @@ const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
 /**
  * Builds a natural English sentence from recognized sign language glosses.
  * Enforces grammatical agreement, inserts necessary copula/articles,
- * and formats proper English capitalization and punctuation.
+ * deduplicates consecutive raw glosses, and separates language tags.
  */
-export function buildSentenceFromGlosses(glosses: string[]): SentenceTranslationResult {
+export function buildSentenceFromGlosses(
+  glosses: string[],
+  activeLanguage: 'ISL' | 'ASL' = 'ISL'
+): SentenceTranslationResult {
   if (!glosses || glosses.length === 0) {
     return {
       rawGlosses: [],
       cleanGlosses: [],
+      distinctGlosses: [],
+      language: activeLanguage,
       glossDisplay: '',
       naturalSentence: '',
       ruleApplied: 'empty',
@@ -103,42 +150,75 @@ export function buildSentenceFromGlosses(glosses: string[]): SentenceTranslation
   }
 
   const rawGlosses = [...glosses];
-  const cleanGlosses = rawGlosses.map(normalizeGloss);
-  const glossDisplay = rawGlosses.join(' • ');
+  const detectedLanguage: 'ISL' | 'ASL' = rawGlosses.some((g) => g.startsWith('ASL_'))
+    ? 'ASL'
+    : activeLanguage;
 
-  // 1. Direct rule match on full sequence
+  const cleanGlosses = rawGlosses.map(normalizeGloss);
+
+  // Consecutive deduplication: collapse adjacent repeated identical glosses
+  const distinctGlosses: string[] = [];
+  for (const g of cleanGlosses) {
+    if (distinctGlosses.length === 0 || distinctGlosses[distinctGlosses.length - 1] !== g) {
+      distinctGlosses.push(g);
+    }
+  }
+
+  const glossDisplay = distinctGlosses.join(' • ');
+
+  // 1. Direct rule match on distinct sequence
+  const distinctKey = distinctGlosses.join(' ');
+  if (SENTENCE_GRAMMAR_RULES[distinctKey]) {
+    return {
+      rawGlosses,
+      cleanGlosses,
+      distinctGlosses,
+      language: detectedLanguage,
+      glossDisplay,
+      naturalSentence: SENTENCE_GRAMMAR_RULES[distinctKey],
+      ruleApplied: 'exact_phrase_rule',
+    };
+  }
+
+  // 2. Direct rule match on full sequence
   const fullKey = cleanGlosses.join(' ');
   if (SENTENCE_GRAMMAR_RULES[fullKey]) {
     return {
       rawGlosses,
       cleanGlosses,
+      distinctGlosses,
+      language: detectedLanguage,
       glossDisplay,
       naturalSentence: SENTENCE_GRAMMAR_RULES[fullKey],
       ruleApplied: 'exact_phrase_rule',
     };
   }
 
-  // 2. Sub-phrase pattern matching: check if starts with "MY NAME ..."
+  // 3. Sub-phrase pattern matching: check if starts with "MY NAME ..."
   if (cleanGlosses[0] === 'MY' && cleanGlosses[1] === 'NAME') {
     const rest = cleanGlosses.slice(2).map(g => g.charAt(0) + g.slice(1).toLowerCase()).join(' ');
     const sentence = rest ? `My name is ${rest}.` : 'My name is...';
     return {
       rawGlosses,
       cleanGlosses,
+      distinctGlosses,
+      language: detectedLanguage,
       glossDisplay,
       naturalSentence: sentence,
       ruleApplied: 'name_intro_rule',
     };
   }
 
-  // 3. Pronoun + Copula + Predicate rule:
+  // 4. Pronoun + Copula + Predicate rule:
   // e.g. "I + HAPPY" -> "I am happy.", "YOU + GOOD" -> "You are good."
   const pronouns = new Set(['I', 'ME', 'YOU', 'WE', 'THEY', 'HE', 'SHE']);
   const adjectives = new Set(['HAPPY', 'SAD', 'GOOD', 'BAD', 'TIRED', 'FINE']);
 
-  if (cleanGlosses.length === 2 && pronouns.has(cleanGlosses[0]) && adjectives.has(cleanGlosses[1])) {
-    const subj = cleanGlosses[0];
-    const adj = cleanGlosses[1].toLowerCase();
+  const targetTokens = distinctGlosses.length > 0 ? distinctGlosses : cleanGlosses;
+
+  if (targetTokens.length === 2 && pronouns.has(targetTokens[0]) && adjectives.has(targetTokens[1])) {
+    const subj = targetTokens[0];
+    const adj = targetTokens[1].toLowerCase();
     let copula = 'am';
     if (subj === 'YOU' || subj === 'WE' || subj === 'THEY') copula = 'are';
     else if (subj === 'HE' || subj === 'SHE') copula = 'is';
@@ -147,16 +227,18 @@ export function buildSentenceFromGlosses(glosses: string[]): SentenceTranslation
     return {
       rawGlosses,
       cleanGlosses,
+      distinctGlosses,
+      language: detectedLanguage,
       glossDisplay,
       naturalSentence: `${subjWord} ${copula} ${adj}.`,
       ruleApplied: 'pronoun_copula_adjective',
     };
   }
 
-  // 4. Fallback Rule-Based Sentence Synthesis:
+  // 5. Fallback Rule-Based Sentence Synthesis:
   // Maps individual words, capitalizes the first word, ensures 'I' is uppercase,
   // and adds terminal punctuation.
-  const words = cleanGlosses.map((g, idx) => {
+  const words = targetTokens.map((g, idx) => {
     let word = glossToWord(g);
     if (idx === 0) {
       word = word.charAt(0).toUpperCase() + word.slice(1);
@@ -177,6 +259,8 @@ export function buildSentenceFromGlosses(glosses: string[]): SentenceTranslation
   return {
     rawGlosses,
     cleanGlosses,
+    distinctGlosses,
+    language: detectedLanguage,
     glossDisplay,
     naturalSentence: natural,
     ruleApplied: 'general_synthesizer',

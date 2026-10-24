@@ -17,7 +17,7 @@ import {
   SentenceTranslationResult,
 } from '../ml';
 import { addRecentConversation } from '../data/store';
-import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS } from '../lib/speech';
+import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS, recordUserInteraction } from '../lib/speech';
 import {
   Video,
   Play,
@@ -88,6 +88,7 @@ export const SignToVoicePage: React.FC = () => {
   const [holdProgress, setHoldProgress] = useState<number>(0);
   const [acceptedWords, setAcceptedWords] = useState<string[]>([]);
   const [rawGlosses, setRawGlosses] = useState<string[]>([]);
+  const [distinctGlosses, setDistinctGlosses] = useState<string[]>([]);
   const [naturalSentence, setNaturalSentence] = useState<string>('');
   const [simCategory, setSimCategory] = useState<'all' | 'pronouns' | 'communication' | 'needs'>('all');
   const [currentEmotion, setCurrentEmotion] = useState<EmotionType>('happy');
@@ -137,6 +138,7 @@ export const SignToVoicePage: React.FC = () => {
 
   // Start Camera
   const startCamera = async () => {
+    recordUserInteraction();
     setCameraError(null);
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -283,8 +285,8 @@ export const SignToVoicePage: React.FC = () => {
   // Wire ISLRecognizer callbacks for sentence building & optional speech
   useEffect(() => {
     recognizerRef.current.setCallbacks({
-      onWordRecognized: (_gloss: string, text: string) => {
-        if (autoSpeak) {
+      onWordRecognized: (_gloss: string, text: string, confidence: number = 0.95) => {
+        if (autoSpeak && confidence >= 0.85) {
           speech.speak(text, {
             emotion: currentEmotion,
             lang: language === 'ISL' ? 'en-IN' : 'en-US',
@@ -295,6 +297,7 @@ export const SignToVoicePage: React.FC = () => {
       onSentenceUpdated: (fullText: string, words: string[], translation?: SentenceTranslationResult) => {
         setAcceptedWords(words);
         setRawGlosses(translation?.rawGlosses || []);
+        setDistinctGlosses(translation?.distinctGlosses || []);
         const finalSentence = translation?.naturalSentence || fullText;
         setNaturalSentence(finalSentence);
 
@@ -352,6 +355,7 @@ export const SignToVoicePage: React.FC = () => {
 
   // Simulation Mode Trigger for testing without camera
   const triggerSimulatedSign = (gloss: string) => {
+    recordUserInteraction();
     recognizerRef.current.triggerManualSign(gloss);
   };
 
@@ -364,6 +368,10 @@ export const SignToVoicePage: React.FC = () => {
 
   // Speak with Emotion Modulation via shared speech helper
   const handleSpeak = () => {
+    if (!translatedSentence || translatedSentence.includes('Frame your hands')) {
+      return;
+    }
+    recordUserInteraction();
     speech.speak(translatedSentence, {
       emotion: currentEmotion,
       lang: language === 'ISL' ? 'en-IN' : 'en-US',
@@ -408,6 +416,7 @@ export const SignToVoicePage: React.FC = () => {
   const handleResetWords = () => {
     setAcceptedWords([]);
     setRawGlosses([]);
+    setDistinctGlosses([]);
     setNaturalSentence('');
     recognizerRef.current.clearSentence();
     setLiveCandidate(null);
@@ -818,19 +827,23 @@ export const SignToVoicePage: React.FC = () => {
 
             {/* Sign Gloss Tokens & Sentence Quote Box */}
             <div className="space-y-2">
-              {/* Live Gloss Sequence badge strip */}
-              {rawGlosses.length > 0 && (
-                <div className="flex items-center gap-1.5 flex-wrap p-2.5 rounded-xl bg-slate-100/90 border border-slate-200/80 text-[11px] font-bold text-[#6E7387]">
-                  <span className="text-[10px] uppercase font-black text-[#7C9CFF] tracking-wider">
+              {/* Distinct Gloss Sequence badge strip */}
+              {distinctGlosses.length > 0 && (
+                <div className="flex items-center gap-2 flex-wrap p-3 rounded-2xl bg-white/70 border border-slate-200/60 text-xs font-bold shadow-xs">
+                  {/* Dedicated language badge kept strictly separate from the gloss tokens */}
+                  <span className="px-2.5 py-1 rounded-full bg-[#7C9CFF] text-white text-[10px] font-black uppercase tracking-wider shadow-xs">
+                    {language}
+                  </span>
+                  <span className="text-[10px] uppercase font-black text-[#6E7387] tracking-wider">
                     Sign Glosses:
                   </span>
-                  {rawGlosses.map((g, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-0.5 rounded-lg bg-white shadow-xs text-[#2B2D42] border border-slate-200/60 font-mono text-[10px] font-black"
-                    >
-                      {g}
-                    </span>
+                  {distinctGlosses.map((gloss, idx) => (
+                    <React.Fragment key={idx}>
+                      {idx > 0 && <span className="text-[#6E7387] font-black text-xs">→</span>}
+                      <span className="px-2.5 py-1 rounded-xl bg-white text-[#2B2D42] border border-slate-200 font-mono text-xs font-black shadow-xs">
+                        {gloss}
+                      </span>
+                    </React.Fragment>
                   ))}
                 </div>
               )}

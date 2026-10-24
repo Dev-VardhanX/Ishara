@@ -478,6 +478,12 @@ const dist2D = (a: Landmark, b: Landmark): number => {
   return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 };
 
+const dist3D = (a: Landmark, b: Landmark): number => {
+  const az = a.z ?? 0;
+  const bz = b.z ?? 0;
+  return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2) + Math.pow(az - bz, 2));
+};
+
 interface HandFeatures {
   wrist: Landmark;
   palmSize: number;
@@ -500,6 +506,9 @@ interface HandFeatures {
   ilySign: boolean;
   nameShape: boolean;
   pointing: boolean;
+  pointingToChest: boolean;
+  pointingToCamera: boolean;
+  pointingToSide: boolean;
   tHandshape: boolean; // ASL Bathroom
   isFaceZone: boolean;
   isChestZone: boolean;
@@ -510,44 +519,65 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   if (!landmarks || landmarks.length < 21) return null;
 
   const wrist = landmarks[WRIST];
-  const palmSize = dist2D(wrist, landmarks[MIDDLE_MCP]) || 0.15;
-  const nDist = (i: number, j: number) => dist2D(landmarks[i], landmarks[j]) / palmSize;
+  const palmSize2D = dist2D(wrist, landmarks[MIDDLE_MCP]) || 0.15;
+  const palmSize3D = dist3D(wrist, landmarks[MIDDLE_MCP]) || 0.15;
+  const palmSize = palmSize2D;
+  const nDist2D = (i: number, j: number) => dist2D(landmarks[i], landmarks[j]) / palmSize2D;
+  const nDist3D = (i: number, j: number) => dist3D(landmarks[i], landmarks[j]) / palmSize3D;
 
-  // Finger extensions (scale normalized)
-  const thumbExtended = nDist(THUMB_TIP, THUMB_MCP) > 0.65 && nDist(THUMB_TIP, MIDDLE_MCP) > 0.72;
-  const indexExtended = nDist(INDEX_TIP, WRIST) > 1.25 && nDist(INDEX_TIP, INDEX_MCP) > 0.60;
-  const middleExtended = nDist(MIDDLE_TIP, WRIST) > 1.25 && nDist(MIDDLE_TIP, MIDDLE_MCP) > 0.60;
-  const ringExtended = nDist(RING_TIP, WRIST) > 1.25 && nDist(RING_TIP, RING_MCP) > 0.60;
-  const pinkyExtended = nDist(PINKY_TIP, WRIST) > 1.20 && nDist(PINKY_TIP, PINKY_MCP) > 0.55;
+  // Finger 3D extension tests (scale normalized, depth-invariant to camera foreshortening)
+  const indexExtended3D = nDist3D(INDEX_TIP, INDEX_MCP) > 0.48 || nDist3D(INDEX_TIP, WRIST) > 0.85;
+  const middleExtended3D = nDist3D(MIDDLE_TIP, MIDDLE_MCP) > 0.48 || nDist3D(MIDDLE_TIP, WRIST) > 0.85;
+  const ringExtended3D = nDist3D(RING_TIP, RING_MCP) > 0.48 || nDist3D(RING_TIP, WRIST) > 0.85;
+  const pinkyExtended3D = nDist3D(PINKY_TIP, PINKY_MCP) > 0.44 || nDist3D(PINKY_TIP, WRIST) > 0.80;
 
-  // Finger curls
-  const indexCurled = nDist(INDEX_TIP, WRIST) < 1.15 || nDist(INDEX_TIP, INDEX_MCP) < 0.45;
-  const middleCurled = nDist(MIDDLE_TIP, WRIST) < 1.15 || nDist(MIDDLE_TIP, MIDDLE_MCP) < 0.45;
-  const ringCurled = nDist(RING_TIP, WRIST) < 1.15 || nDist(RING_TIP, RING_MCP) < 0.45;
-  const pinkyCurled = nDist(PINKY_TIP, WRIST) < 1.15 || nDist(PINKY_TIP, PINKY_MCP) < 0.45;
+  // Finger 3D curls (joints folded inward toward palm)
+  const indexCurled3D = nDist3D(INDEX_TIP, INDEX_MCP) < 0.38;
+  const middleCurled3D = nDist3D(MIDDLE_TIP, MIDDLE_MCP) < 0.38;
+  const ringCurled3D = nDist3D(RING_TIP, RING_MCP) < 0.38;
+  const pinkyCurled3D = nDist3D(PINKY_TIP, PINKY_MCP) < 0.38;
+
+  // Finger 2D extensions (planar view)
+  const indexExtended2D = nDist2D(INDEX_TIP, WRIST) > 1.25 && nDist2D(INDEX_TIP, INDEX_MCP) > 0.58;
+  const middleExtended2D = nDist2D(MIDDLE_TIP, WRIST) > 1.25 && nDist2D(MIDDLE_TIP, MIDDLE_MCP) > 0.58;
+  const ringExtended2D = nDist2D(RING_TIP, WRIST) > 1.25 && nDist2D(RING_TIP, RING_MCP) > 0.58;
+  const pinkyExtended2D = nDist2D(PINKY_TIP, WRIST) > 1.20 && nDist2D(PINKY_TIP, PINKY_MCP) > 0.52;
+
+  // Unified finger extensions
+  const thumbExtended = nDist2D(THUMB_TIP, THUMB_MCP) > 0.65 && nDist2D(THUMB_TIP, MIDDLE_MCP) > 0.70;
+  const indexExtended = indexExtended2D || indexExtended3D;
+  const middleExtended = middleExtended2D || middleExtended3D;
+  const ringExtended = ringExtended2D || ringExtended3D;
+  const pinkyExtended = pinkyExtended2D || pinkyExtended3D;
+
+  // Finger curls (strictly false if finger is extended)
+  const indexCurled = !indexExtended && (indexCurled3D || nDist2D(INDEX_TIP, WRIST) < 1.10);
+  const middleCurled = !middleExtended && (middleCurled3D || nDist2D(MIDDLE_TIP, WRIST) < 1.10);
+  const ringCurled = !ringExtended && (ringCurled3D || nDist2D(RING_TIP, WRIST) < 1.10);
+  const pinkyCurled = !pinkyExtended && (pinkyCurled3D || nDist2D(PINKY_TIP, WRIST) < 1.10);
 
   // Thumb directions (in screen coords, smaller y is higher up)
-  const thumbUp = thumbExtended && landmarks[THUMB_TIP].y < landmarks[THUMB_MCP].y - 0.04;
-  const thumbDown = thumbExtended && landmarks[THUMB_TIP].y > landmarks[THUMB_MCP].y + 0.04;
+  const thumbUp = thumbExtended && landmarks[THUMB_TIP].y < landmarks[THUMB_MCP].y - 0.04 && indexCurled && middleCurled;
+  const thumbDown = thumbExtended && landmarks[THUMB_TIP].y > landmarks[THUMB_MCP].y + 0.04 && indexCurled && middleCurled;
 
   // Compound Shapes
   const openPalm = indexExtended && middleExtended && ringExtended && pinkyExtended;
-  const fist = indexCurled && middleCurled && ringCurled && pinkyCurled && !thumbUp;
+  const fist = indexCurled && middleCurled && ringCurled && pinkyCurled && !thumbUp && !thumbDown;
 
   // Bunched fingertips: all 5 tips close together (eating/food handshape)
   const bunchedTips =
-    nDist(THUMB_TIP, INDEX_TIP) < 0.45 &&
-    nDist(THUMB_TIP, MIDDLE_TIP) < 0.45 &&
-    nDist(THUMB_TIP, RING_TIP) < 0.50 &&
-    nDist(THUMB_TIP, PINKY_TIP) < 0.55;
+    nDist2D(THUMB_TIP, INDEX_TIP) < 0.45 &&
+    nDist2D(THUMB_TIP, MIDDLE_TIP) < 0.45 &&
+    nDist2D(THUMB_TIP, RING_TIP) < 0.50 &&
+    nDist2D(THUMB_TIP, PINKY_TIP) < 0.55;
 
   // C-handshape: curved hand as if holding a glass
   const cHandshape =
     !openPalm &&
     !fist &&
     !bunchedTips &&
-    nDist(THUMB_TIP, INDEX_TIP) >= 0.38 &&
-    nDist(THUMB_TIP, INDEX_TIP) <= 1.15 &&
+    nDist2D(THUMB_TIP, INDEX_TIP) >= 0.38 &&
+    nDist2D(THUMB_TIP, INDEX_TIP) <= 1.15 &&
     landmarks[THUMB_TIP].y < landmarks[WRIST].y + 0.08;
 
   // W-handshape: index, middle, ring extended, thumb holding pinky
@@ -555,7 +585,7 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     indexExtended &&
     middleExtended &&
     ringExtended &&
-    (pinkyCurled || nDist(THUMB_TIP, PINKY_TIP) < 0.60);
+    (pinkyCurled || nDist2D(THUMB_TIP, PINKY_TIP) < 0.60);
 
   // ILY (I Love You) handshape: thumb, index, pinky extended; middle and ring curled
   const ilySign = thumbExtended && indexExtended && pinkyExtended && middleCurled && ringCurled;
@@ -566,10 +596,25 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     middleExtended &&
     ringCurled &&
     pinkyCurled &&
-    nDist(INDEX_TIP, MIDDLE_TIP) < 0.35;
+    nDist2D(INDEX_TIP, MIDDLE_TIP) < 0.35;
 
-  // Pointing: only index extended
-  const pointing = indexExtended && middleCurled && ringCurled && pinkyCurled && !thumbExtended;
+  // Pointing: only index extended, other 3 fingers curled, thumb not interfering
+  const pointing = indexExtended && middleCurled && ringCurled && pinkyCurled && !thumbUp && !thumbDown;
+
+  // 3D Pointing Direction vectors
+  const indexTipZ = landmarks[INDEX_TIP].z ?? 0;
+  const indexMcpZ = landmarks[INDEX_MCP].z ?? 0;
+  const deltaZ = indexTipZ - indexMcpZ;
+  const deltaX = landmarks[INDEX_TIP].x - landmarks[INDEX_MCP].x;
+
+  // Pointing towards camera (tip closer to camera than knuckle)
+  const pointingToCamera = pointing && deltaZ < -0.02;
+
+  // Pointing towards chest / self (tip directed toward body/chest)
+  const pointingToChest = pointing && deltaZ >= -0.02 && Math.abs(deltaX) < 0.12;
+
+  // Pointing laterally sideways
+  const pointingToSide = pointing && Math.abs(deltaX) >= 0.10;
 
   // T-handshape (ASL Bathroom): thumb tucked between index and middle
   const tHandshape =
@@ -577,7 +622,7 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     middleCurled &&
     ringCurled &&
     pinkyCurled &&
-    nDist(THUMB_TIP, INDEX_MCP) < 0.45;
+    nDist2D(THUMB_TIP, INDEX_MCP) < 0.45;
 
   // Hand height zones in frame
   const avgY = (wrist.y + landmarks[MIDDLE_MCP].y) / 2;
@@ -607,6 +652,9 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
     ilySign,
     nameShape,
     pointing,
+    pointingToChest,
+    pointingToCamera,
+    pointingToSide,
     tHandshape,
     isFaceZone,
     isChestZone,
@@ -650,12 +698,20 @@ export class MultiLanguageClassifier {
       return;
     }
     const h0 = hands[0];
+    // Track the leading extended fingertip: if index is extended further than middle, track index tip
+    const isIndexLeading =
+      h0[INDEX_TIP].y < h0[MIDDLE_TIP].y - 0.03 ||
+      Math.abs(h0[INDEX_TIP].x - h0[WRIST].x) > Math.abs(h0[MIDDLE_TIP].x - h0[WRIST].x) + 0.05 ||
+      (h0[INDEX_TIP].z !== undefined && h0[MIDDLE_TIP].z !== undefined && h0[INDEX_TIP].z < h0[MIDDLE_TIP].z - 0.04);
+
+    const activeTip = isIndexLeading ? h0[INDEX_TIP] : h0[MIDDLE_TIP];
+
     this.history.push({
       time: timestamp,
       wristX: h0[WRIST].x,
       wristY: h0[WRIST].y,
-      tipX: h0[MIDDLE_TIP].x,
-      tipY: h0[MIDDLE_TIP].y,
+      tipX: activeTip.x,
+      tipY: activeTip.y,
       handCount: hands.length,
     });
 
@@ -676,8 +732,10 @@ export class MultiLanguageClassifier {
     // Movement analysis from history window
     let dx = 0;
     let dy = 0;
-    let oscillationsX = 0;
+    let wristOscillationsX = 0;
+    let tipOscillationsX = 0;
     let oscillationsY = 0;
+    let tipSpanX = 0;
 
     if (this.history.length >= 6) {
       const recent = this.history.slice(-15);
@@ -686,24 +744,44 @@ export class MultiLanguageClassifier {
       dx = last.wristX - first.wristX;
       dy = last.wristY - first.wristY;
 
-      // Count horizontal direction reversals for waving/wagging
+      let minTipX = recent[0].tipX;
+      let maxTipX = recent[0].tipX;
+
+      // Count horizontal direction reversals for wrist
       let prevDirX = 0;
       for (let i = 1; i < recent.length; i++) {
         const step = recent[i].wristX - recent[i - 1].wristX;
         if (Math.abs(step) > 0.008) {
           const dir = Math.sign(step);
           if (prevDirX !== 0 && dir !== prevDirX) {
-            oscillationsX++;
+            wristOscillationsX++;
           }
           prevDirX = dir;
         }
       }
 
+      // Count horizontal direction reversals & lateral span for fingertips (vital for waving / wagging)
+      let prevTipDirX = 0;
+      for (let i = 1; i < recent.length; i++) {
+        if (recent[i].tipX < minTipX) minTipX = recent[i].tipX;
+        if (recent[i].tipX > maxTipX) maxTipX = recent[i].tipX;
+
+        const tipStep = recent[i].tipX - recent[i - 1].tipX;
+        if (Math.abs(tipStep) > 0.006) {
+          const dir = Math.sign(tipStep);
+          if (prevTipDirX !== 0 && dir !== prevTipDirX) {
+            tipOscillationsX++;
+          }
+          prevTipDirX = dir;
+        }
+      }
+      tipSpanX = maxTipX - minTipX;
+
       // Count vertical direction reversals for nodding/tapping
       let prevDirY = 0;
       for (let i = 1; i < recent.length; i++) {
         const step = recent[i].wristY - recent[i - 1].wristY;
-        if (Math.abs(step) > 0.008) {
+        if (Math.abs(step) > 0.007) {
           const dir = Math.sign(step);
           if (prevDirY !== 0 && dir !== prevDirY) {
             oscillationsY++;
@@ -712,6 +790,9 @@ export class MultiLanguageClassifier {
         }
       }
     }
+
+    // Unified horizontal oscillation count (considers both wrist and fingertip)
+    const oscillationsX = Math.max(wristOscillationsX, tipOscillationsX);
 
     const formatResult = (signId: string, confidence: number): ClassificationResult => {
       const def = SIGN_VOCABULARY[signId];
@@ -885,17 +966,35 @@ export class MultiLanguageClassifier {
       return formatResult('BATHROOM', 0.94);
     }
 
-    // 2.3 SLEEP (Hand tilted against cheek / face)
+    // 2.3 GOODBYE (Open palm waving horizontally side-to-side)
+    const isWaving = tipOscillationsX >= 2 || (tipOscillationsX >= 1 && tipSpanX > 0.055);
+    if (f0.openPalm && isWaving && hands[0][MIDDLE_TIP].y < f0.wrist.y) {
+      return formatResult('GOODBYE', 0.95);
+    }
+
+    // 2.4 HELLO (Open palm raised high near temple/brow held steady without waving)
+    if (
+      f0.openPalm &&
+      (hands[0][MIDDLE_TIP].y < 0.40 || f0.isFaceZone) &&
+      !isWaving &&
+      tipSpanX < 0.045
+    ) {
+      return formatResult('HELLO', 0.94);
+    }
+
+    // 2.5 SLEEP (Hand tilted against cheek / face, steady without waving)
     if (
       (f0.openPalm || f0.bunchedTips) &&
       f0.isFaceZone &&
       Math.abs(hands[0][INDEX_TIP].x - f0.wrist.x) > 0.08 &&
+      !isWaving &&
+      tipSpanX < 0.045 &&
       Math.abs(dx) < 0.03
     ) {
       return formatResult('SLEEP', 0.92);
     }
 
-    // 2.4 HAPPY (Open flat hand brushing upward repeatedly on chest)
+    // 2.6 HAPPY (Open flat hand brushing upward repeatedly on chest)
     if (
       f0.openPalm &&
       f0.isChestZone &&
@@ -905,28 +1004,13 @@ export class MultiLanguageClassifier {
       return formatResult('HAPPY', 0.93);
     }
 
-    // 2.5 SAD (Open hand in front of face with drooping fingers moving downward)
+    // 2.7 SAD (Open hand in front of face with drooping fingers moving downward)
     if (
       f0.openPalm &&
       f0.isFaceZone &&
       dy > 0.02
     ) {
       return formatResult('SAD', 0.93);
-    }
-
-    // 2.6 GOODBYE (Open palm waving horizontally side-to-side)
-    if (f0.openPalm && oscillationsX >= 2 && hands[0][MIDDLE_TIP].y < f0.wrist.y) {
-      return formatResult('GOODBYE', 0.94);
-    }
-
-    // 2.7 HELLO (Open palm raised high near temple/brow)
-    if (
-      f0.openPalm &&
-      hands[0][MIDDLE_TIP].y < 0.35 &&
-      f0.wrist.y < 0.55 &&
-      oscillationsX < 2
-    ) {
-      return formatResult('HELLO', 0.93);
     }
 
     // 2.8 THANK_YOU (Open flat hand near chin/mouth moving forward/down)
@@ -943,6 +1027,7 @@ export class MultiLanguageClassifier {
       f0.openPalm &&
       hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.12 &&
       f0.isChestZone &&
+      !isWaving &&
       oscillationsX < 2
     ) {
       return formatResult('STOP', 0.92);
@@ -954,6 +1039,7 @@ export class MultiLanguageClassifier {
       f0.isChestZone &&
       Math.abs(dx) < 0.03 &&
       Math.abs(dy) < 0.03 &&
+      !isWaving &&
       hands[0][MIDDLE_TIP].y > f0.wrist.y - 0.10
     ) {
       return formatResult('WAIT', 0.90);
@@ -1018,7 +1104,7 @@ export class MultiLanguageClassifier {
     }
 
     // 2.19 YES (Closed fist or thumbs-up nodding up and down vertically)
-    if ((f0.fist || f0.thumbUp) && oscillationsY >= 1) {
+    if ((f0.fist || f0.thumbUp) && (oscillationsY >= 1 || Math.abs(dy) > 0.025)) {
       return formatResult('YES', 0.94);
     }
 
@@ -1033,73 +1119,115 @@ export class MultiLanguageClassifier {
     }
 
     // 2.22 NO (Index finger wagging side to side OR index+middle snapping shut)
+    const isWagging = tipOscillationsX >= 2 || (f0.pointing && tipSpanX > 0.04);
     if (
-      (f0.pointing && oscillationsX >= 2) ||
-      (f0.nameShape && oscillationsX >= 2)
+      (f0.pointing && isWagging) ||
+      (f0.nameShape && (isWagging || oscillationsY >= 1))
     ) {
-      return formatResult('NO', 0.92);
+      return formatResult('NO', 0.94);
     }
 
-    // 2.23 I / ME (Index finger pointing directly to chest)
+    // 2.23 WE (Index finger or open hand sweeping across chest in horizontal arc)
+    if (
+      (f0.pointing || f0.openPalm) &&
+      f0.isChestZone &&
+      Math.abs(dx) >= 0.065 &&
+      tipOscillationsX <= 1
+    ) {
+      return formatResult('WE', 0.93);
+    }
+
+    // 2.24 THEY (Index finger pointing laterally to the side)
     if (
       f0.pointing &&
       f0.isChestZone &&
-      hands[0][INDEX_TIP].y > 0.38 &&
-      oscillationsX < 2
+      (f0.pointingToSide || Math.abs(dx) > 0.05) &&
+      tipOscillationsX < 2
     ) {
-      return formatResult('I', 0.93);
+      return formatResult('THEY', 0.92);
     }
 
-    // 2.24 YOU (Index finger pointing forward towards camera at chest level)
+    // 2.25 HE (Index finger pointing sideways at upper face / temple level)
+    if (
+      f0.pointing &&
+      f0.isFaceZone &&
+      f0.pointingToSide &&
+      tipOscillationsX < 2
+    ) {
+      return formatResult('HE', 0.92);
+    }
+
+    // 2.26 SHE (Index finger pointing sideways at lower face / chin level)
     if (
       f0.pointing &&
       f0.isChestZone &&
-      hands[0][INDEX_TIP].y <= 0.55 &&
-      Math.abs(dx) < 0.04
+      f0.pointingToSide &&
+      tipOscillationsX < 2
     ) {
-      return formatResult('YOU', 0.93);
+      return formatResult('SHE', 0.92);
     }
 
-    // 2.25 THEY (Index finger pointing laterally with sweeping arc)
+    // 2.27 YOU (Index finger pointing forward towards camera at chest level)
     if (
       f0.pointing &&
       f0.isChestZone &&
-      Math.abs(dx) > 0.06
+      (f0.pointingToCamera || (!f0.pointingToChest && !f0.pointingToSide)) &&
+      Math.abs(dx) < 0.05 &&
+      tipOscillationsX < 2
     ) {
-      return formatResult('THEY', 0.91);
+      return formatResult('YOU', 0.94);
     }
 
-    // 2.26 MY (Flat open palm resting on center of chest)
+    // 2.28 I / ME (Index finger pointing directly to chest)
+    if (
+      f0.pointing &&
+      f0.isChestZone &&
+      (f0.pointingToChest || hands[0][INDEX_TIP].y > 0.38) &&
+      Math.abs(dx) < 0.05 &&
+      tipOscillationsX < 2
+    ) {
+      return formatResult('I', 0.94);
+    }
+
+    // 2.29 MY (Flat open palm resting on center of chest)
     if (
       f0.openPalm &&
       f0.isChestZone &&
+      Math.abs(dx) < 0.035 &&
+      Math.abs(dy) < 0.035 &&
+      !isWaving
+    ) {
+      return formatResult('MY', 0.93);
+    }
+
+    // 2.30 YOUR (Flat open palm pushed forward towards other person)
+    if (
+      f0.openPalm &&
+      f0.isChestZone &&
+      hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.06 &&
       Math.abs(dx) < 0.04 &&
-      Math.abs(dy) < 0.04
+      !isWaving
     ) {
-      return formatResult('MY', 0.92);
+      return formatResult('YOUR', 0.92);
     }
 
-    // 2.27 YOUR (Flat open palm pushed forward towards other person)
-    if (
-      f0.openPalm &&
-      f0.isChestZone &&
-      hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.08 &&
-      Math.abs(dx) < 0.04
-    ) {
-      return formatResult('YOUR', 0.91);
-    }
-
-    // 2.28 NAME (Index + Middle extended together held or tapped near chest)
+    // 2.31 NAME (Index + Middle extended together held or tapped near chest)
     if (f0.nameShape && f0.isChestZone) {
       return formatResult('NAME', 0.91);
     }
 
-    // 2.29 SORRY (Closed fist moving in a circular motion on chest)
-    if (f0.fist && f0.isChestZone) {
+    // 2.32 SORRY (Closed fist moving in a circular motion on chest)
+    if (
+      f0.fist &&
+      f0.isChestZone &&
+      (Math.abs(dx) > 0.02 || tipSpanX > 0.03) &&
+      oscillationsX >= 1 &&
+      (Math.abs(dy) > 0.02 || oscillationsY >= 1)
+    ) {
       return formatResult('SORRY', 0.90);
     }
 
-    // 2.30 PLEASE in ASL (Flat open hand rubbing chest in circular motion)
+    // 2.33 PLEASE in ASL (Flat open hand rubbing chest in circular motion)
     if (
       lang === 'ASL' &&
       f0.openPalm &&
@@ -1309,7 +1437,7 @@ export class ISLRecognizer implements Recognizer {
     this.lastConfirmedTime = timestamp;
     this.candidateStableFrames = 0;
 
-    const translation = buildSentenceFromGlosses(this.rawGlosses);
+    const translation = buildSentenceFromGlosses(this.rawGlosses, this.classifier.getLanguage());
 
     this.callbacks.onWordRecognized?.(gloss, text, confidence);
     this.callbacks.onSentenceUpdated?.(translation.naturalSentence, [...this.sentenceWords], translation);
@@ -1332,11 +1460,11 @@ export class ISLRecognizer implements Recognizer {
   }
 
   public getSentenceTranslation(): SentenceTranslationResult {
-    return buildSentenceFromGlosses(this.rawGlosses);
+    return buildSentenceFromGlosses(this.rawGlosses, this.classifier.getLanguage());
   }
 
   public getFullSentence(): string {
-    return buildSentenceFromGlosses(this.rawGlosses).naturalSentence;
+    return buildSentenceFromGlosses(this.rawGlosses, this.classifier.getLanguage()).naturalSentence;
   }
 
   public clearSentence(): void {
@@ -1346,7 +1474,7 @@ export class ISLRecognizer implements Recognizer {
     this.candidateStableFrames = 0;
     this.lastConfirmedGloss = null;
     this.lastConfirmedTime = 0;
-    const emptyTranslation = buildSentenceFromGlosses([]);
+    const emptyTranslation = buildSentenceFromGlosses([], this.classifier.getLanguage());
     this.callbacks.onSentenceUpdated?.('', [], emptyTranslation);
     this.callbacks.onCandidateUpdate?.(null, 0);
     this.callbacks.onProgressUpdated?.(0);
