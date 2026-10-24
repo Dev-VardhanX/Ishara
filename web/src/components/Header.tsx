@@ -1,35 +1,49 @@
 import React from 'react';
-import { Wifi, Sparkles, HandMetal } from 'lucide-react';
+import { Wifi, Sparkles, HandMetal, Settings as SettingsIcon } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { SegmentedControl } from './SegmentedControl';
 
 interface HeaderProps {
   title?: string;
   subtitle?: string;
+  badge?: React.ReactNode;
 }
 
-export const Header: React.FC<HeaderProps> = ({ title, subtitle }) => {
+export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
   return (
     <header className="pb-6 select-none">
       {/* Mobile Top App Bar (shown only on phones) */}
       <div className="md:hidden flex items-center justify-between pb-4 mb-4 border-b border-slate-200/50">
-        <NavLink to="/" className="flex items-center gap-2 clay-focus rounded-xl">
+        <NavLink to="/" className="flex items-center gap-2 clay-focus rounded-xl" title="Ishara Home">
           <div className="w-8 h-8 rounded-xl bg-[#7C9CFF] flex items-center justify-center text-white shadow-clay-raised-sm">
             <HandMetal className="w-4 h-4" />
           </div>
           <span className="text-xl font-black text-[#2B2D42]">Ishara</span>
         </NavLink>
 
-        <SegmentedControl showBadge={false} />
+        <div className="flex items-center gap-2">
+          <NavLink
+            to="/settings"
+            className="p-2 rounded-xl bg-white/70 text-[#2B2D42] hover:text-[#7C9CFF] shadow-sm clay-focus"
+            title="Settings"
+            aria-label="Settings"
+          >
+            <SettingsIcon className="w-4 h-4" />
+          </NavLink>
+          <SegmentedControl showBadge={false} />
+        </div>
       </div>
 
       {/* Main Header Container */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           {title && (
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2B2D42] tracking-tight">
-              {title}
-            </h1>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-[#2B2D42] tracking-tight">
+                {title}
+              </h1>
+              {badge}
+            </div>
           )}
           {subtitle && (
             <p className="text-sm font-semibold text-[#6E7387] mt-1">

@@ -11,6 +11,7 @@ import {
   LogOut,
   Sparkles,
   Clock,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import { useLanguageStore } from '../store/useLanguageStore';
 import { useAuth } from '../context/AuthContext';
@@ -71,7 +72,14 @@ export const Sidebar: React.FC = () => {
       activeClass: 'bg-[#2B2D42] text-white shadow-clay-raised',
       hasAsl: true,
     },
-  ];
+    {
+      name: 'Settings',
+      path: '/settings',
+      icon: SettingsIcon,
+      activeClass: 'bg-[#8EA7E9] text-white shadow-clay-raised',
+      hasAsl: true,
+    },
+  ].filter((item) => !import.meta.env.PROD || !item.path.startsWith('/dev'));
 
   const handleLogout = async () => {
     await logout();
@@ -140,7 +148,11 @@ export const Sidebar: React.FC = () => {
       {/* User Card with Logout at the bottom */}
       <div className="mt-6 pt-4 border-t border-slate-200/60">
         <div className="clay-card p-3.5 flex items-center justify-between gap-3 bg-[#E9EEF7]">
-          <div className="flex items-center gap-3 min-w-0">
+          <NavLink
+            to="/settings"
+            className="flex items-center gap-3 min-w-0 hover:opacity-80 transition-opacity clay-focus rounded-xl p-0.5"
+            title="Go to Settings"
+          >
             <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#7C9CFF] to-[#D4A5FF] flex items-center justify-center font-black text-white text-sm shadow-sm ring-2 ring-white shrink-0">
               {initials}
             </div>
@@ -152,7 +164,7 @@ export const Sidebar: React.FC = () => {
                 {user?.email || 'Active Session'}
               </p>
             </div>
-          </div>
+          </NavLink>
 
           <button
             type="button"

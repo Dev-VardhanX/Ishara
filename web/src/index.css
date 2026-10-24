@@ -42,13 +42,14 @@ body {
     background-color: var(--clay-bg);
     border-radius: var(--clay-radius);
     box-shadow: var(--clay-raised);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
 
   .clay-card-flat {
     background-color: #FFFFFF;
     border-radius: var(--clay-radius);
     border: 1px solid rgba(226, 232, 240, 0.8);
+    transition: all 0.18s ease;
   }
 
   .clay-button {
@@ -60,17 +61,25 @@ body {
     padding: 12px 24px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: all 0.18s ease;
   }
 
-  .clay-button:hover {
+  .clay-button:hover:not(:disabled) {
     filter: brightness(1.03);
     transform: translateY(-1px);
   }
 
-  .clay-button:active {
+  .clay-button:active:not(:disabled) {
     box-shadow: var(--clay-pressed);
     transform: translateY(1px);
+  }
+
+  .clay-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    filter: none;
   }
 
   .clay-button-coral {
@@ -101,7 +110,7 @@ body {
     padding: 14px 22px;
     color: var(--clay-text);
     outline: none;
-    transition: box-shadow 0.15s ease;
+    transition: box-shadow 0.18s ease, background-color 0.18s ease;
   }
 
   .clay-input:focus {
@@ -110,6 +119,19 @@ body {
 
   /* Mandatory visible keyboard focus ring (WCAG AA) */
   .clay-focus {
-    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#7C9CFF];
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#7C9CFF] focus-visible:ring-offset-[#E9EEF7];
+    transition: outline 0.18s ease, box-shadow 0.18s ease;
+  }
+}
+
+/* Accessibility: Respect Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

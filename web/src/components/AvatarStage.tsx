@@ -10,12 +10,23 @@ interface AvatarStageProps {
 // Emoji gesture mapping for friendly visual representation
 const GLOSS_EMOJI_MAP: Record<string, string> = {
   HELLO: '👋',
+  HOW: '🤔',
+  YOU: '👉',
+  YOUR: '👉',
+  NICE: '✨',
+  MEET: '🤝',
   THANK_YOU: '🙏',
+  VERY: '🔥',
+  MUCH: '💯',
   YES: '👍',
   NO: '🙅',
   PLEASE: '🤲',
   SORRY: '🙇',
   GOOD_MORNING: '🌅',
+  GOOD_AFTERNOON: '☀️',
+  GOOD_EVENING: '🌆',
+  GOOD_NIGHT: '🌙',
+  CAN: '💪',
   HELP: '🆘',
   HOW_ARE_YOU: '🤝',
   NAME: '🏷️',
@@ -27,9 +38,22 @@ const GLOSS_EMOJI_MAP: Record<string, string> = {
   FOOD: '🍲',
   WATER: '💧',
   WHERE: '❓',
+  WHAT: '❓',
+  METRO: '🚇',
+  STATION: '🚉',
+  I: '🙋',
+  ME: '🙋',
+  MY: '🙋',
+  NEED: '🤲',
   DOCTOR: '🩺',
+  HOSPITAL: '🏥',
   STOP: '🛑',
   TODAY: '📅',
+  UNDERSTAND: '💡',
+  LEARN: '📚',
+  SIGN: '🤟',
+  HAPPY: '😊',
+  SAD: '😢',
 };
 
 export const AvatarStage: React.FC<AvatarStageProps> = ({
@@ -48,7 +72,9 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
     }
   }, [currentGloss]);
 
-  const activeEmoji = currentGloss ? GLOSS_EMOJI_MAP[currentGloss] || '🤟' : '🙋‍♀️';
+  const activeEmoji = currentGloss
+    ? GLOSS_EMOJI_MAP[currentGloss] || (currentGloss.length === 1 ? '🔤' : '🤟')
+    : '🙋‍♀️';
 
   return (
     <div className="clay-card p-6 relative overflow-hidden bg-gradient-to-b from-[#C4B5FD]/30 via-[#E0E7FF]/40 to-[#E9EEF7] min-h-[460px] flex flex-col justify-between select-none">
@@ -80,9 +106,8 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
 
         {/* Big Emoji Hand Card with Bounce Animation */}
         <div
-          className={`w-44 h-44 rounded-full bg-gradient-to-tr from-[#7C9CFF]/30 via-[#D4A5FF]/30 to-[#FFB59E]/30 flex items-center justify-center text-7xl shadow-clay-raised border-4 border-white/80 transition-transform duration-300 ${
-            bounce ? 'scale-110 -translate-y-2' : 'scale-100'
-          }`}
+          className={`w-44 h-44 rounded-full bg-gradient-to-tr from-[#7C9CFF]/30 via-[#D4A5FF]/30 to-[#FFB59E]/30 flex items-center justify-center text-7xl shadow-clay-raised border-4 border-white/80 transition-transform duration-300 ${bounce ? 'scale-110 -translate-y-2' : 'scale-100'
+            }`}
         >
           <span className={bounce ? 'animate-bounce' : ''}>
             {activeEmoji}

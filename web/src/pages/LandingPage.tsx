@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   HandMetal,
@@ -13,10 +13,16 @@ import {
   Layers,
   Sparkles,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Laptop,
+  Instagram,
 } from 'lucide-react';
 
 export const LandingPage: React.FC = () => {
+  useEffect(() => {
+    document.title = 'Ishara — Two-Way Sign Language Translator';
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#E9EEF7] text-[#2B2D42] selection:bg-[#7C9CFF]/30 select-none">
       {/* Sticky Navbar */}
@@ -72,6 +78,9 @@ export const LandingPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Text Column */}
           <div className="lg:col-span-7 space-y-6">
+            <h1  className="text-6xl sm:text-8xl font-black text-[#2B2D42] tracking-tight leading-[1.12]">
+              ISHARA
+            </h1>
             <div className="inline-block px-4 py-1.5 rounded-full bg-white/80 border border-slate-200/60 text-[11px] font-black text-[#7C9CFF] uppercase tracking-wider shadow-sm">
               Revolutionizing Accessibility
             </div>
@@ -110,7 +119,9 @@ export const LandingPage: React.FC = () => {
               <div className="w-full aspect-[3/4] rounded-[24px] overflow-hidden bg-slate-200 border border-white/80 shadow-inner relative flex items-center justify-center">
                 <img
                   src="/hero-character.jpg"
-                  alt="Ishara 3D Cartoon Avatar"
+                  alt="Ishara 3D sign language avatar"
+                  width={896}
+                  height={1200}
                   className="w-full h-full object-cover object-top"
                   onError={(e) => {
                     (e.target as HTMLElement).style.display = 'none';
@@ -125,7 +136,7 @@ export const LandingPage: React.FC = () => {
               >
                 <div className="flex items-center gap-2.5 mb-1">
                   <div className="w-6 h-6 rounded-lg bg-[#FFE8E2] text-[#FF8A8A] flex items-center justify-center text-xs">
-                    ✋
+                    <Video className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-xs font-black text-[#2B2D42] group-hover:text-[#7C9CFF] transition-colors">
                     Sign to Text
@@ -143,7 +154,7 @@ export const LandingPage: React.FC = () => {
               >
                 <div className="flex items-center gap-2.5 mb-1">
                   <div className="w-6 h-6 rounded-lg bg-[#E2EBFF] text-[#7C9CFF] flex items-center justify-center text-xs">
-                    🎙️
+                    <MessageSquare className="w-3.5 h-3.5" />
                   </div>
                   <span className="text-xs font-black text-[#2B2D42] group-hover:text-[#7C9CFF] transition-colors">
                     Voice to Sign
@@ -173,8 +184,8 @@ export const LandingPage: React.FC = () => {
           {/* Card 1: ISL + ASL Support */}
           <div className="clay-card p-7 flex flex-col items-center text-center justify-between">
             <div>
-              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center text-3xl mb-5 shadow-sm border border-slate-100">
-                🤟
+              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center mb-5 shadow-sm border border-slate-100">
+                <HandMetal className="w-8 h-8 text-[#7C9CFF]" />
               </div>
               <h3 className="font-black text-lg text-[#2B2D42]">ISL + ASL Support</h3>
               <p className="text-xs font-semibold text-[#6E7387] mt-2.5 leading-relaxed">
@@ -186,8 +197,8 @@ export const LandingPage: React.FC = () => {
           {/* Card 2: Voice Output */}
           <div className="clay-card p-7 flex flex-col items-center text-center justify-between">
             <div>
-              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center text-3xl mb-5 shadow-sm border border-slate-100">
-                📢
+              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center mb-5 shadow-sm border border-slate-100">
+                <Volume2 className="w-8 h-8 text-[#FF8A8A]" />
               </div>
               <h3 className="font-black text-lg text-[#2B2D42]">Voice Output</h3>
               <p className="text-xs font-semibold text-[#6E7387] mt-2.5 leading-relaxed">
@@ -199,8 +210,8 @@ export const LandingPage: React.FC = () => {
           {/* Card 3: Sign Learning */}
           <div className="clay-card p-7 flex flex-col items-center text-center justify-between">
             <div>
-              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center text-3xl mb-5 shadow-sm border border-slate-100">
-                📖
+              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center mb-5 shadow-sm border border-slate-100">
+                <BookOpen className="w-8 h-8 text-[#5ECB82]" />
               </div>
               <h3 className="font-black text-lg text-[#2B2D42]">Sign Learning</h3>
               <p className="text-xs font-semibold text-[#6E7387] mt-2.5 leading-relaxed">
@@ -212,8 +223,8 @@ export const LandingPage: React.FC = () => {
           {/* Card 4: Live Translation */}
           <div className="clay-card p-7 flex flex-col items-center text-center justify-between">
             <div>
-              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center text-3xl mb-5 shadow-sm border border-slate-100">
-                ⚡
+              <div className="w-16 h-16 rounded-[22px] bg-white/80 flex items-center justify-center mb-5 shadow-sm border border-slate-100">
+                <Sparkles className="w-8 h-8 text-[#B39DDB]" />
               </div>
               <h3 className="font-black text-lg text-[#2B2D42]">Live Translation</h3>
               <p className="text-xs font-semibold text-[#6E7387] mt-2.5 leading-relaxed">
@@ -308,25 +319,25 @@ export const LandingPage: React.FC = () => {
             {/* Right Column: 4 Honest Claim Cards */}
             <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-5 rounded-[22px] bg-[#E9EEF7] border border-slate-200/60 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-2xl mb-1">💻</span>
+                <Laptop className="w-7 h-7 text-[#7C9CFF] mb-1" />
                 <p className="text-sm font-black text-[#2B2D42] mt-1">Video never leaves your device</p>
                 <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider mt-0.5">Local MediaPipe Vision</p>
               </div>
 
               <div className="p-5 rounded-[22px] bg-[#E9EEF7] border border-slate-200/60 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-2xl mb-1">🔒</span>
+                <Lock className="w-7 h-7 text-[#FF8A8A] mb-1" />
                 <p className="text-sm font-black text-[#2B2D42] mt-1">HTTPS everywhere</p>
                 <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider mt-0.5">Encrypted Transit</p>
               </div>
 
               <div className="p-5 rounded-[22px] bg-[#E9EEF7] border border-slate-200/60 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-2xl mb-1">🚫</span>
+                <ShieldCheck className="w-7 h-7 text-[#5ECB82] mb-1" />
                 <p className="text-sm font-black text-[#2B2D42] mt-1">No data resale</p>
                 <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider mt-0.5">Zero Monetization</p>
               </div>
 
               <div className="p-5 rounded-[22px] bg-[#E9EEF7] border border-slate-200/60 shadow-sm text-center flex flex-col items-center justify-center">
-                <span className="text-2xl mb-1">🎯</span>
+                <CheckCircle2 className="w-7 h-7 text-[#B39DDB] mb-1" />
                 <p className="text-sm font-black text-[#2B2D42] mt-1">Open about limits</p>
                 <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider mt-0.5">Clear Model Vocab</p>
               </div>
@@ -409,7 +420,7 @@ export const LandingPage: React.FC = () => {
                   className="w-8 h-8 rounded-full bg-white/80 hover:bg-white text-[#2B2D42] flex items-center justify-center text-xs shadow-sm clay-focus"
                   title="Instagram"
                 >
-                  📷
+                  <Instagram className="w-3.5 h-3.5" />
                 </a>
                 <a
                   href="#social"

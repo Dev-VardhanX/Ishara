@@ -48,9 +48,8 @@ export const DevPosePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setModelStatus(modelStatus === 'running' ? 'ready' : 'running')}
-                className={`clay-button w-full py-2.5 text-xs font-black flex items-center justify-center gap-2 ${
-                  modelStatus === 'running' ? 'clay-button-coral' : ''
-                }`}
+                className={`clay-button w-full py-2.5 text-xs font-black flex items-center justify-center gap-2 ${modelStatus === 'running' ? 'clay-button-coral' : ''
+                  }`}
               >
                 <Activity className="w-4 h-4" />
                 <span>{modelStatus === 'running' ? 'Stop Pose Stream' : 'Run Live Landmark Stream'}</span>

@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { AvatarStage } from '../components/AvatarStage';
 import { useLanguageStore } from '../store/useLanguageStore';
 import { useSpeech } from '../lib/speech';
 import lessonsData from '../data/lessons.json';
-import { updateTopicProgress, addRecentConversation } from '../data/store';
+import { updateTopicProgress, addRecentConversation, saveLessonProgress, fetchProgress } from '../data/store';
 import {
   GraduationCap,
   Flame,
@@ -20,6 +20,10 @@ import {
   Award,
   Sparkles,
   HelpCircle,
+  HandMetal,
+  Users,
+  Utensils,
+  Compass,
 } from 'lucide-react';
 
 interface SignItem {
@@ -40,6 +44,11 @@ interface QuizItem {
 export const LearnPage: React.FC = () => {
   const { language } = useLanguageStore();
   const speech = useSpeech();
+
+  // Set page title
+  useEffect(() => {
+    document.title = 'Learn Sign — Ishara';
+  }, []);
 
   // Active Lesson State
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -66,7 +75,8 @@ export const LearnPage: React.FC = () => {
       lessons: '5 Signs • Beginner',
       progress: 100,
       completed: true,
-      emoji: '👋',
+      icon: HandMetal,
+      iconColor: 'text-[#5ECB82]',
       color: 'bg-[#A8E6A1]',
     },
     {
@@ -75,7 +85,8 @@ export const LearnPage: React.FC = () => {
       lessons: '18 Lessons • Beginner',
       progress: 50,
       completed: false,
-      emoji: '👨‍👩‍👧',
+      icon: Users,
+      iconColor: 'text-[#7C9CFF]',
       color: 'bg-[#7C9CFF]',
     },
     {
@@ -84,7 +95,8 @@ export const LearnPage: React.FC = () => {
       lessons: '15 Lessons • Intermediate',
       progress: 0,
       locked: true,
-      emoji: '🍲',
+      icon: Utensils,
+      iconColor: 'text-[#FF8A8A]',
       color: 'bg-slate-300',
     },
     {
@@ -93,7 +105,8 @@ export const LearnPage: React.FC = () => {
       lessons: '20 Lessons • Intermediate',
       progress: 0,
       locked: true,
-      emoji: '✈️',
+      icon: Compass,
+      iconColor: 'text-[#B39DDB]',
       color: 'bg-slate-300',
     },
   ];
@@ -144,17 +157,31 @@ export const LearnPage: React.FC = () => {
     } else {
       // Finished
       setQuizCompleted(true);
-      // Save progress to store
+      const isLastAnswerCorrect = selectedAnswer === currentQuiz[quizQuestionIndex]?.answer;
+      const finalScore = quizScore + (isLastAnswerCorrect ? 1 : 0);
+
+      // Save progress to store and Supabase public.learn_progress
       updateTopicProgress('greetings', 100);
+      saveLessonProgress(activeLesson.id || 'greetings', finalScore, 'completed');
+
       try {
-        addRecentConversation({
-          title: `Quiz: ${activeLesson.title}`,
-          mode: `${language} Learning`,
-          timestamp: 'Just now',
-          snippet: `Scored ${quizScore + (selectedAnswer === currentQuiz[quizQuestionIndex]?.answer ? 1 : 0)} / 5 on signs quiz.`,
-          language,
-          iconEmoji: '🎓',
-        });
+        addRecentConversation(
+          {
+            title: `Quiz: ${activeLesson.title}`,
+            mode: `${language} Learning`,
+            timestamp: 'Just now',
+            snippet: `Scored ${finalScore} / 5 on signs quiz.`,
+            language,
+            iconEmoji: '🎓',
+            direction: 'sign_to_voice',
+          },
+          {
+            direction: 'sign_to_voice',
+            text: `Quiz: ${activeLesson.title}`,
+            translatedText: `Score: ${finalScore}/5`,
+            emotion: finalScore >= 4 ? 'happy' : 'neutral',
+          }
+        );
       } catch (err) {
         console.warn('Failed to save quiz result', err);
       }
@@ -297,8 +324,8 @@ export const LearnPage: React.FC = () => {
               } transition-transform`}
             >
               <div>
-                <div className="w-full aspect-square rounded-[22px] bg-white/70 flex items-center justify-center text-5xl mb-4 shadow-sm border border-slate-100">
-                  {cat.emoji}
+                <div className="w-full aspect-square rounded-[22px] bg-white/70 flex items-center justify-center mb-4 shadow-sm border border-slate-100">
+                  <cat.icon className={`w-14 h-14 ${cat.iconColor}`} />
                 </div>
                 <h4 className="font-black text-base text-[#2B2D42]">{cat.title}</h4>
                 <p className="text-[11px] font-semibold text-[#6E7387] mt-0.5">{cat.lessons}</p>
@@ -390,8 +417,8 @@ export const LearnPage: React.FC = () => {
                   className="p-4 rounded-2xl bg-white/80 border border-slate-200/60 shadow-sm flex flex-col justify-between gap-3 hover:border-[#7C9CFF]/50 transition-all"
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#E9EEF7] flex items-center justify-center text-2xl shrink-0 shadow-inner">
-                      {sign.emoji}
+                    <div className="w-12 h-12 rounded-2xl bg-[#E9EEF7] flex items-center justify-center shrink-0 shadow-inner text-[#7C9CFF]">
+                      <HandMetal className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">

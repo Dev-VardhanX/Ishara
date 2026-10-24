@@ -17,7 +17,7 @@ import {
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, login, signup, isConfigured } = useAuth();
+  const { user, login, signup, resetPassword, isConfigured } = useAuth();
 
   // Mode: Sign In or Sign Up
   const [isSignUp, setIsSignUp] = useState(false);
@@ -30,10 +30,16 @@ export const LoginPage: React.FC = () => {
 
   // UI state
   const [formError, setFormError] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Target destination after login
   const from = (location.state as any)?.from?.pathname || '/dashboard';
+
+  // Update page title
+  useEffect(() => {
+    document.title = isSignUp ? 'Sign Up — Ishara' : 'Sign In — Ishara';
+  }, [isSignUp]);
 
   // If already authenticated, redirect
   useEffect(() => {
@@ -46,6 +52,7 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
+    setInfoMessage(null);
 
     // Basic Client-side Validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -63,11 +70,14 @@ export const LoginPage: React.FC = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await signup(email.trim(), password);
+        const { error, message } = await signup(email.trim(), password);
         if (error) {
           setFormError(error);
           setIsSubmitting(false);
           return;
+        }
+        if (message) {
+          setInfoMessage(message);
         }
       } else {
         const { error } = await login(email.trim(), password, keepMeSignedIn);
@@ -87,6 +97,28 @@ export const LoginPage: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    setFormError(null);
+    setInfoMessage(null);
+    if (!email || !email.includes('@')) {
+      setFormError('Please enter your email address in the field below first.');
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      const { error, message } = await resetPassword(email.trim());
+      if (error) {
+        setFormError(error);
+      } else if (message) {
+        setInfoMessage(message);
+      }
+    } catch (err: any) {
+      setFormError(err?.message || 'Failed to send password reset email.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#E9EEF7] flex items-center justify-center p-4 sm:p-6 md:p-10 select-none">
       <div className="clay-card w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 overflow-hidden bg-[#E9EEF7]">
@@ -95,10 +127,12 @@ export const LoginPage: React.FC = () => {
           <div className="w-full max-w-[320px] aspect-[3/4] rounded-[24px] overflow-hidden shadow-clay-raised mb-6 bg-slate-200 border-2 border-white/80">
             <img
               src="/login-character.jpg"
-              alt="Ishara 3D Avatar"
+              alt="Ishara 3D sign language avatar"
+              width={896}
+              height={1200}
               className="w-full h-full object-cover object-center"
               onError={(e) => {
-                // Fallback emoji illustration if image fails to load
+                // Fallback illustration if image fails to load
                 (e.target as HTMLElement).style.display = 'none';
               }}
             />
@@ -204,6 +238,14 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
+          {/* Success / Info Message Banner */}
+          {infoMessage && (
+            <div className="mb-4 p-3.5 rounded-2xl bg-[#E5F8E2] border border-[#A8E6A1] text-emerald-900 flex items-center gap-2.5 text-xs font-bold animate-fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{infoMessage}</span>
+            </div>
+          )}
+
           {/* Auth Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -232,10 +274,9 @@ export const LoginPage: React.FC = () => {
                 {!isSignUp && (
                   <button
                     type="button"
-                    onClick={() =>
-                      alert('Password reset link has been dispatched to your email address.')
-                    }
-                    className="text-[11px] font-bold text-[#7C9CFF] hover:underline"
+                    onClick={handleForgotPassword}
+                    disabled={isSubmitting}
+                    className="text-[11px] font-bold text-[#7C9CFF] hover:underline cursor-pointer"
                   >
                     Forgot?
                   </button>

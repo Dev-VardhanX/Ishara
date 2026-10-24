@@ -42,6 +42,11 @@ export const VoiceToSignPage: React.FC = () => {
   // Playback timer reference
   const timerRef = useRef<number | null>(null);
 
+  // Set document title
+  useEffect(() => {
+    document.title = 'Voice to Sign — Ishara';
+  }, []);
+
   // Parse text when submitted
   const handleSignSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -54,14 +59,23 @@ export const VoiceToSignPage: React.FC = () => {
 
     // Save each run to history store
     try {
-      addRecentConversation({
-        title: `Avatar: "${inputText.trim().slice(0, 24)}${inputText.length > 24 ? '...' : ''}"`,
-        mode: `Voice to ${language}`,
-        timestamp: 'Just now',
-        snippet: inputText.trim(),
-        language,
-        iconEmoji: '🗣️',
-      });
+      addRecentConversation(
+        {
+          title: `Avatar: "${inputText.trim().slice(0, 24)}${inputText.length > 24 ? '...' : ''}"`,
+          mode: `Voice to ${language}`,
+          timestamp: 'Just now',
+          snippet: inputText.trim(),
+          language,
+          iconEmoji: '🗣️',
+          direction: 'voice_to_sign',
+        },
+        {
+          direction: 'voice_to_sign',
+          text: inputText.trim(),
+          translatedText: parsed.map((t) => t.gloss).join(' '),
+          emotion: 'neutral',
+        }
+      );
     } catch (err) {
       console.warn('Failed to save to history', err);
     }
@@ -126,6 +140,36 @@ export const VoiceToSignPage: React.FC = () => {
     setTokens([]);
     setCurrentIndex(0);
     setPlaying(false);
+  };
+
+  const handleSelectExample = (sentence: string) => {
+    setInputText(sentence);
+    const parsed = parseTextToGlosses(sentence);
+    setTokens(parsed);
+    setCurrentIndex(0);
+    setPlaying(true);
+
+    try {
+      addRecentConversation(
+        {
+          title: `Avatar: "${sentence.slice(0, 24)}${sentence.length > 24 ? '...' : ''}"`,
+          mode: `Voice to ${language}`,
+          timestamp: 'Just now',
+          snippet: sentence,
+          language,
+          iconEmoji: '🗣️',
+          direction: 'voice_to_sign',
+        },
+        {
+          direction: 'voice_to_sign',
+          text: sentence,
+          translatedText: parsed.map((t) => t.gloss).join(' '),
+          emotion: 'neutral',
+        }
+      );
+    } catch (err) {
+      console.warn('Failed to save to history', err);
+    }
   };
 
   // Web Speech API Integration
@@ -398,6 +442,29 @@ export const VoiceToSignPage: React.FC = () => {
             </button>
           </div>
         </form>
+
+        {/* 5 Quick-Pick Example Chips */}
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-200/50 mt-3">
+          <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
+            Quick Examples:
+          </span>
+          {[
+            'Hello, how are you?',
+            'Nice to meet you.',
+            'Where is the metro station?',
+            'I need a doctor.',
+            'Thank you very much.',
+          ].map((sample) => (
+            <button
+              key={sample}
+              type="button"
+              onClick={() => handleSelectExample(sample)}
+              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white/80 hover:bg-white text-[#2B2D42] border border-slate-200/80 shadow-sm hover:scale-105 hover:border-[#7C9CFF]/50 transition-all cursor-pointer clay-focus"
+            >
+              {sample}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

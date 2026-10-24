@@ -1,15 +1,22 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '../components/Header';
+import { Badge } from '../components/Badge';
 import { useLanguageStore } from '../store/useLanguageStore';
 import {
-  RuleBasedRecognizer,
-  RecognitionSmoother,
-  OnnxRecognizer,
   HAND_CONNECTIONS,
   Landmark,
 } from '../lib/recognizer';
-import { addRecentConversation, getRecentConversations, RecentConversation } from '../data/store';
-import { FilesetResolver, HandLandmarker } from '@mediapipe/tasks-vision';
+import {
+  init as initHandTracker,
+  detect as detectHands,
+  close as closeHandTracker,
+  handTracker,
+  createActiveRecognizer,
+  DemoRecognizer,
+  GESTURE_TO_PHRASE_INDEX,
+  DEMO_PHRASES,
+} from '../ml';
+import { addRecentConversation } from '../data/store';
 import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS } from '../lib/speech';
 import {
   Video,
@@ -62,13 +69,13 @@ export const SignToVoicePage: React.FC = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
-  // MediaPipe HandLandmarker instance reference
-  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  // HandLandmarker offline status & state
   const [modelLoading, setModelLoading] = useState<boolean>(true);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [modelDelegate, setModelDelegate] = useState<'GPU' | 'CPU' | null>(null);
 
-  // Recognizer & Smoother instances
-  const recognizerRef = useRef<RuleBasedRecognizer>(new RuleBasedRecognizer());
-  const smootherRef = useRef<RecognitionSmoother>(new RecognitionSmoother(8)); // 8 frames smoothing
+  // Recognizer instance (uses DemoRecognizer from src/ml/index.ts)
+  const recognizerRef = useRef<DemoRecognizer>(createActiveRecognizer() as DemoRecognizer);
 
   // Camera & Stream Status
   const [cameraActive, setCameraActive] = useState<boolean>(false);
@@ -94,48 +101,31 @@ export const SignToVoicePage: React.FC = () => {
     { id: '2', time: '12:45', text: 'Nice to meet you today.' },
   ]);
 
-  // Initialize MediaPipe HandLandmarker from official CDN
+  // Load offline HandLandmarker model using local WASM and /models/hand_landmarker.task
+  const loadModel = useCallback(async () => {
+    setModelLoading(true);
+    setModelError(null);
+    try {
+      await initHandTracker();
+      setModelLoading(false);
+      setModelDelegate(handTracker.getActiveDelegate());
+    } catch (err: any) {
+      console.error('Failed to load HandLandmarker model:', err);
+      setModelError(err?.message || 'Could not load hand landmark model. Please check file access.');
+      setModelLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    let isMounted = true;
-
-    const initMediaPipe = async () => {
-      try {
-        setModelLoading(true);
-        const vision = await FilesetResolver.forVisionTasks(
-          'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-        );
-
-        if (!isMounted) return;
-
-        const landmarker = await HandLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath:
-              'https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task',
-            delegate: 'GPU',
-          },
-          runningMode: 'VIDEO',
-          numHands: 2,
-        });
-
-        if (isMounted) {
-          handLandmarkerRef.current = landmarker;
-          setModelLoading(false);
-        }
-      } catch (err: any) {
-        console.warn('MediaPipe initialization warning (falling back to mock landmarks)', err);
-        if (isMounted) {
-          setModelLoading(false);
-        }
-      }
-    };
-
-    initMediaPipe();
+    document.title = 'Sign to Voice — Ishara';
+    loadModel();
 
     return () => {
-      isMounted = false;
       stopCamera();
+      closeHandTracker();
+      recognizerRef.current.destroy();
     };
-  }, []);
+  }, [loadModel]);
 
   // Start Camera
   const startCamera = async () => {
@@ -225,84 +215,123 @@ export const SignToVoicePage: React.FC = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      if (handLandmarkerRef.current) {
-        try {
-          const startTimeMs = performance.now();
-          const results = handLandmarkerRef.current.detectForVideo(video, startTimeMs);
+      const startTimeMs = performance.now();
+      const hands = detectHands(video, startTimeMs);
 
-          if (results.landmarks && results.landmarks.length > 0) {
-            const firstHand = results.landmarks[0] as Landmark[];
+      if (hands && hands.length > 0) {
+        // 1. Draw Hand Skeleton and Joints on Canvas Overlay for up to two hands
+        ctx.save();
+        hands.forEach((hand, handIdx) => {
+          const boneColor = handIdx === 0 ? '#FF8A8A' : '#A8E6A1';
+          const jointColor = handIdx === 0 ? '#7C9CFF' : '#D4A5FF';
 
-            // 1. Draw Hand Skeleton on Canvas Overlay
-            ctx.save();
-            ctx.lineWidth = 3;
-            ctx.strokeStyle = '#FF8A8A'; // Coral bone lines
-
-            HAND_CONNECTIONS.forEach(([startIdx, endIdx]) => {
-              const start = firstHand[startIdx];
-              const end = firstHand[endIdx];
-              if (start && end) {
-                ctx.beginPath();
-                ctx.moveTo(start.x * canvas.width, start.y * canvas.height);
-                ctx.lineTo(end.x * canvas.width, end.y * canvas.height);
-                ctx.stroke();
-              }
-            });
-
-            // 2. Draw Landmark Joint Points
-            firstHand.forEach((point) => {
+          // Draw skeleton connection lines
+          ctx.lineWidth = 3;
+          ctx.strokeStyle = boneColor;
+          HAND_CONNECTIONS.forEach(([startIdx, endIdx]) => {
+            const start = hand[startIdx];
+            const end = hand[endIdx];
+            if (start && end) {
               ctx.beginPath();
-              ctx.arc(point.x * canvas.width, point.y * canvas.height, 5, 0, 2 * Math.PI);
-              ctx.fillStyle = '#7C9CFF'; // Blue joints
-              ctx.fill();
-              ctx.lineWidth = 1.5;
-              ctx.strokeStyle = '#FFFFFF';
+              ctx.moveTo(start.x * canvas.width, start.y * canvas.height);
+              ctx.lineTo(end.x * canvas.width, end.y * canvas.height);
               ctx.stroke();
-            });
-            ctx.restore();
-
-            // 3. Classify with RuleBasedRecognizer
-            const rawResult = recognizerRef.current.recognize(firstHand);
-
-            // 4. Smooth candidate over 8 frames
-            const smoothed = smootherRef.current.process(rawResult);
-            setLiveCandidate(smootherRef.current.getCandidate());
-            setHoldProgress(smootherRef.current.getCurrentHoldProgress());
-
-            // 5. Accept gesture when hold threshold reached
-            if (smoothed && smoothed.gloss) {
-              const newWord = smoothed.gloss.toLowerCase();
-              setAcceptedWords((prev) => {
-                // Avoid immediate duplicates
-                if (prev[prev.length - 1]?.toLowerCase() === newWord) {
-                  return prev;
-                }
-                return [...prev, newWord];
-              });
-
-              if (autoSpeak) {
-                speech.speak(newWord, {
-                  emotion: currentEmotion,
-                  lang: language === 'ISL' ? 'en-IN' : 'en-US',
-                  isAutoSpeak: true,
-                });
-              }
-
-              smootherRef.current.reset();
             }
-          } else {
-            smootherRef.current.process(null);
+          });
+
+          // Draw landmark joint points
+          hand.forEach((point) => {
+            ctx.beginPath();
+            ctx.arc(point.x * canvas.width, point.y * canvas.height, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = jointColor;
+            ctx.fill();
+            ctx.lineWidth = 1.5;
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.stroke();
+          });
+        });
+        ctx.restore();
+
+        // 2. Classify with active Recognizer (DemoRecognizer)
+        const firstHand = hands[0];
+        const result = recognizerRef.current.recognize(firstHand);
+
+        // Update preview gloss while holding before word-by-word reveal triggers
+        if (!recognizerRef.current.isCurrentlyRevealing()) {
+          if (result && recognizerRef.current.getHoldProgress() > 0) {
+            setLiveCandidate(result.gloss);
+          } else if (!result && recognizerRef.current.getHoldProgress() === 0) {
             setLiveCandidate(null);
-            setHoldProgress(0);
           }
-        } catch (detectionErr) {
-          // Frame skip or format warning
+        }
+      } else {
+        recognizerRef.current.recognize([]);
+        if (!recognizerRef.current.isCurrentlyRevealing()) {
+          setLiveCandidate(null);
+          setHoldProgress(0);
         }
       }
     }
 
     animationFrameRef.current = requestAnimationFrame(runDetection);
-  }, [cameraActive, isPaused, autoSpeak, currentEmotion, language, speech]);
+  }, [cameraActive, isPaused]);
+
+  // Wire DemoRecognizer callbacks for word-by-word reveal & speech
+  useEffect(() => {
+    recognizerRef.current.setCallbacks({
+      onWordRevealed: (_word: string, currentText: string) => {
+        setLiveCandidate(currentText);
+      },
+      onPhraseCompleted: (_phrase, fullText: string) => {
+        setAcceptedWords(fullText.split(' '));
+
+        if (autoSpeak) {
+          speech.speak(fullText, {
+            emotion: currentEmotion,
+            lang: language === 'ISL' ? 'en-IN' : 'en-US',
+            isAutoSpeak: true,
+          });
+        }
+
+        const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const newEntry = {
+          id: String(Date.now()),
+          time: timeStr,
+          text: fullText,
+        };
+        setTranscripts((prev) => [newEntry, ...prev.slice(0, 4)]);
+
+        try {
+          addRecentConversation(
+            {
+              title: `Sign: "${fullText.slice(0, 24)}${fullText.length > 24 ? '...' : ''}"`,
+              mode: `Sign to Voice (${language})`,
+              timestamp: 'Just now',
+              snippet: fullText,
+              language,
+              iconEmoji: '🤟',
+              direction: 'sign_to_voice',
+            },
+            {
+              direction: 'sign_to_voice',
+              text: fullText,
+              translatedText: fullText,
+              emotion: currentEmotion,
+            }
+          );
+        } catch (err) {
+          console.warn('Failed to save to history', err);
+        }
+
+        setTimeout(() => {
+          setLiveCandidate(null);
+        }, 1200);
+      },
+      onProgressUpdated: (progress: number) => {
+        setHoldProgress(progress);
+      },
+    });
+  }, [autoSpeak, currentEmotion, language, speech]);
 
   // Start / restart detection loop
   useEffect(() => {
@@ -317,24 +346,8 @@ export const SignToVoicePage: React.FC = () => {
   }, [cameraActive, runDetection]);
 
   // Simulation Mode Trigger for testing without camera
-  const triggerSimulatedSign = (gloss: string) => {
-    setLiveCandidate(gloss);
-    setHoldProgress(1.0);
-    const word = gloss.toLowerCase();
-    setAcceptedWords((prev) => [...prev, word]);
-
-    if (autoSpeak) {
-      speech.speak(word, {
-        emotion: currentEmotion,
-        lang: language === 'ISL' ? 'en-IN' : 'en-US',
-        isAutoSpeak: true,
-      });
-    }
-
-    setTimeout(() => {
-      setLiveCandidate(null);
-      setHoldProgress(0);
-    }, 1200);
+  const triggerSimulatedSign = (phraseIndex: number) => {
+    recognizerRef.current.triggerPhraseByIndex(phraseIndex);
   };
 
   // Full translated sentence
@@ -388,7 +401,9 @@ export const SignToVoicePage: React.FC = () => {
   // Reset words
   const handleResetWords = () => {
     setAcceptedWords([]);
-    smootherRef.current.reset();
+    recognizerRef.current.reset();
+    setLiveCandidate(null);
+    setHoldProgress(0);
   };
 
   return (
@@ -397,6 +412,11 @@ export const SignToVoicePage: React.FC = () => {
       <Header
         title="Live Translator"
         subtitle="Real-time in-browser sign language classification into speech and subtitles"
+        badge={
+          <Badge tooltip="Recognition uses a scripted demo vocabulary." variant="purple">
+            Demo mode
+          </Badge>
+        }
       />
 
       {/* Camera Permission / Device Error Banner */}
@@ -429,6 +449,39 @@ export const SignToVoicePage: React.FC = () => {
         </div>
       )}
 
+      {/* Model Loading / Initialization Error Banner */}
+      {modelError && (
+        <div className="p-4 rounded-2xl bg-[#FFE8E2] border border-[#FF8A8A]/50 text-[#2B2D42] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm animate-fade-in">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="w-5 h-5 text-[#FF8A8A] shrink-0" />
+            <div>
+              <p className="text-xs font-black text-[#2B2D42]">HandLandmarker Offline Load Error</p>
+              <p className="text-xs font-medium text-[#6E7387]">{modelError}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={loadModel}
+              className="clay-button clay-button-white px-3 py-1.5 text-xs font-black flex items-center gap-1.5"
+            >
+              <RefreshCw className="w-3.5 h-3.5 text-[#7C9CFF]" />
+              <span>Retry Model</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setModelError(null);
+                setUseSimulation(true);
+              }}
+              className="clay-button px-3 py-1.5 text-xs font-black"
+            >
+              Use Gesture Simulator
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Main Grid: Left Camera & Live Recognition, Right Audio Output & History */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column (Webcam Preview & Controls) */}
@@ -447,14 +500,62 @@ export const SignToVoicePage: React.FC = () => {
               </div>
 
               <div className="flex items-center gap-2">
-                <div className="px-3 py-1 rounded-full bg-black/50 backdrop-blur text-[11px] font-bold text-white/80">
-                  {modelLoading ? 'Loading MediaPipe...' : 'MediaPipe Vision Ready'}
+                <div
+                  className={`px-3 py-1 rounded-full backdrop-blur text-[11px] font-bold ${
+                    modelError
+                      ? 'bg-red-500/80 text-white'
+                      : modelLoading
+                      ? 'bg-amber-500/80 text-white animate-pulse'
+                      : 'bg-black/50 text-white/90'
+                  }`}
+                >
+                  {modelError ? (
+                    'Model Failed'
+                  ) : modelLoading ? (
+                    <span className="flex items-center gap-1.5">
+                      <RefreshCw className="w-3 h-3 animate-spin" />
+                      <span>Loading MediaPipe (Offline WASM)...</span>
+                    </span>
+                  ) : (
+                    <span>
+                      MediaPipe Ready (Offline{modelDelegate ? ` • ${modelDelegate}` : ''})
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
 
             {/* Video & Canvas Viewport */}
             <div className="relative my-auto flex items-center justify-center min-h-[300px]">
+              {/* Clear Model Loading Overlay */}
+              {modelLoading && (
+                <div className="absolute inset-0 z-20 rounded-[22px] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                  <div className="w-10 h-10 rounded-full border-3 border-[#7C9CFF]/30 border-t-[#7C9CFF] animate-spin mb-3"></div>
+                  <p className="text-sm font-black text-white">Loading HandLandmarker Model...</p>
+                  <p className="text-xs text-white/70 mt-1 max-w-xs">
+                    Initializing MediaPipe WASM runtime & loading /models/hand_landmarker.task
+                  </p>
+                </div>
+              )}
+
+              {/* Model Error Overlay inside viewport when camera is offline */}
+              {modelError && !cameraActive && !modelLoading && (
+                <div className="absolute inset-0 z-20 rounded-[22px] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                  <AlertCircle className="w-10 h-10 text-[#FF8A8A] mb-2" />
+                  <p className="text-xs font-black text-white">Model Load Failed</p>
+                  <p className="text-[11px] text-white/70 mt-1 max-w-xs leading-relaxed">
+                    {modelError}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={loadModel}
+                    className="clay-button clay-button-coral text-xs font-black px-4 py-2 mt-3"
+                  >
+                    Retry Loading Model
+                  </button>
+                </div>
+              )}
+
               {/* Actual Video Feed */}
               <video
                 ref={videoRef}
@@ -548,22 +649,22 @@ export const SignToVoicePage: React.FC = () => {
             <div className="clay-card p-4 bg-white/80 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-black uppercase text-[#6E7387]">
-                  Gesture Simulator (Rule-Based Heuristics)
+                  Gesture Simulator (Scripted Demo Mode)
                 </span>
                 <span className="text-[10px] text-[#7C9CFF] font-bold">Quick Demo Mode</span>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { gloss: 'HELLO', label: '👋 Open Palm (HELLO)' },
-                  { gloss: 'YES', label: '👍 Thumbs Up (YES)' },
-                  { gloss: 'NO', label: '✊ Fist (NO)' },
-                  { gloss: 'YOU', label: '👉 Pointing (YOU)' },
-                  { gloss: 'OK', label: '👌 OK Sign (OK)' },
+                  { label: '👋 Open Palm (HELLO)', idx: 0 },
+                  { label: '👍 Thumbs Up (YES)', idx: 9 },
+                  { label: '✊ Fist (NO)', idx: 10 },
+                  { label: '👉 Pointing (HELP)', idx: 4 },
+                  { label: '👌 OK Sign (THANK YOU)', idx: 3 },
                 ].map((item) => (
                   <button
-                    key={item.gloss}
+                    key={item.label}
                     type="button"
-                    onClick={() => triggerSimulatedSign(item.gloss)}
+                    onClick={() => triggerSimulatedSign(item.idx)}
                     className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black text-[#2B2D42] shadow-sm hover:scale-102 transition-all"
                   >
                     {item.label}
@@ -615,11 +716,11 @@ export const SignToVoicePage: React.FC = () => {
               </div>
             </div>
 
-            {/* 8-Frame Smoothing Hold Progress Bar */}
+            {/* Gesture Hold Stability Progress Bar */}
             {liveCandidate && (
               <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-[10px] font-black text-[#6E7387]">
-                  <span>Frame Hold Stability (8 frames)</span>
+                  <span>Hold Stability (1.2s Steady Detection)</span>
                   <span>{Math.round(holdProgress * 100)}%</span>
                 </div>
                 <div className="h-2 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">

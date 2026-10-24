@@ -5,7 +5,9 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguageStore } from '../store/useLanguageStore';
 import {
   getRecentConversations,
+  fetchRecentConversations,
   getProgress,
+  fetchProgress,
   getUserSettings,
   updateUserSettings,
   RecentConversation,
@@ -22,23 +24,58 @@ import {
   Check,
   Clock,
   ExternalLink,
+  Video,
+  MessageSquare,
+  GraduationCap,
+  History as HistoryIcon,
+  HandMetal,
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { language } = useLanguageStore();
 
-  // Local data store state
+  // Local & Supabase data store state
   const [conversations, setConversations] = useState<RecentConversation[]>([]);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [settings, setSettings] = useState<UserSettings>(getUserSettings());
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isOffline, setIsOffline] = useState<boolean>(false);
+
+  // Set document title
+  useEffect(() => {
+    document.title = 'Dashboard — Ishara';
+  }, []);
 
   // Load data from centralized store on mount
   useEffect(() => {
-    setConversations(getRecentConversations(3));
-    setProgress(getProgress());
+    let isMounted = true;
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        const [convResult, progResult] = await Promise.all([
+          fetchRecentConversations(3),
+          fetchProgress(),
+        ]);
+        if (isMounted) {
+          setConversations(convResult.data);
+          setIsOffline(convResult.isOffline);
+          setProgress(progResult.progress);
+        }
+      } catch (err) {
+        console.warn('Dashboard fetch error:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+    loadData();
     setSettings(getUserSettings());
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Compute time-appropriate greeting
@@ -50,8 +87,9 @@ export const DashboardPage: React.FC = () => {
   };
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Ananya';
+  const userEmail = user?.email;
 
-  // 5 Feature Cards strictly matching requirements (Language Packs and Free Plan removed)
+  // 5 Feature Cards strictly matching requirements
   const featureCards = [
     {
       id: 'sign-to-voice',
@@ -59,7 +97,8 @@ export const DashboardPage: React.FC = () => {
       desc: 'Real-time camera translation for ISL gestures into text and audio.',
       actionText: 'Open Translator',
       link: '/sign-to-voice',
-      iconEmoji: '🤟',
+      icon: Video,
+      iconColor: 'text-[#7C9CFF]',
       hasAsl: false,
     },
     {
@@ -68,7 +107,8 @@ export const DashboardPage: React.FC = () => {
       desc: 'Input text or voice and see our 3D avatar perform the translation.',
       actionText: 'View Avatar',
       link: '/voice-to-sign',
-      iconEmoji: '🗣️',
+      icon: MessageSquare,
+      iconColor: 'text-[#FF8A8A]',
       hasAsl: true,
     },
     {
@@ -77,7 +117,8 @@ export const DashboardPage: React.FC = () => {
       desc: 'Master Indian Sign Language with interactive daily lessons.',
       actionText: 'Continue Lesson',
       link: '/learn',
-      iconEmoji: '📖',
+      icon: GraduationCap,
+      iconColor: 'text-[#5ECB82]',
       hasAsl: false,
     },
     {
@@ -86,51 +127,47 @@ export const DashboardPage: React.FC = () => {
       desc: 'Review your past translations and saved conversations.',
       actionText: 'See Activity',
       link: '/history',
-      iconEmoji: '⏱️',
+      icon: HistoryIcon,
+      iconColor: 'text-[#B39DDB]',
       hasAsl: true,
     },
     {
       id: 'settings',
       title: 'Settings',
       desc: 'Customize accessibility, voice types, and profile details.',
-      actionText: 'Preferences',
-      link: '#settings',
-      iconEmoji: '⚙️',
+      actionText: 'Preferences & Account',
+      link: '/settings',
+      icon: SettingsIcon,
+      iconColor: 'text-[#2B2D42]',
       hasAsl: true,
-      onClick: (e: React.MouseEvent) => {
-        e.preventDefault();
-        setIsSettingsOpen(true);
-      },
     },
   ];
 
   return (
     <div className="space-y-8 select-none">
-      {/* Top Greeting Header with Dynamic User Name */}
+      {/* Top Greeting Header with Dynamic User Name & Email */}
       <Header
         title={`${getGreeting()}, ${userName}!`}
-        subtitle={`Ready to break some barriers today with ${language}?`}
+        subtitle={
+          userEmail
+            ? `${userEmail} • Ready to break some barriers today with ${language}?`
+            : `Ready to break some barriers today with ${language}?`
+        }
       />
 
       {/* 5 Feature Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {featureCards.map((card) => {
-          const isLink = !card.onClick;
-          const CardElement = isLink ? NavLink : 'div';
-          const cardProps = isLink
-            ? { to: card.link }
-            : { onClick: card.onClick, role: 'button', tabIndex: 0 };
-
           return (
-            <CardElement
+            <NavLink
               key={card.id}
-              {...(cardProps as any)}
+              to={card.link}
               className="clay-card p-7 flex flex-col justify-between group clay-focus relative overflow-hidden cursor-pointer"
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-white/70 flex items-center justify-center text-3xl shadow-sm">
-                    {card.iconEmoji}
+                  <div className="w-14 h-14 rounded-2xl bg-white/70 flex items-center justify-center shadow-sm">
+                    <card.icon className={`w-7 h-7 ${card.iconColor}`} />
                   </div>
 
                   {language === 'ASL' && !card.hasAsl && (
@@ -152,7 +189,7 @@ export const DashboardPage: React.FC = () => {
                 <span>{card.actionText}</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
               </div>
-            </CardElement>
+            </NavLink>
           );
         })}
       </div>
@@ -229,37 +266,79 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Conversation Items */}
-            <div className="space-y-3">
-              {conversations.map((conv) => (
-                <NavLink
-                  key={conv.id}
-                  to="/history"
-                  className="p-3.5 rounded-2xl bg-white/60 hover:bg-white/90 flex items-center justify-between transition-colors border border-slate-200/40 group clay-focus"
-                >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl bg-[#7C9CFF]/15 flex items-center justify-center text-lg shrink-0 shadow-sm">
-                      {conv.iconEmoji}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-black text-[#2B2D42] truncate group-hover:text-[#7C9CFF] transition-colors">
-                        {conv.title}
-                      </p>
-                      <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider">
-                        {conv.timestamp} • {conv.mode}
-                      </p>
+            {isLoading ? (
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="p-3.5 rounded-2xl bg-white/40 animate-pulse flex items-center justify-between border border-slate-200/30"
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      <div className="w-10 h-10 rounded-xl bg-slate-200/80 shrink-0" />
+                      <div className="space-y-2 flex-1">
+                        <div className="h-3 bg-slate-200/80 rounded w-3/4" />
+                        <div className="h-2 bg-slate-200/60 rounded w-1/2" />
+                      </div>
                     </div>
                   </div>
-                  <ChevronRight className="w-4 h-4 text-[#6E7387] group-hover:translate-x-0.5 transition-transform shrink-0" />
-                </NavLink>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : conversations.length === 0 ? (
+              <div className="p-6 text-center text-xs font-semibold text-[#6E7387] bg-white/40 rounded-2xl border border-slate-200/40">
+                No recent conversations recorded yet. Start translating to see activity here!
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {conversations.map((conv) => {
+                  const ConvIcon =
+                    conv.direction === 'sign_to_voice'
+                      ? Video
+                      : conv.mode?.toLowerCase().includes('learning')
+                      ? GraduationCap
+                      : MessageSquare;
+                  const iconColor =
+                    conv.direction === 'sign_to_voice'
+                      ? 'text-[#7C9CFF]'
+                      : conv.mode?.toLowerCase().includes('learning')
+                      ? 'text-[#5ECB82]'
+                      : 'text-[#FF8A8A]';
+
+                  return (
+                    <NavLink
+                      key={conv.id}
+                      to="/history"
+                      className="p-3.5 rounded-2xl bg-white/60 hover:bg-white/90 flex items-center justify-between transition-colors border border-slate-200/40 group clay-focus"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100/80 flex items-center justify-center text-lg shrink-0 shadow-sm">
+                          <ConvIcon className={`w-5 h-5 ${iconColor}`} />
+                        </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-black text-[#2B2D42] truncate group-hover:text-[#7C9CFF] transition-colors">
+                          {conv.title}
+                        </p>
+                        <p className="text-[10px] font-bold text-[#6E7387] uppercase tracking-wider">
+                          {conv.timestamp} • {conv.mode}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#6E7387] group-hover:translate-x-0.5 transition-transform shrink-0" />
+                  </NavLink>
+                );
+              })}
+              </div>
+            )}
           </div>
 
           <div className="pt-4 mt-4 border-t border-slate-200/60 flex items-center justify-between text-xs text-[#6E7387] font-semibold">
-            <span>Backed by local data store</span>
-            <span className="text-emerald-600 font-bold flex items-center gap-1">
+            <span>{isOffline ? 'Offline, saved on this device' : 'Synced with Supabase Cloud'}</span>
+            <span
+              className={`${
+                isOffline ? 'text-amber-600' : 'text-emerald-600'
+              } font-bold flex items-center gap-1`}
+            >
               <Check className="w-3.5 h-3.5" />
-              <span>Up to date</span>
+              <span>{isOffline ? 'Offline Cache' : 'Up to date'}</span>
             </span>
           </div>
         </div>
