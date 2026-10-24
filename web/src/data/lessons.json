@@ -141,7 +141,7 @@
           "id": "asl-q4",
           "question": "Hand saluting out from the forehead represents:",
           "gloss": "HELLO",
-          "options": ["GOODBYE", "HELLO", "THANK_YOU", "SORRY"],
+          "options": ["WELCOME", "HELLO", "THANK_YOU", "SORRY"],
           "answer": "HELLO"
         },
         {

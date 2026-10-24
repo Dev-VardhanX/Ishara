@@ -142,17 +142,7 @@ export const SIGN_VOCABULARY: Record<string, SignDefinition> = {
     text: 'Hello',
     category: 'communication',
     twoHanded: false,
-    description: 'Open palm brow salute (ISL) / formal forehead salute (ASL)',
-  },
-  GOODBYE: {
-    id: 'GOODBYE',
-    islGloss: 'ISL_GOODBYE',
-    aslGloss: 'ASL_GOODBYE',
-    label: 'Goodbye',
-    text: 'Goodbye',
-    category: 'communication',
-    twoHanded: false,
-    description: 'Open palm facing camera waving side-to-side horizontally',
+    description: 'Open palm brow salute or wave near face/upper body (ISL/ASL)',
   },
   THANK_YOU: {
     id: 'THANK_YOU',
@@ -606,15 +596,23 @@ function extractHandFeatures(landmarks: Landmark[]): HandFeatures | null {
   const indexMcpZ = landmarks[INDEX_MCP].z ?? 0;
   const deltaZ = indexTipZ - indexMcpZ;
   const deltaX = landmarks[INDEX_TIP].x - landmarks[INDEX_MCP].x;
+  const deltaY = landmarks[INDEX_TIP].y - landmarks[INDEX_MCP].y;
 
-  // Pointing towards camera (tip closer to camera than knuckle)
-  const pointingToCamera = pointing && deltaZ < -0.02;
+  // Pointing laterally sideways (third person reference: HE / SHE / THEY)
+  const pointingToSide = pointing && Math.abs(deltaX) >= 0.12;
 
-  // Pointing towards chest / self (tip directed toward body/chest)
-  const pointingToChest = pointing && deltaZ >= -0.02 && Math.abs(deltaX) < 0.12;
+  // Pointing towards camera (tip extended forward towards viewer in depth)
+  // Negative deltaZ means tip is closer to the camera than the MCP knuckle
+  const pointingToCamera = pointing && !pointingToSide && deltaZ < -0.015 && deltaY < 0.12 && Math.abs(deltaX) < 0.14;
 
-  // Pointing laterally sideways
-  const pointingToSide = pointing && Math.abs(deltaX) >= 0.10;
+  // Pointing towards chest / self (tip directed backward/inward toward body or downwards at sternum)
+  // Positive or near-zero deltaZ, or index finger directed down/inward towards torso
+  const pointingToChest =
+    pointing &&
+    !pointingToSide &&
+    !pointingToCamera &&
+    (deltaZ >= -0.015 || deltaY > -0.02 || landmarks[INDEX_TIP].y > 0.40) &&
+    Math.abs(deltaX) < 0.14;
 
   // T-handshape (ASL Bathroom): thumb tucked between index and middle
   const tHandshape =
@@ -737,7 +735,7 @@ export class MultiLanguageClassifier {
     let oscillationsY = 0;
     let tipSpanX = 0;
 
-    if (this.history.length >= 6) {
+    if (this.history.length >= 3) {
       const recent = this.history.slice(-15);
       const first = recent[0];
       const last = recent[recent.length - 1];
@@ -966,23 +964,8 @@ export class MultiLanguageClassifier {
       return formatResult('BATHROOM', 0.94);
     }
 
-    // 2.3 GOODBYE (Open palm waving horizontally side-to-side)
+    // 2.3 SLEEP (Hand tilted against cheek / face, steady without waving)
     const isWaving = tipOscillationsX >= 2 || (tipOscillationsX >= 1 && tipSpanX > 0.055);
-    if (f0.openPalm && isWaving && hands[0][MIDDLE_TIP].y < f0.wrist.y) {
-      return formatResult('GOODBYE', 0.95);
-    }
-
-    // 2.4 HELLO (Open palm raised high near temple/brow held steady without waving)
-    if (
-      f0.openPalm &&
-      (hands[0][MIDDLE_TIP].y < 0.40 || f0.isFaceZone) &&
-      !isWaving &&
-      tipSpanX < 0.045
-    ) {
-      return formatResult('HELLO', 0.94);
-    }
-
-    // 2.5 SLEEP (Hand tilted against cheek / face, steady without waving)
     if (
       (f0.openPalm || f0.bunchedTips) &&
       f0.isFaceZone &&
@@ -992,6 +975,15 @@ export class MultiLanguageClassifier {
       Math.abs(dx) < 0.03
     ) {
       return formatResult('SLEEP', 0.92);
+    }
+
+    // 2.4 HELLO (Open palm raised near temple/brow/face, whether waving or held steady)
+    // Note: GOODBYE is removed per user request so all open-palm wave or salute gestures classify cleanly as HELLO.
+    if (
+      f0.openPalm &&
+      (hands[0][MIDDLE_TIP].y < 0.48 || f0.isFaceZone || hands[0][MIDDLE_TIP].y < f0.wrist.y - 0.02)
+    ) {
+      return formatResult('HELLO', 0.95);
     }
 
     // 2.6 HAPPY (Open flat hand brushing upward repeatedly on chest)
@@ -1048,7 +1040,9 @@ export class MultiLanguageClassifier {
     // 2.11 COME (Beckoning inward toward body)
     if (
       (f0.pointing || f0.openPalm) &&
-      dy < -0.02 &&
+      !f0.pointingToChest &&
+      dy < -0.03 &&
+      oscillationsY === 0 &&
       f0.isChestZone
     ) {
       return formatResult('COME', 0.91);
@@ -1057,7 +1051,9 @@ export class MultiLanguageClassifier {
     // 2.12 GO (Pointing forward and moving outward abruptly)
     if (
       f0.pointing &&
-      (dy > 0.03 || Math.abs(dx) > 0.04) &&
+      !f0.pointingToChest &&
+      (dy > 0.04 || Math.abs(dx) > 0.05) &&
+      oscillationsY === 0 &&
       f0.isChestZone
     ) {
       return formatResult('GO', 0.92);
@@ -1167,26 +1163,36 @@ export class MultiLanguageClassifier {
       return formatResult('SHE', 0.92);
     }
 
-    // 2.27 YOU (Index finger pointing forward towards camera at chest level)
+    // 2.27 YOU (Index finger pointing forward towards conversational partner / camera)
     if (
       f0.pointing &&
       f0.isChestZone &&
-      (f0.pointingToCamera || (!f0.pointingToChest && !f0.pointingToSide)) &&
-      Math.abs(dx) < 0.05 &&
-      tipOscillationsX < 2
+      f0.pointingToCamera &&
+      !f0.pointingToSide &&
+      tipOscillationsX < 2 &&
+      Math.abs(dx) < 0.05
     ) {
-      return formatResult('YOU', 0.94);
+      return formatResult('YOU', 0.95);
     }
 
-    // 2.28 I / ME (Index finger pointing directly to chest)
+    // 2.28 ME (Index finger pointing to chest with distinct tapping motion on sternum)
+    const isTappingChest = oscillationsY >= 1 || Math.abs(dy) > 0.025;
     if (
       f0.pointing &&
       f0.isChestZone &&
-      (f0.pointingToChest || hands[0][INDEX_TIP].y > 0.38) &&
-      Math.abs(dx) < 0.05 &&
-      tipOscillationsX < 2
+      f0.pointingToChest &&
+      !f0.pointingToSide &&
+      isTappingChest
     ) {
-      return formatResult('I', 0.94);
+      return formatResult('ME', 0.95);
+    }
+
+    // 2.29 I (Index finger pointing steadily to chest, OR ASL pinky-I shape on chest)
+    if (
+      (f0.pointing && f0.isChestZone && f0.pointingToChest && !f0.pointingToSide && !isTappingChest) ||
+      (f0.pinkyExtended && f0.indexCurled && f0.middleCurled && f0.ringCurled && f0.isChestZone)
+    ) {
+      return formatResult('I', 0.95);
     }
 
     // 2.29 MY (Flat open palm resting on center of chest)

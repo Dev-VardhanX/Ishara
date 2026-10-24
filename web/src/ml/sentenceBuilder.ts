@@ -27,6 +27,12 @@ export function extractLanguage(gloss: string, fallback: 'ISL' | 'ASL' = 'ISL'):
 export function glossToWord(gloss: string): string {
   const norm = normalizeGloss(gloss);
   switch (norm) {
+    case 'I':
+      return 'I';
+    case 'ME':
+      return 'me';
+    case 'YOU':
+      return 'you';
     case 'THANK_YOU':
       return 'thank you';
     case 'DONT_UNDERSTAND':
@@ -45,7 +51,6 @@ export function glossToWord(gloss: string): string {
 const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
   // Single Signs (standalone confirmations)
   'HELLO': 'Hello!',
-  'GOODBYE': 'Goodbye!',
   'YES': 'Yes.',
   'NO': 'No.',
   'I': 'I.',
@@ -85,6 +90,7 @@ const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
   'I NEED FOOD': 'I need food.',
   'I NEED HELP': 'I need help.',
   'PLEASE HELP ME': 'Please help me.',
+  'HELP ME': 'Help me.',
   'YOU HELP ME': 'You help me.',
   'I HELP YOU': 'I will help you.',
   'CAN YOU HELP ME': 'Can you please help me?',
@@ -94,9 +100,11 @@ const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
   'MY NAME FRIEND': 'My name is Friend.',
   'HELLO MY NAME': 'Hello, my name is...',
   'HELLO FRIEND': 'Hello, my friend!',
-  'GOODBYE FRIEND': 'Goodbye, my friend!',
   'THANK_YOU FRIEND': 'Thank you, friend.',
   'YOU MY FRIEND': 'You are my friend.',
+  'YOU AND ME': 'You and me.',
+  'ME AND YOU': 'Me and you.',
+  'I LOVE YOU': 'I love you.',
   'WE FRIENDS': 'We are friends.',
   'YOUR NAME WHAT': 'What is your name?',
 
@@ -123,7 +131,6 @@ const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
   'I WRITE': 'I am writing.',
   'I SLEEP': 'I am going to sleep.',
   'I TIRED SLEEP': 'I am tired and want to sleep.',
-  'I LOVE YOU': 'I love you.',
   'LOVE YOU': 'Love you!',
   'STOP PLEASE': 'Please stop.',
 };
