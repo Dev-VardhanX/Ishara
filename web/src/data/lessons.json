@@ -23,14 +23,14 @@
         {
           "gloss": "PLEASE",
           "word": "Please",
-          "description": "Place flat open hand over chest and rub in gentle circular clockwise motions.",
+          "description": "Two hands pressed together in front of the chest in a Namaste gesture.",
           "emoji": "🤲"
         },
         {
-          "gloss": "GOOD_MORNING",
-          "word": "Good Morning",
-          "description": "Sign 'Good' from chin to flat palm, then raise dominant hand up to mimic the rising sun.",
-          "emoji": "🌅"
+          "gloss": "GOODBYE",
+          "word": "Goodbye",
+          "description": "Open hand facing forward waving horizontally side-to-side.",
+          "emoji": "👋"
         },
         {
           "gloss": "HOW_ARE_YOU",
@@ -56,23 +56,23 @@
         },
         {
           "id": "q3",
-          "question": "A circular hand motion rubbed over the chest signifies:",
+          "question": "Two hands pressed together in front of the chest in Namaste signifies:",
           "gloss": "PLEASE",
-          "options": ["PLEASE", "GOOD_MORNING", "WELCOME", "NO"],
+          "options": ["PLEASE", "GOOD", "SORRY", "NO"],
           "answer": "PLEASE"
         },
         {
           "id": "q4",
-          "question": "Which sign combines 'Good' with an upward sun-rising gesture?",
-          "gloss": "GOOD_MORNING",
-          "options": ["GOOD_NIGHT", "GOOD_MORNING", "HELLO", "HOW_ARE_YOU"],
-          "answer": "GOOD_MORNING"
+          "question": "Which sign represents an open hand facing forward waving side-to-side?",
+          "gloss": "GOODBYE",
+          "options": ["GOOD", "GOODBYE", "HELLO", "HOW_ARE_YOU"],
+          "answer": "GOODBYE"
         },
         {
           "id": "q5",
           "question": "Rotating hands outward with an open questioning posture asks:",
           "gloss": "HOW_ARE_YOU",
-          "options": ["WHERE", "WHY", "HOW_ARE_YOU", "WHO"],
+          "options": ["NAME", "FOOD", "HOW_ARE_YOU", "FRIEND"],
           "answer": "HOW_ARE_YOU"
         }
       ]
@@ -109,10 +109,10 @@
           "emoji": "✊"
         },
         {
-          "gloss": "YOU",
-          "word": "You",
-          "description": "Point index finger directly forward toward the conversational partner.",
-          "emoji": "👉"
+          "gloss": "PLEASE",
+          "word": "Please",
+          "description": "Place flat open hand over chest and rub in gentle circular clockwise motions.",
+          "emoji": "🤲"
         }
       ],
       "quiz": [
@@ -120,7 +120,7 @@
           "id": "asl-q1",
           "question": "An S-hand nodding up and down represents:",
           "gloss": "YES",
-          "options": ["YES", "NO", "MAYBE", "STOP"],
+          "options": ["YES", "NO", "GOOD", "STOP"],
           "answer": "YES"
         },
         {
@@ -132,23 +132,23 @@
         },
         {
           "id": "asl-q3",
-          "question": "Index finger pointing directly at the other person signs:",
-          "gloss": "YOU",
-          "options": ["ME", "THEY", "YOU", "WE"],
-          "answer": "YOU"
+          "question": "Flat hand rubbing the chest in a gentle circular motion signs:",
+          "gloss": "PLEASE",
+          "options": ["SORRY", "PLEASE", "THANK_YOU", "HELP"],
+          "answer": "PLEASE"
         },
         {
           "id": "asl-q4",
           "question": "Hand saluting out from the forehead represents:",
           "gloss": "HELLO",
-          "options": ["WELCOME", "HELLO", "THANK_YOU", "SORRY"],
+          "options": ["GOODBYE", "HELLO", "THANK_YOU", "SORRY"],
           "answer": "HELLO"
         },
         {
           "id": "asl-q5",
           "question": "Fingertips touching the chin and extending forward signs:",
           "gloss": "THANK_YOU",
-          "options": ["THANK_YOU", "WELCOME", "NO", "NAME"],
+          "options": ["THANK_YOU", "FRIEND", "NO", "NAME"],
           "answer": "THANK_YOU"
         }
       ]

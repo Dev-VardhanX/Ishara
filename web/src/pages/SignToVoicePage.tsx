@@ -92,7 +92,7 @@ export const SignToVoicePage: React.FC = () => {
   const [distinctGlosses, setDistinctGlosses] = useState<string[]>([]);
   const [naturalSentence, setNaturalSentence] = useState<string>('');
   const [similarGlosses, setSimilarGlosses] = useState<AlternativeCandidate[]>([]);
-  const [simCategory, setSimCategory] = useState<'all' | 'pronouns' | 'communication' | 'needs'>('all');
+  const [simCategory, setSimCategory] = useState<'all' | 'greetings' | 'basic' | 'needs' | 'social'>('all');
   const [currentEmotion, setCurrentEmotion] = useState<EmotionType>('happy');
   const [selectedVoice, setSelectedVoice] = useState<string>('Standard Natural');
   const [copied, setCopied] = useState<boolean>(false);
@@ -579,7 +579,11 @@ export const SignToVoicePage: React.FC = () => {
               <video
                 ref={videoRef}
                 playsInline
+                autoPlay
                 muted
+                onLoadedMetadata={() => {
+                  videoRef.current?.play().catch(() => {});
+                }}
                 className={`w-full max-h-[340px] object-cover rounded-[22px] transform -scale-x-100 ${
                   cameraActive ? 'block' : 'hidden'
                 }`}
@@ -669,13 +673,13 @@ export const SignToVoicePage: React.FC = () => {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <span className="text-[11px] font-black uppercase text-[#6E7387]">
-                    Gesture Simulator ({language} — 42 Signs)
+                    Gesture Simulator ({language} — {Object.keys(SIGN_VOCABULARY).length} Signs)
                   </span>
                   <p className="text-[10px] text-[#6E7387] mt-0.5">Click signs to test recognition & natural sentence builder</p>
                 </div>
                 {/* Category filters */}
                 <div className="flex gap-1">
-                  {(['all', 'pronouns', 'communication', 'needs'] as const).map((cat) => (
+                  {(['all', 'greetings', 'basic', 'needs', 'social'] as const).map((cat) => (
                     <button
                       key={cat}
                       type="button"

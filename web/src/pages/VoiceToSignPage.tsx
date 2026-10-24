@@ -450,10 +450,10 @@ export const VoiceToSignPage: React.FC = () => {
           </span>
           {[
             'Hello, how are you?',
-            'Nice to meet you.',
-            'Where is the metro station?',
-            'I need a doctor.',
             'Thank you very much.',
+            'Please help me.',
+            'Goodbye, my friend!',
+            'Yes, good friend.',
           ].map((sample) => (
             <button
               key={sample}
