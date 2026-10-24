@@ -1,0 +1,157 @@
+{
+  "version": 1,
+  "lessons": [
+    {
+      "id": "isl-greetings-1",
+      "language": "ISL",
+      "category": "Greetings",
+      "title": "Essential Greetings",
+      "description": "Learn the most common everyday greetings in Indian Sign Language.",
+      "signs": [
+        {
+          "gloss": "HELLO",
+          "word": "Hello",
+          "description": "Raise dominant hand to forehead temple, touch lightly, and extend outward in a smooth waving motion.",
+          "emoji": "👋"
+        },
+        {
+          "gloss": "THANK_YOU",
+          "word": "Thank You",
+          "description": "Touch fingers of flat hand to chin or lips, then extend palm forward towards the other person.",
+          "emoji": "🙏"
+        },
+        {
+          "gloss": "PLEASE",
+          "word": "Please",
+          "description": "Place flat open hand over chest and rub in gentle circular clockwise motions.",
+          "emoji": "🤲"
+        },
+        {
+          "gloss": "GOOD_MORNING",
+          "word": "Good Morning",
+          "description": "Sign 'Good' from chin to flat palm, then raise dominant hand up to mimic the rising sun.",
+          "emoji": "🌅"
+        },
+        {
+          "gloss": "HOW_ARE_YOU",
+          "word": "How Are You",
+          "description": "Point fingers inward toward chest then rotate outward with questioning open palms.",
+          "emoji": "🤝"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "q1",
+          "question": "Which sign represents an open hand starting at the temple extending outward?",
+          "gloss": "HELLO",
+          "options": ["HELLO", "THANK_YOU", "SORRY", "YES"],
+          "answer": "HELLO"
+        },
+        {
+          "id": "q2",
+          "question": "Which gesture starts at the chin or lips and moves toward the listener?",
+          "gloss": "THANK_YOU",
+          "options": ["NO", "PLEASE", "THANK_YOU", "HELP"],
+          "answer": "THANK_YOU"
+        },
+        {
+          "id": "q3",
+          "question": "A circular hand motion rubbed over the chest signifies:",
+          "gloss": "PLEASE",
+          "options": ["PLEASE", "GOOD_MORNING", "WELCOME", "NO"],
+          "answer": "PLEASE"
+        },
+        {
+          "id": "q4",
+          "question": "Which sign combines 'Good' with an upward sun-rising gesture?",
+          "gloss": "GOOD_MORNING",
+          "options": ["GOOD_NIGHT", "GOOD_MORNING", "HELLO", "HOW_ARE_YOU"],
+          "answer": "GOOD_MORNING"
+        },
+        {
+          "id": "q5",
+          "question": "Rotating hands outward with an open questioning posture asks:",
+          "gloss": "HOW_ARE_YOU",
+          "options": ["WHERE", "WHY", "HOW_ARE_YOU", "WHO"],
+          "answer": "HOW_ARE_YOU"
+        }
+      ]
+    },
+    {
+      "id": "asl-greetings-1",
+      "language": "ASL",
+      "category": "Greetings",
+      "title": "ASL Starter Signs",
+      "description": "Everyday greetings and polite expressions in American Sign Language.",
+      "signs": [
+        {
+          "gloss": "HELLO",
+          "word": "Hello",
+          "description": "Open B-hand at temple saluting forward with a welcoming gesture.",
+          "emoji": "👋"
+        },
+        {
+          "gloss": "THANK_YOU",
+          "word": "Thank You",
+          "description": "Touch fingertips to chin and move forward towards the other person.",
+          "emoji": "🙏"
+        },
+        {
+          "gloss": "YES",
+          "word": "Yes",
+          "description": "Make an S-fist and nod the wrist up and down twice like a nodding head.",
+          "emoji": "👍"
+        },
+        {
+          "gloss": "NO",
+          "word": "No",
+          "description": "Snap index finger and middle finger down against thumb rapidly.",
+          "emoji": "✊"
+        },
+        {
+          "gloss": "YOU",
+          "word": "You",
+          "description": "Point index finger directly forward toward the conversational partner.",
+          "emoji": "👉"
+        }
+      ],
+      "quiz": [
+        {
+          "id": "asl-q1",
+          "question": "An S-hand nodding up and down represents:",
+          "gloss": "YES",
+          "options": ["YES", "NO", "MAYBE", "STOP"],
+          "answer": "YES"
+        },
+        {
+          "id": "asl-q2",
+          "question": "Fingers snapping down onto the thumb indicates:",
+          "gloss": "NO",
+          "options": ["HELLO", "NO", "YES", "PLEASE"],
+          "answer": "NO"
+        },
+        {
+          "id": "asl-q3",
+          "question": "Index finger pointing directly at the other person signs:",
+          "gloss": "YOU",
+          "options": ["ME", "THEY", "YOU", "WE"],
+          "answer": "YOU"
+        },
+        {
+          "id": "asl-q4",
+          "question": "Hand saluting out from the forehead represents:",
+          "gloss": "HELLO",
+          "options": ["GOODBYE", "HELLO", "THANK_YOU", "SORRY"],
+          "answer": "HELLO"
+        },
+        {
+          "id": "asl-q5",
+          "question": "Fingertips touching the chin and extending forward signs:",
+          "gloss": "THANK_YOU",
+          "options": ["THANK_YOU", "WELCOME", "NO", "NAME"],
+          "answer": "THANK_YOU"
+        }
+      ]
+    }
+  ]
+}
