@@ -60,7 +60,7 @@ export const SEED_CONVERSATIONS: RecentConversation[] = [
     startedAt: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
     snippet: 'Asking for directions to the fresh organic produce aisle.',
     language: 'ISL',
-    iconEmoji: '🖐️',
+    iconEmoji: 'hand',
     direction: 'sign_to_voice',
   },
   {
@@ -71,7 +71,7 @@ export const SEED_CONVERSATIONS: RecentConversation[] = [
     startedAt: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
     snippet: 'Doctor explained the follow-up consultation schedule.',
     language: 'ISL',
-    iconEmoji: '💬',
+    iconEmoji: 'message',
     direction: 'voice_to_sign',
   },
   {
@@ -82,7 +82,7 @@ export const SEED_CONVERSATIONS: RecentConversation[] = [
     startedAt: new Date(Date.now() - 72 * 3600 * 1000).toISOString(),
     snippet: 'Learned 5 new signs: Hello, Thank You, Sorry, Please, Good Morning.',
     language: 'ISL',
-    iconEmoji: '🎓',
+    iconEmoji: 'graduation',
     direction: 'sign_to_voice',
   },
 ];
@@ -355,7 +355,7 @@ export const fetchRecentConversations = async (
               startedAt: row.started_at,
               snippet,
               language: (row.sign_lang as 'ISL' | 'ASL') || 'ISL',
-              iconEmoji: isSignToVoice ? '🤟' : '🗣️',
+              iconEmoji: isSignToVoice ? 'sign' : 'voice',
               direction,
             };
           });
@@ -444,7 +444,7 @@ export const fetchHistory = async (filters?: {
               startedAt: row.started_at,
               snippet,
               language: (row.sign_lang as 'ISL' | 'ASL') || 'ISL',
-              iconEmoji: isSignToVoice ? '🤟' : '🗣️',
+              iconEmoji: isSignToVoice ? 'sign' : 'voice',
               direction,
             };
           });

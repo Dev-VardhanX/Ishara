@@ -20,6 +20,7 @@ import {
   CheckCircle,
   X,
   ChevronDown,
+  Clock,
 } from 'lucide-react';
 
 export const HistoryPage: React.FC = () => {
@@ -93,13 +94,18 @@ export const HistoryPage: React.FC = () => {
 
   // Helper icon generator
   const getIconDetails = (item: RecentConversation) => {
-    if (item.mode.includes('Learning') || item.iconEmoji === '🎓') {
+    if (item.mode.includes('Learning') || item.iconEmoji === 'graduation') {
       return {
         icon: GraduationCap,
         bgClass: 'bg-[#E5F8E2] text-[#65B75D]',
       };
     }
-    if (item.direction === 'voice_to_sign' || item.mode.includes('Voice to')) {
+    if (
+      item.direction === 'voice_to_sign' ||
+      item.mode.includes('Voice to') ||
+      item.iconEmoji === 'message' ||
+      item.iconEmoji === 'voice'
+    ) {
       return {
         icon: MessageSquare,
         bgClass: 'bg-[#FFE8E2] text-[#FF8A8A]',
@@ -260,8 +266,8 @@ export const HistoryPage: React.FC = () => {
         <div className="space-y-6 pt-2">
           {historyGroups.every((g) => g.entries.length === 0) ? (
             <div className="clay-card p-12 text-center flex flex-col items-center justify-center space-y-3 bg-white/70">
-              <div className="w-16 h-16 rounded-3xl bg-[#7C9CFF]/15 flex items-center justify-center text-3xl">
-                ⏱️
+              <div className="w-16 h-16 rounded-3xl bg-[#7C9CFF]/15 flex items-center justify-center text-[#7C9CFF]">
+                <Clock className="w-8 h-8" />
               </div>
               <h3 className="text-base font-extrabold text-[#2B2D42]">No Conversations Found</h3>
               <p className="text-xs text-[#6E7387] max-w-sm">

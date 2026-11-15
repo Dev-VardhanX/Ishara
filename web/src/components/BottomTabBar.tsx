@@ -6,46 +6,56 @@ import {
   MessageSquare,
   GraduationCap,
   History,
+  AlertTriangle,
 } from 'lucide-react';
 import { useLanguageStore } from '../store/useLanguageStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export const BottomTabBar: React.FC = () => {
   const { language } = useLanguageStore();
+  const { t } = useLocaleStore();
 
   const tabItems = [
     {
-      name: 'Dashboard',
+      name: t('nav.dashboard'),
       path: '/dashboard',
       icon: LayoutDashboard,
       activeClass: 'bg-[#7C9CFF] text-white shadow-clay-raised-sm',
       hasAsl: true,
     },
     {
-      name: 'Sign-to-Voice',
+      name: t('nav.signToVoice'),
       path: '/sign-to-voice',
       icon: Video,
       activeClass: 'bg-[#7C9CFF] text-white shadow-clay-raised-sm',
       hasAsl: false,
     },
     {
-      name: 'Voice-to-Sign',
+      name: t('nav.voiceToSign'),
       path: '/voice-to-sign',
       icon: MessageSquare,
       activeClass: 'bg-[#FF8A8A] text-white shadow-clay-raised-sm',
       hasAsl: true,
     },
     {
-      name: 'Learn',
+      name: t('nav.learn'),
       path: '/learn',
       icon: GraduationCap,
       activeClass: 'bg-[#5ECB82] text-white shadow-clay-raised-sm',
       hasAsl: false,
     },
     {
-      name: 'History',
+      name: t('nav.history'),
       path: '/history',
       icon: History,
       activeClass: 'bg-[#B39DDB] text-white shadow-clay-raised-sm',
+      hasAsl: true,
+    },
+    {
+      name: 'SOS',
+      path: '/emergency',
+      icon: AlertTriangle,
+      activeClass: 'bg-[#FF4D4D] text-white shadow-clay-raised-sm',
       hasAsl: true,
     },
   ];
@@ -59,11 +69,11 @@ export const BottomTabBar: React.FC = () => {
         <NavLink
           key={item.path}
           to={item.path}
+          aria-label={item.name}
           className={({ isActive }) =>
-            `relative flex flex-col items-center justify-center py-1.5 px-2.5 rounded-2xl text-[10px] font-black transition-all clay-focus ${
-              isActive
-                ? `${item.activeClass} -translate-y-1`
-                : 'text-[#6E7387] hover:text-[#2B2D42]'
+            `relative flex flex-col items-center justify-center py-1.5 px-2.5 rounded-2xl text-[10px] font-black transition-all clay-focus ${isActive
+              ? `${item.activeClass} -translate-y-1`
+              : 'text-[#6E7387] hover:text-[#2B2D42]'
             }`
           }
         >

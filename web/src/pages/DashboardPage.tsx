@@ -29,7 +29,9 @@ import {
   GraduationCap,
   History as HistoryIcon,
   HandMetal,
+  Flame,
 } from 'lucide-react';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -235,7 +237,7 @@ export const DashboardPage: React.FC = () => {
 
           <div className="pt-6 mt-6 border-t border-slate-200/60 flex items-center justify-between">
             <span className="text-xs font-bold text-[#6E7387]">
-              Current Streak: <strong className="text-[#FF8A8A]">{progress?.streakDays || 12} Days 🔥</strong>
+              Current Streak: <strong className="text-[#FF8A8A] inline-flex items-center gap-1">{progress?.streakDays || 12} Days <Flame className="w-3.5 h-3.5 text-[#FF8A8A]" /></strong>
             </span>
             <NavLink
               to="/learn"

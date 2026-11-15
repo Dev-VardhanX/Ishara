@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { AvatarStage } from '../components/AvatarStage';
+import { SignIcon } from '../components/SignIcon';
 import { useLanguageStore } from '../store/useLanguageStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { useSpeech } from '../lib/speech';
 import lessonsData from '../data/lessons.json';
 import { updateTopicProgress, addRecentConversation, saveLessonProgress, fetchProgress } from '../data/store';
@@ -43,6 +45,7 @@ interface QuizItem {
 
 export const LearnPage: React.FC = () => {
   const { language } = useLanguageStore();
+  const { t, locale, voiceCode } = useLocaleStore();
   const speech = useSpeech();
 
   // Set page title
@@ -172,7 +175,7 @@ export const LearnPage: React.FC = () => {
             timestamp: 'Just now',
             snippet: `Scored ${finalScore} / 5 on signs quiz.`,
             language,
-            iconEmoji: '🎓',
+            iconEmoji: 'graduation',
             direction: 'sign_to_voice',
           },
           {
@@ -418,17 +421,27 @@ export const LearnPage: React.FC = () => {
                 >
                   <div className="flex items-start gap-3">
                     <div className="w-12 h-12 rounded-2xl bg-[#E9EEF7] flex items-center justify-center shrink-0 shadow-inner text-[#7C9CFF]">
-                      <HandMetal className="w-6 h-6" />
+                      <SignIcon gloss={sign.gloss} className="w-6 h-6" />
                     </div>
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base font-black text-[#2B2D42]">{sign.word}</span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-base font-black text-[#2B2D42]">
+                          {t(`signs.${sign.gloss}.word`) !== `signs.${sign.gloss}.word`
+                            ? t(`signs.${sign.gloss}.word`)
+                            : sign.word}
+                        </span>
+                        {t(`signs.${sign.gloss}.word`) !== `signs.${sign.gloss}.word` &&
+                          t(`signs.${sign.gloss}.word`) !== sign.word && (
+                            <span className="text-xs font-bold text-[#6E7387]">({sign.word})</span>
+                          )}
                         <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-[#6E7387]">
                           {sign.gloss}
                         </span>
                       </div>
                       <p className="text-xs font-medium text-[#6E7387] leading-relaxed">
-                        {sign.description}
+                        {t(`signs.${sign.gloss}.desc`) !== `signs.${sign.gloss}.desc`
+                          ? t(`signs.${sign.gloss}.desc`)
+                          : sign.description}
                       </p>
                     </div>
                   </div>

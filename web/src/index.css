@@ -24,7 +24,7 @@
   --clay-pressed: inset 4px 4px 8px rgba(150, 165, 195, 0.55), inset -4px -4px 8px rgba(255, 255, 255, 0.9);
   --clay-pressed-sm: inset 2px 2px 4px rgba(150, 165, 195, 0.45), inset -2px -2px 4px rgba(255, 255, 255, 0.9);
 
-  --clay-font: 'Nunito', system-ui, -apple-system, sans-serif;
+  --clay-font: 'Nunito', 'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans Tamil', 'Noto Sans Telugu', 'Noto Sans Gujarati', 'Noto Sans Kannada', 'Noto Sans Malayalam', 'Noto Sans Gurmukhi', 'Nirmala UI', system-ui, -apple-system, sans-serif;
 }
 
 body {

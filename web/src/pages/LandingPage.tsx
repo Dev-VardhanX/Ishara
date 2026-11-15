@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import { IsharaLogo } from '../components/IsharaLogo';
+import { LocaleSelector } from '../components/LocaleSelector';
 import {
   HandMetal,
   ArrowRight,
@@ -29,11 +31,8 @@ export const LandingPage: React.FC = () => {
       <header className="sticky top-0 z-50 bg-[#E9EEF7]/85 backdrop-blur-md border-b border-slate-200/50 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-3 clay-focus rounded-2xl group">
-            <div className="w-10 h-10 rounded-2xl bg-[#7C9CFF] flex items-center justify-center text-white shadow-clay-raised">
-              <HandMetal className="w-6 h-6 transform group-hover:scale-110 transition-transform" />
-            </div>
-            <span className="text-2xl font-black text-[#2B2D42] tracking-tight">Ishara</span>
+          <NavLink to="/" className="flex items-center clay-focus rounded-2xl group" aria-label="Ishara Home">
+            <IsharaLogo size="md" showWordmark={true} />
           </NavLink>
 
           {/* Center Links */}
@@ -57,6 +56,7 @@ export const LandingPage: React.FC = () => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
+            <LocaleSelector />
             <NavLink
               to="/login"
               className="px-5 py-2 rounded-clay font-black text-xs text-[#2B2D42] hover:bg-white/60 clay-focus transition-all"

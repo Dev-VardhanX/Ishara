@@ -11,18 +11,19 @@ export type SpeechEmotion = 'happy' | 'neutral' | 'sad' | 'angry' | 'surprised';
 
 export interface EmotionPreset {
   name: string;
-  emoji: string;
+  iconName: string;
+  emoji?: string;
   pitch: number;
   rate: number;
   volume: number;
 }
 
 export const SPEECH_EMOTIONS: Record<SpeechEmotion, EmotionPreset> = {
-  happy: { name: 'Happy', emoji: '😊', pitch: 1.2, rate: 1.1, volume: 1.0 },
-  neutral: { name: 'Neutral', emoji: '😐', pitch: 1.0, rate: 1.0, volume: 1.0 },
-  sad: { name: 'Sad', emoji: '😢', pitch: 0.8, rate: 0.85, volume: 1.0 },
-  angry: { name: 'Angry', emoji: '😠', pitch: 1.0, rate: 1.15, volume: 1.0 },
-  surprised: { name: 'Surprised', emoji: '😲', pitch: 1.3, rate: 1.1, volume: 1.0 },
+  happy: { name: 'Happy', iconName: 'smile', pitch: 1.2, rate: 1.1, volume: 1.0 },
+  neutral: { name: 'Neutral', iconName: 'minus', pitch: 1.0, rate: 1.0, volume: 1.0 },
+  sad: { name: 'Sad', iconName: 'frown', pitch: 0.8, rate: 0.85, volume: 1.0 },
+  angry: { name: 'Angry', iconName: 'alert-circle', pitch: 1.0, rate: 1.15, volume: 1.0 },
+  surprised: { name: 'Surprised', iconName: 'sparkles', pitch: 1.3, rate: 1.1, volume: 1.0 },
 };
 
 export interface SpeakOptions {
@@ -103,7 +104,6 @@ function updateVoices(): SpeechSynthesisVoice[] {
 
   const voices = window.speechSynthesis.getVoices() || [];
   cachedVoices = voices;
-  console.log('[Ishara Speech] Voice count: ' + cachedVoices.length);
 
   if (cachedVoices.length === 0) {
     // If voices are empty after initial load attempt, notify
@@ -146,50 +146,63 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Pick a voice matching the output language (default en-US / en-IN),
- * falling back to the first available voice.
+ * Strips all emoji characters, icons, and non-verbal punctuation symbols
+ * so text-to-speech engines never vocalize them aloud.
  */
-export function getBestVoice(targetLang: string = 'en-US'): SpeechSynthesisVoice | null {
+export function stripEmojisAndSymbols(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F1E0}-\u{1F1FF}\u{1F600}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
+    .replace(/[•_—*#]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Pick a voice matching the target language code, supporting all Indian languages:
+ * en-IN, hi-IN, bn-IN, mr-IN, ta-IN, te-IN, gu-IN, kn-IN, ml-IN, pa-IN.
+ * Falls back gracefully to English or available system voice.
+ */
+export function getBestVoice(targetLang: string = 'en-IN'): SpeechSynthesisVoice | null {
   if (cachedVoices.length === 0 && typeof window !== 'undefined' && 'speechSynthesis' in window) {
     updateVoices();
   }
 
   if (cachedVoices.length === 0) {
-    console.log('[Ishara Speech] Chosen voice: None');
     return null;
   }
 
   const normalized = targetLang.toLowerCase().replace('_', '-');
+  const langPrefix = normalized.split('-')[0];
 
-  // 1. Exact match with target lang (e.g., 'en-US' or 'en-IN')
+  // 1. Exact match with target lang (e.g., 'hi-in' or 'en-in')
   let match = cachedVoices.find(
     (v) => v.lang.toLowerCase().replace('_', '-') === normalized
   );
 
-  // 2. Secondary preferences: if en-US requested, check en-IN; if en-IN requested, check en-US
+  // 2. Language prefix match (e.g., any Hindi 'hi', Bengali 'bn', Tamil 'ta', etc.)
   if (!match) {
-    const alternates = normalized.includes('in')
-      ? ['en-in', 'en-gb', 'en-us']
-      : ['en-us', 'en-in', 'en-gb'];
-
-    for (const alt of alternates) {
-      match = cachedVoices.find((v) =>
-        v.lang.toLowerCase().replace('_', '-').startsWith(alt)
-      );
-      if (match) break;
-    }
+    match = cachedVoices.find((v) =>
+      v.lang.toLowerCase().replace('_', '-').startsWith(langPrefix)
+    );
   }
 
-  // 3. Any English voice if English is target
-  if (!match && normalized.startsWith('en')) {
+  // 3. Indian English fallback if an Indian voice was requested but missing on host OS
+  if (!match && normalized !== 'en-in' && !normalized.startsWith('en')) {
+    match = cachedVoices.find((v) =>
+      v.lang.toLowerCase().replace('_', '-').includes('en-in')
+    );
+  }
+
+  // 4. Any English voice
+  if (!match) {
     match = cachedVoices.find((v) =>
       v.lang.toLowerCase().startsWith('en')
     );
   }
 
-  // 4. Fall back to the first available voice
+  // 5. Fall back to the first available voice
   const chosen = match || cachedVoices[0] || null;
-  console.log('[Ishara Speech] Chosen voice: ' + (chosen ? `${chosen.name} (${chosen.lang})` : 'None'));
 
   return chosen;
 }
@@ -241,12 +254,17 @@ export function speak(text: string, options: SpeakOptions = {}): boolean {
       return false;
     }
 
-    // 4. Create SpeechSynthesisUtterance and store in module-level reference
-    const utterance = new SpeechSynthesisUtterance(text.trim());
+    // 4. Sanitize text so emojis and symbols are never spoken aloud
+    const cleanedText = stripEmojisAndSymbols(text);
+    if (!cleanedText) {
+      return false;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(cleanedText);
     currentUtterance = utterance;
 
     // Pick voice
-    const voice = getBestVoice(options.lang || 'en-US');
+    const voice = getBestVoice(options.lang || 'en-IN');
     if (voice) {
       utterance.voice = voice;
       utterance.lang = voice.lang;

@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { Sparkles, Hand, Play, Pause } from 'lucide-react';
+import React from 'react';
+import { Sparkles, HandMetal } from 'lucide-react';
+import { SignIcon } from './SignIcon';
+import { SIGN_VOCABULARY } from '../ml';
 
 interface AvatarStageProps {
   currentGloss: string | null;
@@ -7,88 +9,24 @@ interface AvatarStageProps {
   playing: boolean;
 }
 
-// Emoji gesture mapping for friendly visual representation
-const GLOSS_EMOJI_MAP: Record<string, string> = {
-  HELLO: '👋',
-  HOW: '🤔',
-  YOU: '👉',
-  YOUR: '👉',
-  NICE: '✨',
-  MEET: '🤝',
-  THANK_YOU: '🙏',
-  VERY: '🔥',
-  MUCH: '💯',
-  YES: '👍',
-  NO: '🙅',
-  PLEASE: '🤲',
-  SORRY: '🙇',
-  GOOD_MORNING: '🌅',
-  GOOD_AFTERNOON: '☀️',
-  GOOD_EVENING: '🌆',
-  GOOD_NIGHT: '🌙',
-  CAN: '💪',
-  HELP: '🆘',
-  HOW_ARE_YOU: '🤝',
-  NAME: '🏷️',
-  WELCOME: '🤗',
-  FRIEND: '🧑‍🤝‍🧑',
-  LOVE: '❤️',
-  FAMILY: '👨‍👩‍👧',
-  HOME: '🏡',
-  FOOD: '🍲',
-  WATER: '💧',
-  WHERE: '❓',
-  WHAT: '❓',
-  METRO: '🚇',
-  STATION: '🚉',
-  I: '🙋',
-  ME: '🙋',
-  MY: '🙋',
-  NEED: '🤲',
-  DOCTOR: '🩺',
-  HOSPITAL: '🏥',
-  STOP: '🛑',
-  TODAY: '📅',
-  UNDERSTAND: '💡',
-  LEARN: '📚',
-  SIGN: '🤟',
-  HAPPY: '😊',
-  SAD: '😢',
-};
-
 export const AvatarStage: React.FC<AvatarStageProps> = ({
   currentGloss,
   speed,
   playing,
 }) => {
-  const [bounce, setBounce] = useState(false);
+  const normalizedGloss = currentGloss
+    ? currentGloss.trim().toUpperCase().replace(/^(ISL_|ASL_)/, '')
+    : null;
 
-  // Trigger bounce animation whenever currentGloss changes
-  useEffect(() => {
-    if (currentGloss) {
-      setBounce(true);
-      const timer = setTimeout(() => setBounce(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [currentGloss]);
-
-  const activeEmoji = currentGloss
-    ? GLOSS_EMOJI_MAP[currentGloss] || (currentGloss.length === 1 ? '🔤' : '🤟')
-    : '🙋‍♀️';
+  const signDef = normalizedGloss ? SIGN_VOCABULARY[normalizedGloss] : null;
 
   return (
-    <div className="clay-card p-6 relative overflow-hidden bg-gradient-to-b from-[#C4B5FD]/30 via-[#E0E7FF]/40 to-[#E9EEF7] min-h-[460px] flex flex-col justify-between select-none">
-      {/* 
-        Replace the body with the Three.js VRM viewer later.
-        This viewport will host the 3D VRM cartoon avatar rendering canvas,
-        bone transforms for finger joints, and glTF animation clip sequencer.
-      */}
-
-      {/* Viewport Header Telemetry */}
+    <div className="clay-card p-6 relative overflow-hidden bg-gradient-to-b from-[#C4B5FD]/20 via-[#E0E7FF]/30 to-[#E9EEF7] min-h-[460px] flex flex-col justify-between select-none">
+      {/* Viewport Header */}
       <div className="flex items-center justify-between z-10">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border border-slate-200/60 text-xs font-black text-[#2B2D42] shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
-          <span>3D Avatar Stage</span>
+          <span>Visual Sign Gesture Stage</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-1"></span>
         </div>
 
@@ -99,32 +37,51 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
         </div>
       </div>
 
-      {/* Main Avatar Stage Visual with Emoji Hand & Gloss Display */}
-      <div className="flex flex-col items-center justify-center my-auto py-8 relative">
+      {/* Main Sign Visual: Clay Card with Icon and Gesture Description */}
+      <div className="flex flex-col items-center justify-center my-auto py-6 relative z-10 space-y-5">
         {/* Soft radial glow */}
-        <div className="absolute w-64 h-64 rounded-full bg-gradient-to-tr from-[#7C9CFF]/20 via-[#D4A5FF]/20 to-[#FFB59E]/20 blur-2xl pointer-events-none"></div>
+        <div className="absolute w-72 h-72 rounded-full bg-gradient-to-tr from-[#7C9CFF]/20 via-[#D4A5FF]/20 to-[#FFB59E]/20 blur-3xl pointer-events-none"></div>
 
-        {/* Big Emoji Hand Card with Bounce Animation */}
-        <div
-          className={`w-44 h-44 rounded-full bg-gradient-to-tr from-[#7C9CFF]/30 via-[#D4A5FF]/30 to-[#FFB59E]/30 flex items-center justify-center text-7xl shadow-clay-raised border-4 border-white/80 transition-transform duration-300 ${bounce ? 'scale-110 -translate-y-2' : 'scale-100'
-            }`}
-        >
-          <span className={bounce ? 'animate-bounce' : ''}>
-            {activeEmoji}
-          </span>
+        {/* Tactile Clay Sign Card */}
+        <div className="w-40 h-40 rounded-[28px] bg-white/90 backdrop-blur flex items-center justify-center shadow-clay-raised border-2 border-white/80 transition-all duration-300">
+          {normalizedGloss ? (
+            <div className="w-20 h-20 rounded-2xl bg-[#E9EEF7] flex items-center justify-center text-[#7C9CFF] shadow-inner">
+              <SignIcon gloss={normalizedGloss} className="w-12 h-12" />
+            </div>
+          ) : (
+            <div className="w-20 h-20 rounded-2xl bg-[#E9EEF7] flex items-center justify-center text-[#6E7387] shadow-inner">
+              <HandMetal className="w-12 h-12" />
+            </div>
+          )}
         </div>
 
-        {/* Current Gloss in Large Text */}
-        <div className="mt-6 text-center z-10 space-y-1">
+        {/* Current Gloss ID & Word */}
+        <div className="text-center space-y-1.5 max-w-md px-4">
           <p className="text-[10px] font-black uppercase text-[#6E7387] tracking-widest">
-            Target Gloss ID
+            {normalizedGloss ? 'Active Sign Gloss' : 'Rest Position'}
           </p>
           <div className="inline-block px-5 py-2 rounded-2xl bg-white/90 backdrop-blur shadow-clay-raised-sm border border-slate-100">
             <h2 className="text-2xl sm:text-3xl font-black text-[#2B2D42] tracking-tight">
-              {currentGloss ? currentGloss : '(REST POSE)'}
+              {normalizedGloss ? normalizedGloss : 'NEUTRAL_REST'}
             </h2>
           </div>
+
+          {/* Gesture Kinematics & Execution Guide */}
+          <p className="text-xs font-semibold text-[#6E7387] pt-1">
+            {signDef?.description ||
+              (normalizedGloss
+                ? `Perform gesture for sign "${normalizedGloss}".`
+                : 'Avatar hands in neutral resting pose awaiting input.')}
+          </p>
         </div>
+      </div>
+
+      {/* Footer Info */}
+      <div className="z-10 flex items-center justify-between text-[11px] font-semibold text-[#6E7387] border-t border-slate-200/50 pt-3">
+        <span>Handshape & Kinematics Sync</span>
+        <span className="font-mono text-[10px] text-[#7C9CFF]">
+          {signDef?.twoHanded ? '2-Handed Gesture' : '1-Handed Gesture'}
+        </span>
       </div>
     </div>
   );
