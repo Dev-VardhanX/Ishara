@@ -4,7 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/AppLayout';
-import { HandMetal } from 'lucide-react';
+import { IsharaLogo } from './components/IsharaLogo';
 
 // Code-split pages so Three.js, MediaPipe, etc. load only when visited
 const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
@@ -17,15 +17,13 @@ const HistoryPage = lazy(() => import('./pages/HistoryPage').then((m) => ({ defa
 const DevPosePage = lazy(() => import('./pages/DevPosePage').then((m) => ({ default: m.DevPosePage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
+const EmergencyPage = lazy(() => import('./pages/EmergencyPage').then((m) => ({ default: m.EmergencyPage })));
 
 // Accessible, claymorphic loading skeleton during dynamic route import
 const PageFallback: React.FC = () => (
   <div className="min-h-screen bg-[#E9EEF7] flex items-center justify-center p-6 select-none" role="status" aria-label="Loading page">
     <div className="clay-card p-8 flex flex-col items-center gap-3.5 bg-[#E9EEF7] border border-white/60">
-      <div className="w-12 h-12 rounded-2xl bg-[#7C9CFF] flex items-center justify-center text-white shadow-clay-raised">
-        <HandMetal className="w-6 h-6 animate-pulse" />
-      </div>
-      <span className="text-xs font-black text-[#2B2D42] tracking-wider uppercase">Loading Ishara...</span>
+      <IsharaLogo size="lg" animate={true} showWordmark={true} />
     </div>
   </div>
 );
@@ -41,6 +39,11 @@ export const App: React.FC = () => {
             {/* Public Unauthenticated Views */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+
+            {/* Emergency Mode: Reachable without login (guest mode) and offline */}
+            <Route element={<AppLayout />}>
+              <Route path="/emergency" element={<EmergencyPage />} />
+            </Route>
 
             {/* Protected App Routes Wrapped in App Shell Layout */}
             <Route element={<ProtectedRoute />}>

@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { AvatarStage } from '../components/AvatarStage';
 import { useLanguageStore } from '../store/useLanguageStore';
-import { parseTextToGlosses, GlossToken } from '../lib/textToGloss';
+import { useLocaleStore } from '../store/useLocaleStore';
+import { parseTextToGlosses, getTextToGlossDetails, GlossToken, TextToGlossDetails } from '../lib/textToGloss';
 import { addRecentConversation } from '../data/store';
 import { useSpeech } from '../lib/speech';
 import {
@@ -23,16 +24,30 @@ import {
 
 export const VoiceToSignPage: React.FC = () => {
   const { language } = useLanguageStore();
+  const { t, locale, voiceCode } = useLocaleStore();
   const speech = useSpeech();
 
 
   // State
   const defaultSentence = 'Hello, how are you today?';
   const [inputText, setInputText] = useState(defaultSentence);
-  const [tokens, setTokens] = useState<GlossToken[]>(() => parseTextToGlosses(defaultSentence));
+  const [parseDetails, setParseDetails] = useState<TextToGlossDetails>(() =>
+    getTextToGlossDetails(defaultSentence, language)
+  );
+  const [tokens, setTokens] = useState<GlossToken[]>(() => parseDetails.tokens);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(1.0);
   const [playing, setPlaying] = useState<boolean>(false);
+
+  // Sync parsing when language changes
+  useEffect(() => {
+    if (inputText.trim()) {
+      const details = getTextToGlossDetails(inputText.trim(), language);
+      setParseDetails(details);
+      setTokens(details.tokens);
+      setCurrentIndex(0);
+    }
+  }, [language]);
 
   // Web Speech API state
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -52,8 +67,9 @@ export const VoiceToSignPage: React.FC = () => {
     if (e) e.preventDefault();
     if (!inputText.trim()) return;
 
-    const parsed = parseTextToGlosses(inputText.trim());
-    setTokens(parsed);
+    const details = getTextToGlossDetails(inputText.trim(), language);
+    setParseDetails(details);
+    setTokens(details.tokens);
     setCurrentIndex(0);
     setPlaying(true);
 
@@ -66,13 +82,13 @@ export const VoiceToSignPage: React.FC = () => {
           timestamp: 'Just now',
           snippet: inputText.trim(),
           language,
-          iconEmoji: '🗣️',
+          iconEmoji: 'voice',
           direction: 'voice_to_sign',
         },
         {
           direction: 'voice_to_sign',
           text: inputText.trim(),
-          translatedText: parsed.map((t) => t.gloss).join(' '),
+          translatedText: details.tokens.map((t) => t.gloss).join(' '),
           emotion: 'neutral',
         }
       );
@@ -157,7 +173,7 @@ export const VoiceToSignPage: React.FC = () => {
           timestamp: 'Just now',
           snippet: sentence,
           language,
-          iconEmoji: '🗣️',
+          iconEmoji: 'voice',
           direction: 'voice_to_sign',
         },
         {
@@ -196,7 +212,7 @@ export const VoiceToSignPage: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = language === 'ISL' ? 'en-IN' : 'en-US';
+      recognition.lang = voiceCode;
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -240,12 +256,12 @@ export const VoiceToSignPage: React.FC = () => {
         subtitle="Translate spoken voice or typed text into 3D avatar sign gestures"
       />
 
-      {/* Speech Output Voice Error Banner */}
+      {/* Gentle Speech Output Voice Hint */}
       {speech.errorMessage && (
-        <div className="p-4 rounded-2xl bg-[#FFE8E2] border border-[#FF8A8A]/50 text-[#2B2D42] flex items-center justify-between shadow-sm animate-fade-in">
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 text-[#FF8A8A] shrink-0" />
-            <p className="text-xs font-bold">{speech.errorMessage}</p>
+        <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/80 text-[#6E7387] text-xs font-semibold flex items-center justify-between shadow-sm animate-fade-in">
+          <div className="flex items-center gap-2">
+            <Volume2 className="w-3.5 h-3.5 text-[#6E7387] shrink-0" />
+            <p>Voice output unavailable in this browser. Avatar signing and text conversion continue working normally.</p>
           </div>
           <button
             type="button"
@@ -287,6 +303,33 @@ export const VoiceToSignPage: React.FC = () => {
             ))}
           </div>
         </div>
+
+        {/* ISL Word Order Conversion Telemetry */}
+        {language === 'ISL' && parseDetails.islOrderText && (
+          <div className="p-3.5 rounded-2xl bg-white/70 border border-slate-200/70 shadow-sm space-y-1.5 text-xs animate-fade-in">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-[#6E7387] uppercase text-[10px] tracking-wider shrink-0">
+                  English word order:
+                </span>
+                <span className="font-semibold text-[#2B2D42]">
+                  {parseDetails.englishOrderText || '(none)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-black text-[#7C9CFF] uppercase text-[10px] tracking-wider shrink-0">
+                  ISL word order:
+                </span>
+                <span className="font-black text-[#2B2D42]">
+                  {parseDetails.islOrderText}
+                </span>
+              </div>
+            </div>
+            <p className="text-[10px] text-[#6E7387] italic">
+              Rules reviewed against ISL grammar; to be validated with ISL teachers.
+            </p>
+          </div>
+        )}
 
         {/* AvatarStage Component */}
         <div className="relative">

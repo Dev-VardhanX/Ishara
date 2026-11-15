@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
 import { useLanguageStore } from '../store/useLanguageStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 import {
   HAND_CONNECTIONS,
   Landmark,
@@ -16,9 +17,10 @@ import {
   SIGN_VOCABULARY,
   SentenceTranslationResult,
   AlternativeCandidate,
+  buildSentenceFromGlosses,
 } from '../ml';
 import { addRecentConversation } from '../data/store';
-import { useSpeech, SpeechEmotion, SPEECH_EMOTIONS, recordUserInteraction } from '../lib/speech';
+import { useSpeech, SpeechEmotion, recordUserInteraction } from '../lib/speech';
 import {
   Video,
   Play,
@@ -37,15 +39,18 @@ import {
   ExternalLink,
   ChevronDown,
   VolumeX,
+  User,
+  Smile,
+  Minus,
+  Frown,
 } from 'lucide-react';
 
 // Emotion presets matching docs/contracts/model-contract.md
 export type EmotionType = SpeechEmotion;
 
-
 interface EmotionPreset {
   name: string;
-  emoji: string;
+  icon: React.ComponentType<{ className?: string }>;
   pitch: number;
   rate: number;
   volume: number;
@@ -54,15 +59,16 @@ interface EmotionPreset {
 }
 
 const EMOTION_PRESETS: Record<EmotionType, EmotionPreset> = {
-  happy: { name: 'Happy', emoji: '😊', pitch: 1.2, rate: 1.1, volume: 1.0, bgClass: 'bg-[#FFE8E2]', textClass: 'text-[#FF8A8A]' },
-  neutral: { name: 'Neutral', emoji: '😐', pitch: 1.0, rate: 1.0, volume: 1.0, bgClass: 'bg-slate-100', textClass: 'text-[#6E7387]' },
-  sad: { name: 'Sad', emoji: '😢', pitch: 0.8, rate: 0.85, volume: 0.8, bgClass: 'bg-blue-100', textClass: 'text-[#7C9CFF]' },
-  angry: { name: 'Angry', emoji: '😠', pitch: 1.0, rate: 1.15, volume: 1.0, bgClass: 'bg-red-100', textClass: 'text-red-600' },
-  surprised: { name: 'Surprised', emoji: '😲', pitch: 1.3, rate: 1.1, volume: 1.0, bgClass: 'bg-amber-100', textClass: 'text-amber-600' },
+  happy: { name: 'Happy', icon: Smile, pitch: 1.2, rate: 1.1, volume: 1.0, bgClass: 'bg-[#FFE8E2]', textClass: 'text-[#FF8A8A]' },
+  neutral: { name: 'Neutral', icon: Minus, pitch: 1.0, rate: 1.0, volume: 1.0, bgClass: 'bg-slate-100', textClass: 'text-[#6E7387]' },
+  sad: { name: 'Sad', icon: Frown, pitch: 0.8, rate: 0.85, volume: 0.8, bgClass: 'bg-blue-100', textClass: 'text-[#7C9CFF]' },
+  angry: { name: 'Serious', icon: AlertCircle, pitch: 1.0, rate: 1.15, volume: 1.0, bgClass: 'bg-red-100', textClass: 'text-red-600' },
+  surprised: { name: 'Expressive', icon: Sparkles, pitch: 1.3, rate: 1.1, volume: 1.0, bgClass: 'bg-amber-100', textClass: 'text-amber-600' },
 };
 
 export const SignToVoicePage: React.FC = () => {
   const { language } = useLanguageStore();
+  const { t, locale, voiceCode } = useLocaleStore();
 
   // Video & Canvas references
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -281,7 +287,7 @@ export const SignToVoicePage: React.FC = () => {
         if (autoSpeak && confidence >= 0.85) {
           speech.speak(text, {
             emotion: currentEmotion,
-            lang: language === 'ISL' ? 'en-IN' : 'en-US',
+            lang: voiceCode,
             isAutoSpeak: true,
           });
         }
@@ -290,7 +296,10 @@ export const SignToVoicePage: React.FC = () => {
         setAcceptedWords(words);
         setRawGlosses(translation?.rawGlosses || []);
         setDistinctGlosses(translation?.distinctGlosses || []);
-        const finalSentence = translation?.naturalSentence || fullText;
+        const finalSentence =
+          translation?.rawGlosses && translation.rawGlosses.length > 0
+            ? buildSentenceFromGlosses(translation.rawGlosses, language, locale).naturalSentence
+            : translation?.naturalSentence || fullText;
         setNaturalSentence(finalSentence);
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -309,7 +318,7 @@ export const SignToVoicePage: React.FC = () => {
               timestamp: 'Just now',
               snippet: finalSentence,
               language,
-              iconEmoji: '🤟',
+              iconEmoji: 'sign',
               direction: 'sign_to_voice',
             },
             {
@@ -372,7 +381,7 @@ export const SignToVoicePage: React.FC = () => {
     recordUserInteraction();
     speech.speak(translatedSentence, {
       emotion: currentEmotion,
-      lang: language === 'ISL' ? 'en-IN' : 'en-US',
+      lang: voiceCode,
       isUserClick: true,
     });
   };
@@ -403,7 +412,7 @@ export const SignToVoicePage: React.FC = () => {
         timestamp: 'Just now',
         snippet: translatedSentence,
         language,
-        iconEmoji: '🤟',
+        iconEmoji: 'sign',
       });
     } catch (err) {
       console.warn('Failed to save to history', err);
@@ -430,10 +439,10 @@ export const SignToVoicePage: React.FC = () => {
         subtitle="Real-time in-browser sign language classification into speech and subtitles"
         badge={
           <Badge
-            tooltip={`Real-time ${language} 43-sign geometric & kinematic recognition with natural sentence formation.`}
+            tooltip={`Real-time ${language} 20-sign geometric & kinematic recognition with natural sentence formation.`}
             variant="blue"
           >
-            {language} • 43 Signs
+            {language} • 20 Signs
           </Badge>
         }
       />
@@ -600,14 +609,14 @@ export const SignToVoicePage: React.FC = () => {
               {/* Offline / Frame Guide Overlay */}
               {!cameraActive && (
                 <div className="w-56 h-64 border-2 border-dashed border-white/30 rounded-[32px] flex flex-col items-center justify-center p-5 text-center bg-black/20 backdrop-blur-sm">
-                  <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-4xl mb-3 shadow-inner">
-                    👤
+                  <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center text-white/80 mb-3 shadow-inner">
+                    <User className="w-10 h-10" />
                   </div>
                   <p className="text-xs font-black text-white/90">
-                    Frame your hands and upper body
+                    {t('signToVoice.cameraGuide')}
                   </p>
                   <p className="text-[10px] text-white/60 mt-1">
-                    Hold gesture for 8 frames to classify
+                    {t('signToVoice.holdFramesNote')}
                   </p>
                   <button
                     type="button"
@@ -739,22 +748,34 @@ export const SignToVoicePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Emotion Chip Selector */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-black uppercase text-[#6E7387]">Emotion:</span>
-                <div className="relative inline-block">
-                  <select
-                    value={currentEmotion}
-                    onChange={(e) => setCurrentEmotion(e.target.value as EmotionType)}
-                    className="clay-input text-xs font-black py-1.5 pl-3 pr-7 rounded-full cursor-pointer appearance-none bg-white/80"
-                  >
-                    {Object.entries(EMOTION_PRESETS).map(([key, val]) => (
-                      <option key={key} value={key}>
-                        {val.emoji} {val.name}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="w-3.5 h-3.5 text-[#6E7387] absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              {/* Emotion Selector: Colored Clay Chips with Text Labels & Icons */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[10px] font-black uppercase text-[#6E7387]">
+                  {t('signToVoice.emotionLabel')}:
+                </span>
+                <div className="flex items-center gap-1">
+                  {(Object.keys(EMOTION_PRESETS) as EmotionType[]).map((emoKey) => {
+                    const preset = EMOTION_PRESETS[emoKey];
+                    const isSelected = currentEmotion === emoKey;
+                    const IconComp = preset.icon;
+                    return (
+                      <button
+                        key={emoKey}
+                        type="button"
+                        onClick={() => setCurrentEmotion(emoKey)}
+                        className={`px-2.5 py-1 rounded-xl text-xs font-black transition-all flex items-center gap-1 clay-focus ${
+                          isSelected
+                            ? `${preset.bgClass} ${preset.textClass} shadow-clay-raised-sm ring-1 ring-black/10`
+                            : 'bg-white/70 text-[#6E7387] hover:bg-white'
+                        }`}
+                        title={preset.name}
+                        aria-label={`Select ${preset.name} emotion`}
+                      >
+                        <IconComp className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">{preset.name}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -865,17 +886,17 @@ export const SignToVoicePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Visible Voice Error Banner */}
+            {/* Gentle One-Line Voice Hint when voice synthesis is unavailable */}
             {speech.errorMessage && (
-              <div className="p-3.5 rounded-2xl bg-[#FFE8E2] border border-[#FFB59E] text-[#2B2D42] text-xs font-bold flex items-center justify-between gap-3 shadow-sm animate-fadeIn">
+              <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/80 text-[#6E7387] text-xs font-semibold flex items-center justify-between gap-3 shadow-sm animate-fadeIn">
                 <div className="flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-[#FF8A8A] shrink-0" />
-                  <span>{speech.errorMessage}</span>
+                  <VolumeX className="w-3.5 h-3.5 text-[#6E7387] shrink-0" />
+                  <span>Voice synthesis unavailable on this device. Subtitles and live text translation continue working normally.</span>
                 </div>
                 <button
                   type="button"
                   onClick={speech.clearError}
-                  className="text-[#FF8A8A] hover:underline font-black text-xs shrink-0"
+                  className="text-[#7C9CFF] hover:underline font-bold text-xs shrink-0"
                 >
                   Dismiss
                 </button>
@@ -920,9 +941,10 @@ export const SignToVoicePage: React.FC = () => {
             <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-[#6E7387]">
                 <span>Voice Output ({speech.voiceCount > 0 ? `${speech.voiceCount} voices ready` : selectedVoice})</span>
-                <span className="text-[#FF8A8A] font-extrabold flex items-center gap-1">
-                  <span>{EMOTION_PRESETS[currentEmotion].emoji}</span>
-                  <span>Pitch {EMOTION_PRESETS[currentEmotion].pitch}x</span>
+                <span className="text-[#FF8A8A] font-extrabold flex items-center gap-1.5">
+                  {React.createElement(EMOTION_PRESETS[currentEmotion].icon, { className: 'w-3.5 h-3.5' })}
+                  <span>{EMOTION_PRESETS[currentEmotion].name}</span>
+                  <span className="text-[#6E7387] font-semibold text-[10px]">• Pitch {EMOTION_PRESETS[currentEmotion].pitch}x</span>
                 </span>
               </div>
 

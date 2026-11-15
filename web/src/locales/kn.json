@@ -1,0 +1,232 @@
+{
+  "_note": "Needs review by a native speaker.",
+  "_meta": {
+    "language": "Kannada",
+    "nativeName": "ಕನ್ನಡ",
+    "code": "kn",
+    "voiceCode": "kn-IN"
+  },
+  "nav": {
+    "dashboard": "ಕನ್ನಡ Dashboard",
+    "signToVoice": "Sign to Voice",
+    "voiceToSign": "Voice to Sign",
+    "learn": "Learn Sign",
+    "history": "History",
+    "emergency": "Emergency SOS",
+    "dev": "Dev Pose / Rig",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "login": "Log In"
+  },
+  "header": {
+    "offlineReady": "Offline Ready",
+    "online": "Online",
+    "offline": "Offline",
+    "emergencySos": "Emergency SOS",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Welcome,",
+    "subtitle": "Track your sign language practice daily.",
+    "practiceStreak": "Practice Streak",
+    "currentStreak": "Current Streak",
+    "days": "Days",
+    "dailyGoal": "Daily Goal",
+    "quickActions": "Quick Actions",
+    "startTranslating": "Start Translating",
+    "learnSigns": "Learn Daily Signs",
+    "sosEmergency": "Emergency Assistance",
+    "recentConversations": "Recent Translations",
+    "viewAllHistory": "View All",
+    "level": "Level",
+    "xp": "XP"
+  },
+  "signToVoice": {
+    "title": "Sign to Voice Translator (ಕನ್ನಡ)",
+    "subtitle": "Real-time gesture tracking and speech output.",
+    "startCamera": "Start Camera",
+    "stopCamera": "Stop Camera",
+    "cameraGuide": "Frame hands and upper body",
+    "holdFramesNote": "Hold gesture for 8 frames to classify",
+    "emotionLabel": "Emotion",
+    "speechSpeed": "Speech Speed",
+    "holdStability": "Hold Stability",
+    "liveSentence": "Live Sentence Builder",
+    "speakSentence": "Speak Sentence",
+    "clearSentence": "Clear",
+    "waitingGesture": "Waiting for gesture...",
+    "similarGlosses": "Similar Glosses",
+    "noVoiceHint": "Voice unavailable on this device; text updates normally.",
+    "signsBadge": "Signs"
+  },
+  "voiceToSign": {
+    "title": "Voice to Sign Translator (ಕನ್ನಡ)",
+    "subtitle": "Speak or type in ಕನ್ನಡ to view sign sequences.",
+    "inputPlaceholder": "Type or speak in ಕನ್ನಡ...",
+    "signIt": "Sign It",
+    "listening": "Listening...",
+    "startVoice": "Voice Input",
+    "speechUnsupported": "Speech recognition not supported in browser. Please type.",
+    "speed": "Playback Speed",
+    "grammarOrder": "Grammar Order Comparison",
+    "englishOrder": "English word order",
+    "islOrder": "ISL word order",
+    "teacherNote": "Rules reviewed against ISL grammar; to be validated with teachers.",
+    "notInVocabYet": "not in vocabulary yet",
+    "practiceThisSign": "Practice"
+  },
+  "learn": {
+    "title": "Learn Sign Language (ಕನ್ನಡ)",
+    "subtitle": "Master signs through daily lessons.",
+    "continueWhereLeft": "Continue learning",
+    "overall": "Overall",
+    "courseCategories": "Course Categories",
+    "takeQuiz": "Take Lesson Quiz",
+    "signsInLesson": "Signs in this lesson",
+    "listen": "Listen",
+    "practice": "Practice Gesture",
+    "quizTitle": "Lesson Quiz",
+    "question": "Question",
+    "of": "of",
+    "score": "Score",
+    "listenQuestion": "Listen Question",
+    "nextQuestion": "Next Question",
+    "viewResults": "View Results",
+    "quizComplete": "Quiz Complete!",
+    "outstanding": "Outstanding work!",
+    "keepPracticing": "Keep practicing!"
+  },
+  "emergency": {
+    "title": "Emergency Assistance & SOS",
+    "subtitle": "One-tap siren, location share and spoken help phrases.",
+    "sirenBtn": "TAP FOR SIREN & BEACON",
+    "sirenActive": "EMERGENCY ALERT ACTIVE",
+    "stopSiren": "STOP SIREN & BEACON",
+    "turnVolumeUp": "Turn phone volume to maximum",
+    "locationBtn": "Share Live Location",
+    "locating": "Finding Location...",
+    "call112": "Helper: Call 112",
+    "call112Sub": "Police / Ambulance / Fire",
+    "helpCards": "Immediate Help Cards",
+    "helpCardsSub": "Tap card to broadcast full-screen and speak aloud.",
+    "tapToBroadcast": "Tap to Broadcast Fullscreen",
+    "tapToSpeak": "Tap to Speak",
+    "dismiss": "DISMISS SCREEN",
+    "privacyTitle": "Privacy & Data Protection",
+    "privacyDesc": "Emergency mode runs 100% locally. Zero telemetry.",
+    "screenNotice": "Please read screen carefully. User cannot hear or speak.",
+    "phrases": {
+      "help": "ಸಹಾಯ",
+      "police": "Please call police",
+      "not_safe": "I am not safe, please stay with me",
+      "medical": "I need a doctor / ambulance",
+      "communication": "I cannot hear or speak, please read screen",
+      "family": "Please call my family"
+    }
+  },
+  "settings": {
+    "title": "App Settings",
+    "subtitle": "Configure language and speech preferences.",
+    "interfaceLanguage": "Interface & Voice Language",
+    "interfaceLanguageDesc": "Choose display and speech language.",
+    "signLanguage": "Sign Language Vocabulary",
+    "signLanguageDesc": "Toggle between ISL and ASL.",
+    "voiceSettings": "Voice Settings",
+    "autoSpeak": "Auto-speak detected sentences",
+    "speechRate": "Speech Rate",
+    "storage": "Offline Storage",
+    "offlineReadyDesc": "Cached for offline operation.",
+    "clearCache": "Clear Cache"
+  },
+  "history": {
+    "title": "Conversation History",
+    "subtitle": "Review your past translations.",
+    "clearHistory": "Clear History",
+    "noHistory": "No history found.",
+    "exportCsv": "Export CSV",
+    "exportJson": "Export JSON",
+    "searchPlaceholder": "Search history..."
+  },
+  "signs": {
+    "HELLO": {
+      "word": "ನಮಸ್ಕಾರ",
+      "desc": "Temple salute gesture"
+    },
+    "THANK_YOU": {
+      "word": "ಧನ್ಯವಾದಗಳು",
+      "desc": "Chin outward gesture"
+    },
+    "PLEASE": {
+      "word": "ದಯವಿಟ್ಟು",
+      "desc": "Namaste folded palms gesture"
+    },
+    "SORRY": {
+      "word": "Sorry",
+      "desc": "Fist circular chest gesture"
+    },
+    "GOODBYE": {
+      "word": "Goodbye",
+      "desc": "Waving hand gesture"
+    },
+    "HOW_ARE_YOU": {
+      "word": "How Are You",
+      "desc": "Cupped palms rotating outward"
+    },
+    "YES": {
+      "word": "ಹೌದು",
+      "desc": "Nodding fist gesture"
+    },
+    "NO": {
+      "word": "ಇಲ್ಲ",
+      "desc": "Wagging index gesture"
+    },
+    "GOOD": {
+      "word": "Good",
+      "desc": "Thumbs up gesture"
+    },
+    "BAD": {
+      "word": "Bad",
+      "desc": "Thumbs down gesture"
+    },
+    "HELP": {
+      "word": "ಸಹಾಯ",
+      "desc": "Fist on palm lifting upward"
+    },
+    "STOP": {
+      "word": "Stop",
+      "desc": "Palm barrier gesture"
+    },
+    "EAT": {
+      "word": "Eat",
+      "desc": "Fingertips to mouth gesture"
+    },
+    "DRINK": {
+      "word": "Drink",
+      "desc": "Cup tilted to mouth gesture"
+    },
+    "WATER": {
+      "word": "Water",
+      "desc": "Water gesture near mouth"
+    },
+    "FOOD": {
+      "word": "Food",
+      "desc": "Food gesture tapping mouth"
+    },
+    "HOME": {
+      "word": "Home",
+      "desc": "Roof gable gesture"
+    },
+    "FRIEND": {
+      "word": "Friend",
+      "desc": "Clasped hands gesture"
+    },
+    "NAME": {
+      "word": "Name",
+      "desc": "Fingers tapping chest gesture"
+    },
+    "LOVE": {
+      "word": "Love",
+      "desc": "Crossed wrists over chest"
+    }
+  }
+}

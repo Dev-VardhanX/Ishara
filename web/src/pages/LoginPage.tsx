@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { IsharaLogo } from '../components/IsharaLogo';
+import { LocaleSelector } from '../components/LocaleSelector';
 import {
   HandMetal,
   Mail,
@@ -149,15 +151,14 @@ export const LoginPage: React.FC = () => {
         {/* Right Side: Auth Form Panel */}
         <div className="md:col-span-7 p-8 lg:p-12 flex flex-col justify-center bg-[#E9EEF7]">
           {/* Brand header */}
-          <div className="flex items-center justify-between mb-6">
-            <NavLink to="/" className="flex items-center gap-2.5 clay-focus rounded-xl">
-              <div className="w-9 h-9 rounded-xl bg-[#7C9CFF] flex items-center justify-center text-white shadow-clay-raised-sm">
-                <HandMetal className="w-5 h-5" />
-              </div>
-              <span className="font-extrabold text-xl text-[#2B2D42] tracking-tight">Ishara</span>
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+            <NavLink to="/" className="flex items-center clay-focus rounded-xl" aria-label="Ishara Home">
+              <IsharaLogo size="sm" showWordmark={true} />
             </NavLink>
 
-            {/* Backend mode pill */}
+            <div className="flex items-center gap-2">
+              <LocaleSelector />
+              {/* Backend mode pill */}
             <div
               className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1.5 ${
                 isConfigured
@@ -178,6 +179,7 @@ export const LoginPage: React.FC = () => {
               <span>{isConfigured ? 'Supabase Auth' : 'Demo Mock Auth'}</span>
             </div>
           </div>
+        </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-[#2B2D42] tracking-tight">
             {isSignUp ? 'Create an Account' : 'Sign In'}

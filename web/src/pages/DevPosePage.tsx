@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Header } from '../components/Header';
-import { Activity, Play, RefreshCw, Cpu, Box, Database, Shield } from 'lucide-react';
+import { Activity, Cpu, Box, Bot, CheckCircle2 } from 'lucide-react';
 
 export const DevPosePage: React.FC = () => {
   const [modelStatus, setModelStatus] = useState<'idle' | 'ready' | 'running'>('ready');
-  const [landmarksCount, setLandmarksCount] = useState(75);
-  const [fps, setFps] = useState(30);
+  const [landmarksCount] = useState(75);
+  const [fps] = useState(30);
 
   return (
     <div className="space-y-6">
@@ -48,8 +48,9 @@ export const DevPosePage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setModelStatus(modelStatus === 'running' ? 'ready' : 'running')}
-                className={`clay-button w-full py-2.5 text-xs font-black flex items-center justify-center gap-2 ${modelStatus === 'running' ? 'clay-button-coral' : ''
-                  }`}
+                className={`clay-button w-full py-2.5 text-xs font-black flex items-center justify-center gap-2 ${
+                  modelStatus === 'running' ? 'clay-button-coral' : ''
+                }`}
               >
                 <Activity className="w-4 h-4" />
                 <span>{modelStatus === 'running' ? 'Stop Pose Stream' : 'Run Live Landmark Stream'}</span>
@@ -66,7 +67,10 @@ export const DevPosePage: React.FC = () => {
               Rig format: VRM 1.0 / glTF 2.0 with complete humanoid finger skeleton.
             </p>
             <div className="p-3 rounded-xl bg-white/60 text-xs font-mono text-[#2B2D42] space-y-1">
-              <div>Default Rest Pose: ✅ Verified</div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Default Rest Pose: Verified</span>
+              </div>
               <div>Root Translation: Locked [0, 0, 0]</div>
               <div>Finger Bones: 14 per hand</div>
             </div>
@@ -92,8 +96,8 @@ export const DevPosePage: React.FC = () => {
 
               <div className="relative text-center text-white space-y-3">
                 <div className="w-24 h-24 rounded-full border-2 border-[#7C9CFF] mx-auto flex items-center justify-center shadow-[0_0_15px_rgba(124,156,255,0.4)]">
-                  <div className="w-16 h-16 rounded-full border border-dashed border-[#FF8A8A] flex items-center justify-center text-2xl">
-                    🤖
+                  <div className="w-16 h-16 rounded-full border border-dashed border-[#FF8A8A] flex items-center justify-center">
+                    <Bot className="w-8 h-8 text-[#FF8A8A]" />
                   </div>
                 </div>
                 <div>

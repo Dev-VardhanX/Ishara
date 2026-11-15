@@ -1,0 +1,24 @@
+{
+  "short_name": "Ishara",
+  "name": "Ishara — Two-Way Sign Language Translator",
+  "description": "Real-time sign language translation and learning for Indian & American Sign Languages.",
+  "icons": [
+    {
+      "src": "/icons/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#E9EEF7",
+  "theme_color": "#7C9CFF",
+  "display": "standalone",
+  "orientation": "portrait"
+}

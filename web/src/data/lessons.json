@@ -11,32 +11,27 @@
         {
           "gloss": "HELLO",
           "word": "Hello",
-          "description": "Raise dominant hand to forehead temple, touch lightly, and extend outward in a smooth waving motion.",
-          "emoji": "👋"
+          "description": "Raise dominant hand to forehead temple, touch lightly, and extend outward in a smooth waving motion."
         },
         {
           "gloss": "THANK_YOU",
           "word": "Thank You",
-          "description": "Touch fingers of flat hand to chin or lips, then extend palm forward towards the other person.",
-          "emoji": "🙏"
+          "description": "Touch fingers of flat hand to chin or lips, then extend palm forward towards the other person."
         },
         {
           "gloss": "PLEASE",
           "word": "Please",
-          "description": "Two hands pressed together in front of the chest in a Namaste gesture.",
-          "emoji": "🤲"
+          "description": "Two hands pressed together in front of the chest in a Namaste gesture."
         },
         {
           "gloss": "GOODBYE",
           "word": "Goodbye",
-          "description": "Open hand facing forward waving horizontally side-to-side.",
-          "emoji": "👋"
+          "description": "Open hand facing forward waving horizontally side-to-side."
         },
         {
           "gloss": "HOW_ARE_YOU",
           "word": "How Are You",
-          "description": "Point fingers inward toward chest then rotate outward with questioning open palms.",
-          "emoji": "🤝"
+          "description": "Point fingers inward toward chest then rotate outward with questioning open palms."
         }
       ],
       "quiz": [
@@ -44,35 +39,60 @@
           "id": "q1",
           "question": "Which sign represents an open hand starting at the temple extending outward?",
           "gloss": "HELLO",
-          "options": ["HELLO", "THANK_YOU", "SORRY", "YES"],
+          "options": [
+            "HELLO",
+            "THANK_YOU",
+            "SORRY",
+            "YES"
+          ],
           "answer": "HELLO"
         },
         {
           "id": "q2",
           "question": "Which gesture starts at the chin or lips and moves toward the listener?",
           "gloss": "THANK_YOU",
-          "options": ["NO", "PLEASE", "THANK_YOU", "HELP"],
+          "options": [
+            "NO",
+            "PLEASE",
+            "THANK_YOU",
+            "HELP"
+          ],
           "answer": "THANK_YOU"
         },
         {
           "id": "q3",
           "question": "Two hands pressed together in front of the chest in Namaste signifies:",
           "gloss": "PLEASE",
-          "options": ["PLEASE", "GOOD", "SORRY", "NO"],
+          "options": [
+            "PLEASE",
+            "GOOD",
+            "SORRY",
+            "NO"
+          ],
           "answer": "PLEASE"
         },
         {
           "id": "q4",
           "question": "Which sign represents an open hand facing forward waving side-to-side?",
           "gloss": "GOODBYE",
-          "options": ["GOOD", "GOODBYE", "HELLO", "HOW_ARE_YOU"],
+          "options": [
+            "GOOD",
+            "GOODBYE",
+            "HELLO",
+            "HOW_ARE_YOU"
+          ],
           "answer": "GOODBYE"
         },
         {
           "id": "q5",
           "question": "Rotating hands outward with an open questioning posture asks:",
           "gloss": "HOW_ARE_YOU",
-          "options": ["NAME", "FOOD", "HOW_ARE_YOU", "FRIEND"],
+          "options": [
+            "NAME",
+            "FOOD",
+            "HOW_ARE_YOU",
+            "FRIEND"
+          ],
           "answer": "HOW_ARE_YOU"
         }
       ]
@@ -87,32 +107,27 @@
         {
           "gloss": "HELLO",
           "word": "Hello",
-          "description": "Open B-hand at temple saluting forward with a welcoming gesture.",
-          "emoji": "👋"
+          "description": "Open B-hand at temple saluting forward with a welcoming gesture."
         },
         {
           "gloss": "THANK_YOU",
           "word": "Thank You",
-          "description": "Touch fingertips to chin and move forward towards the other person.",
-          "emoji": "🙏"
+          "description": "Touch fingertips to chin and move forward towards the other person."
         },
         {
           "gloss": "YES",
           "word": "Yes",
-          "description": "Make an S-fist and nod the wrist up and down twice like a nodding head.",
-          "emoji": "👍"
+          "description": "Make an S-fist and nod the wrist up and down twice like a nodding head."
         },
         {
           "gloss": "NO",
           "word": "No",
-          "description": "Snap index finger and middle finger down against thumb rapidly.",
-          "emoji": "✊"
+          "description": "Snap index finger and middle finger down against thumb rapidly."
         },
         {
           "gloss": "PLEASE",
           "word": "Please",
-          "description": "Place flat open hand over chest and rub in gentle circular clockwise motions.",
-          "emoji": "🤲"
+          "description": "Place flat open hand over chest and rub in gentle circular clockwise motions."
         }
       ],
       "quiz": [
@@ -120,35 +135,60 @@
           "id": "asl-q1",
           "question": "An S-hand nodding up and down represents:",
           "gloss": "YES",
-          "options": ["YES", "NO", "GOOD", "STOP"],
+          "options": [
+            "YES",
+            "NO",
+            "GOOD",
+            "STOP"
+          ],
           "answer": "YES"
         },
         {
           "id": "asl-q2",
           "question": "Fingers snapping down onto the thumb indicates:",
           "gloss": "NO",
-          "options": ["HELLO", "NO", "YES", "PLEASE"],
+          "options": [
+            "HELLO",
+            "NO",
+            "YES",
+            "PLEASE"
+          ],
           "answer": "NO"
         },
         {
           "id": "asl-q3",
           "question": "Flat hand rubbing the chest in a gentle circular motion signs:",
           "gloss": "PLEASE",
-          "options": ["SORRY", "PLEASE", "THANK_YOU", "HELP"],
+          "options": [
+            "SORRY",
+            "PLEASE",
+            "THANK_YOU",
+            "HELP"
+          ],
           "answer": "PLEASE"
         },
         {
           "id": "asl-q4",
           "question": "Hand saluting out from the forehead represents:",
           "gloss": "HELLO",
-          "options": ["GOODBYE", "HELLO", "THANK_YOU", "SORRY"],
+          "options": [
+            "GOODBYE",
+            "HELLO",
+            "THANK_YOU",
+            "SORRY"
+          ],
           "answer": "HELLO"
         },
         {
           "id": "asl-q5",
           "question": "Fingertips touching the chin and extending forward signs:",
           "gloss": "THANK_YOU",
-          "options": ["THANK_YOU", "FRIEND", "NO", "NAME"],
+          "options": [
+            "THANK_YOU",
+            "FRIEND",
+            "NO",
+            "NAME"
+          ],
           "answer": "THANK_YOU"
         }
       ]
