@@ -50,8 +50,8 @@ export const LearnPage: React.FC = () => {
 
   // Set page title
   useEffect(() => {
-    document.title = 'Learn Sign — Ishara';
-  }, []);
+    document.title = `${t('learn.title')} — Ishara`;
+  }, [t]);
 
   // Active Lesson State
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -194,8 +194,8 @@ export const LearnPage: React.FC = () => {
   return (
     <div className="space-y-8">
       <Header
-        title="Learn Sign Language"
-        subtitle="Master Indian and American Sign Languages through interactive daily lessons and auditory feedback."
+        title={t('learn.title')}
+        subtitle={t('learn.subtitle')}
       />
 
       {/* Visible Voice Error Banner */}
@@ -210,7 +210,7 @@ export const LearnPage: React.FC = () => {
             onClick={speech.clearError}
             className="text-[#FF8A8A] hover:underline font-black text-xs shrink-0"
           >
-            Dismiss
+            {t('common.dismiss')}
           </button>
         </div>
       )}
@@ -241,16 +241,16 @@ export const LearnPage: React.FC = () => {
             </svg>
             <div className="absolute flex flex-col items-center">
               <span className="text-xl font-black text-[#2B2D42]">75%</span>
-              <span className="text-[9px] font-black uppercase text-[#6E7387]">Overall</span>
+              <span className="text-[9px] font-black uppercase text-[#6E7387]">{t('learn.overall')}</span>
             </div>
           </div>
 
           <div className="space-y-3 text-center sm:text-left flex-1">
             <h3 className="text-xl font-black text-[#2B2D42]">
-              Continue where you left off
+              {t('learn.continueWhereLeft')}
             </h3>
             <p className="text-xs font-semibold text-[#6E7387] leading-relaxed">
-              You're doing great! Complete "{activeLesson.title}" to unlock the next level in {language}.
+              {t('learn.doingGreat', { lesson: activeLesson.title, lang: language })}
             </p>
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
               <button
@@ -259,7 +259,7 @@ export const LearnPage: React.FC = () => {
                 className="clay-button px-6 py-2.5 text-xs font-black inline-flex items-center gap-2 clay-focus"
               >
                 <Play className="w-3.5 h-3.5" />
-                <span>Resume Lesson</span>
+                <span>{t('learn.resumeLesson')}</span>
               </button>
               <button
                 type="button"
@@ -267,7 +267,7 @@ export const LearnPage: React.FC = () => {
                 className="clay-button clay-button-white px-5 py-2.5 text-xs font-black inline-flex items-center gap-2 clay-focus"
               >
                 <Zap className="w-3.5 h-3.5 text-amber-500" />
-                <span>Take Quiz</span>
+                <span>{t('learn.takeQuiz')}</span>
               </button>
             </div>
           </div>
@@ -277,7 +277,7 @@ export const LearnPage: React.FC = () => {
         <div className="lg:col-span-4 clay-card p-7 flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-black text-[#6E7387] uppercase tracking-wider">
-              Daily Streak
+              {t('learn.dailyStreak')}
             </span>
             <div className="w-8 h-8 rounded-full bg-[#FFE8E2] flex items-center justify-center text-sm shadow-sm">
               <Flame className="w-4 h-4 text-[#FF8A8A]" />
@@ -285,7 +285,7 @@ export const LearnPage: React.FC = () => {
           </div>
 
           <div className="my-3">
-            <p className="text-4xl font-black text-[#2B2D42]">12 Days</p>
+            <p className="text-4xl font-black text-[#2B2D42]">{t('learn.daysStreak', { count: 12 })}</p>
           </div>
 
           {/* Streak dots */}
@@ -305,10 +305,10 @@ export const LearnPage: React.FC = () => {
       {/* Course Categories */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-black text-[#2B2D42]">{language} Course Categories</h3>
+          <h3 className="text-xl font-black text-[#2B2D42]">{t('learn.courseCategories', { lang: language })}</h3>
           {language === 'ASL' && (
             <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-[#FFE8E2] text-[#FF8A8A] border border-[#FFB59E]/40">
-              Curriculum Available
+              {t('learn.curriculumAvailable')}
             </span>
           )}
         </div>
@@ -342,13 +342,13 @@ export const LearnPage: React.FC = () => {
                   </div>
                 ) : cat.locked ? (
                   <div className="flex items-center justify-between text-xs font-bold text-[#6E7387]">
-                    <span className="text-[10px]">Locked</span>
+                    <span className="text-[10px]">{t('learn.locked')}</span>
                     <Lock className="w-3.5 h-3.5 text-[#6E7387]" />
                   </div>
                 ) : (
                   <div>
                     <div className="flex justify-between text-[10px] font-black text-[#6E7387] mb-1">
-                      <span>Progress</span>
+                      <span>{t('learn.progress')}</span>
                       <span>{cat.progress}%</span>
                     </div>
                     <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
@@ -369,7 +369,7 @@ export const LearnPage: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-[#7C9CFF]/20 text-[#7C9CFF]">
-                  {activeLesson.language} Lesson
+                  {activeLesson.language} {t('learn.lessonBadge') || 'Lesson'}
                 </span>
                 <span className="text-xs font-semibold text-[#6E7387]">• {activeLesson.category}</span>
               </div>
@@ -383,7 +383,7 @@ export const LearnPage: React.FC = () => {
               className="clay-button px-5 py-2.5 text-xs font-black inline-flex items-center gap-2 clay-focus shadow-clay-raised-sm shrink-0"
             >
               <Zap className="w-4 h-4 text-amber-500" />
-              <span>Take Lesson Quiz</span>
+              <span>{t('learn.takeQuiz')}</span>
             </button>
           </div>
 
@@ -393,14 +393,14 @@ export const LearnPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-[#2B2D42] uppercase tracking-wider flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-[#7C9CFF]" />
-                  <span>3D Avatar Practice: {practicingGloss}</span>
+                  <span>{t('learn.avatarPractice', { gloss: practicingGloss })}</span>
                 </span>
                 <button
                   type="button"
                   onClick={() => setPracticingGloss(null)}
                   className="text-xs font-bold text-[#6E7387] hover:text-[#FF8A8A]"
                 >
-                  Close Practice
+                  {t('learn.practiceClose')}
                 </button>
               </div>
               <AvatarStage currentGloss={practicingGloss} speed={1.0} playing={true} />
@@ -410,7 +410,7 @@ export const LearnPage: React.FC = () => {
           {/* List of Signs with Voice Pronunciation and Avatar Practice */}
           <div className="space-y-3">
             <h4 className="text-xs font-black uppercase text-[#6E7387] tracking-wider">
-              Signs in this lesson ({activeLesson.signs.length})
+              {t('learn.signsInLesson', { count: activeLesson.signs.length })}
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -452,10 +452,10 @@ export const LearnPage: React.FC = () => {
                       type="button"
                       onClick={() => handleListenSign(sign.word)}
                       className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-[#7C9CFF]/15 text-[#2B2D42] hover:text-[#7C9CFF] text-xs font-bold flex items-center gap-1.5 transition-colors"
-                      title="Listen to spoken pronunciation"
+                      title={t('learn.listenSign')}
                     >
                       <Volume2 className="w-3.5 h-3.5" />
-                      <span>Listen</span>
+                      <span>{t('learn.listenSign')}</span>
                     </button>
 
                     <button
@@ -464,7 +464,7 @@ export const LearnPage: React.FC = () => {
                       className="px-3 py-1.5 rounded-xl bg-[#7C9CFF]/20 hover:bg-[#7C9CFF]/30 text-[#7C9CFF] text-xs font-black flex items-center gap-1.5 transition-colors"
                     >
                       <Play className="w-3 h-3" />
-                      <span>Practice Sign</span>
+                      <span>{t('learn.practiceSign')}</span>
                     </button>
                   </div>
                 </div>
@@ -491,9 +491,9 @@ export const LearnPage: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-black uppercase text-[#7C9CFF] tracking-wider flex items-center gap-1.5">
                     <Zap className="w-4 h-4 text-amber-500" />
-                    <span>Question {quizQuestionIndex + 1} of {(activeLesson.quiz as QuizItem[]).length}</span>
+                    <span>{t('learn.questionProgress', { current: quizQuestionIndex + 1, total: (activeLesson.quiz as QuizItem[]).length })}</span>
                   </span>
-                  <span className="text-xs font-bold text-[#6E7387]">Score: {quizScore}</span>
+                  <span className="text-xs font-bold text-[#6E7387]">{t('learn.scoreLabel', { score: quizScore }) || `Score: ${quizScore}`}</span>
                 </div>
 
                 {/* Progress bar */}
@@ -522,7 +522,7 @@ export const LearnPage: React.FC = () => {
                       className="text-xs font-bold text-[#7C9CFF] hover:underline flex items-center gap-1"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
-                      <span>Listen Question</span>
+                      <span>{t('learn.listenQuestion')}</span>
                     </button>
                   </div>
                 </div>
@@ -532,6 +532,9 @@ export const LearnPage: React.FC = () => {
                   {(activeLesson.quiz as QuizItem[])[quizQuestionIndex]?.options.map((opt) => {
                     const isSelected = selectedAnswer === opt;
                     const isCorrect = opt === (activeLesson.quiz as QuizItem[])[quizQuestionIndex]?.answer;
+                    const translatedWord = t(`signs.${opt}.word`);
+                    const hasTranslation = translatedWord && translatedWord !== `signs.${opt}.word`;
+
                     let btnStyle = 'bg-white hover:bg-slate-50 border-slate-200 text-[#2B2D42]';
 
                     if (selectedAnswer !== null) {
@@ -549,9 +552,16 @@ export const LearnPage: React.FC = () => {
                         onClick={() => handleSelectOption(opt)}
                         className={`w-full p-3.5 rounded-2xl border text-left text-xs font-black transition-all flex items-center justify-between ${btnStyle}`}
                       >
-                        <span>{opt}</span>
+                        {hasTranslation ? (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="text-sm font-black text-[#2B2D42]">{translatedWord}</span>
+                            <span className="text-[11px] font-bold text-[#6E7387]">({opt})</span>
+                          </div>
+                        ) : (
+                          <span>{opt}</span>
+                        )}
                         {selectedAnswer !== null && isCorrect && (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                         )}
                       </button>
                     );
@@ -567,8 +577,8 @@ export const LearnPage: React.FC = () => {
                   >
                     <span>
                       {quizQuestionIndex < (activeLesson.quiz as QuizItem[]).length - 1
-                        ? 'Next Question'
-                        : 'View Results'}
+                        ? t('learn.nextQuestion')
+                        : t('learn.viewResults')}
                     </span>
                     <ChevronRight className="w-4 h-4" />
                   </button>
@@ -581,21 +591,21 @@ export const LearnPage: React.FC = () => {
                   <Award className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-black text-[#2B2D42]">Quiz Complete!</h3>
+                  <h3 className="text-2xl font-black text-[#2B2D42]">{t('learn.quizComplete')}</h3>
                   <p className="text-xs font-semibold text-[#6E7387] mt-1">
-                    You scored <strong className="text-[#2B2D42]">{quizScore} / {(activeLesson.quiz as QuizItem[]).length}</strong>. 
-                    {quizScore >= 4 ? ' Outstanding work!' : ' Great effort, keep practicing!'}
+                    {t('learn.scored', { score: quizScore, total: (activeLesson.quiz as QuizItem[]).length })}{' '}
+                    {quizScore >= 4 ? t('learn.outstanding') : t('learn.keepPracticing')}
                   </p>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 flex items-center justify-around">
                   <div>
-                    <span className="text-[10px] font-black uppercase text-[#6E7387]">XP Earned</span>
-                    <p className="text-xl font-black text-amber-500">+{quizScore * 20} XP</p>
+                    <span className="text-[10px] font-black uppercase text-[#6E7387]">{t('learn.xpEarned')}</span>
+                    <p className="text-xl font-black text-amber-500">{t('common.xpPoints', { xp: quizScore * 20 })}</p>
                   </div>
                   <div>
-                    <span className="text-[10px] font-black uppercase text-[#6E7387]">Streak</span>
-                    <p className="text-xl font-black text-[#FF8A8A]">+1 Day</p>
+                    <span className="text-[10px] font-black uppercase text-[#6E7387]">{t('learn.streak')}</span>
+                    <p className="text-xl font-black text-[#FF8A8A]">{t('learn.streakPlus')}</p>
                   </div>
                 </div>
 
@@ -604,7 +614,7 @@ export const LearnPage: React.FC = () => {
                   onClick={() => setQuizActive(false)}
                   className="clay-button w-full py-3 text-xs font-black clay-focus"
                 >
-                  Done
+                  {t('learn.done')}
                 </button>
               </div>
             )}
@@ -624,10 +634,10 @@ export const LearnPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-black text-base text-[#2B2D42] group-hover:text-[#7C9CFF] transition-colors">
-                Sign Practice
+                {t('learn.signPracticeCard')}
               </h4>
               <p className="text-xs font-semibold text-[#6E7387]">
-                Turn on your camera and practice gestures with real-time feedback.
+                {t('learn.signPracticeCardSub')}
               </p>
             </div>
           </div>
@@ -644,10 +654,10 @@ export const LearnPage: React.FC = () => {
             </div>
             <div>
               <h4 className="font-black text-base text-[#2B2D42] group-hover:text-[#7C9CFF] transition-colors">
-                Daily Quiz
+                {t('learn.dailyQuizCard')}
               </h4>
               <p className="text-xs font-semibold text-[#6E7387]">
-                Test your knowledge and earn extra XP for your daily streak.
+                {t('learn.dailyQuizCardSub')}
               </p>
             </div>
           </div>

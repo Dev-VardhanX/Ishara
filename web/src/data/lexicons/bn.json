@@ -1,0 +1,231 @@
+{
+  "locale": "bn",
+  "languageName": "Bengali",
+  "nativeName": "বাংলা",
+  "voiceCode": "bn-IN",
+  "script": "Bengali",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": "।",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "নমস্কার",
+      "alternatives": ["হ্যালো", "সালাম", "নমস্তে", "প্রণাম", "শুভেচ্ছা"],
+      "romanized": ["nomoshkar", "hello", "salam", "pranam", "nomoskar"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "ধন্যবাদ",
+      "alternatives": ["অনেক ধন্যবাদ", "থ্যাংক ইউ", "শুকরিয়া", "কৃতজ্ঞতা", "আন্তরিক ধন্যবাদ"],
+      "romanized": ["dhonnobad", "dhanyabad", "thank you", "shukriya"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "দয়া করে",
+      "alternatives": ["দয়া", "প্লিজ", "অনুরোধ", "একটু", "অনুগ্রহ করে"],
+      "romanized": ["doya kore", "doya", "please", "onurodh", "onugroho kore"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "দুঃখিত",
+      "alternatives": ["মাফ করবেন", "সরি", "ক্ষমা করবেন", "মাফ", "ক্ষমা চাইছি"],
+      "romanized": ["dukkhito", "maf korben", "sorry", "khoma", "maaf"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "বিদায়",
+      "alternatives": ["টাটা", "বাই", "আবার দেখা হবে", "আসি", "ভালো থাকবেন"],
+      "romanized": ["biday", "tata", "bye", "abar dekha hobe", "aasi"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "কেমন আছেন",
+      "alternatives": ["কেমন আছো", "কি খবর", "ভালো আছেন", "কেমন চলছে", "সব ভালো"],
+      "romanized": ["kemon achen", "kemon acho", "ki khobor", "bhalo achen"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "হ্যাঁ",
+      "alternatives": ["হাঁ", "হ্যা", "জি হ্যাঁ", "অবশ্যই", "ঠিক আছে"],
+      "romanized": ["hyan", "ha", "ji hyan", "oboshoy", "theek ache"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "না",
+      "alternatives": ["নয়", "জি না", "কখনও না", "নাহ", "একদম না"],
+      "romanized": ["na", "noy", "ji na", "nah", "ekdom na"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "ভালো",
+      "alternatives": ["সুন্দর", "উত্তম", "ঠিক", "খুব ভালো", "চমৎকার"],
+      "romanized": ["bhalo", "shundor", "uttam", "theek", "chomotkar"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "খারাপ",
+      "alternatives": ["মন্দ", "বাজে", "অসুস্থ", "অন্যায়", "ভালো না"],
+      "romanized": ["kharap", "mondo", "baje", "osustho", "bhalo na"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "সাহায্য",
+      "alternatives": ["সাহায্য করুন", "হেল্প", "বাঁচাও", "সহায়তা", "উপকার"],
+      "romanized": ["sahajjo", "sahajjo korun", "help", "bachao", "sohayota"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "থামুন",
+      "alternatives": ["থামো", "রোখো", "দাঁড়াও", "বাস", "থেমে যাও"],
+      "romanized": ["thamun", "thamo", "rokho", "darao", "bas"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "খাওয়া",
+      "alternatives": ["খান", "খাও", "খাওয়া", "খাবো", "আহার"],
+      "romanized": ["khawa", "khan", "khao", "khabo", "aahar"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "পান",
+      "alternatives": ["পান করুন", "পান করো", "জল খাও", "খাও", "পান করা"],
+      "romanized": ["pan", "pan korun", "pan koro", "jol khao"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "জল",
+      "alternatives": ["পানি", "একটু জল", "জল খাব", "ঠান্ডা জল", "বিশুদ্ধ জল"],
+      "romanized": ["jol", "pani", "water", "thanda jol"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "খাবার",
+      "alternatives": ["ভাত", "অন্ন", "ভোজন", "আহার", "খাদ্য"],
+      "romanized": ["khabar", "bhat", "onno", "bhojon", "food"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "বাড়ি",
+      "alternatives": ["ঘর", "বাসা", "গৃহ", "নিবাস", "আবাস"],
+      "romanized": ["bari", "ghar", "basa", "griho", "home"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "বন্ধু",
+      "alternatives": ["দোস্ত", "বান্ধবী", "সঙ্গী", "মিত্র", "সখা"],
+      "romanized": ["bondhu", "dost", "bandhobi", "shongi", "mitro"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "নাম",
+      "alternatives": ["নাম কি", "আমার নাম", "পরিচয়", "আখ্যান", "অভিধা"],
+      "romanized": ["naam", "nam", "porichoy", "identity"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "ভালোবাসা",
+      "alternatives": ["প্রেম", "স্নেহ", "পছন্দ", "মায়া", "মমতা"],
+      "romanized": ["bhalobasha", "prem", "sneho", "maya", "bhalobasa"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "নমস্কার কেমন আছেন", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "কেমন আছেন", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "আমি ভালো আছি ধন্যবাদ", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "দয়া করে সাহায্য করুন", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "সাহায্য করুন দয়া করে", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "ধন্যবাদ আমার বন্ধু", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "নমস্কার বন্ধু", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "বিদায় আমার বন্ধু", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "আমার জল দরকার", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "দয়া করে জল দিন", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "আমার খাবার দরকার", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "আপনার নাম কি", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "তোমার নাম কি বন্ধু", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "খাবার খান", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "জল পান করুন", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "দয়া করে থামুন", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "হ্যাঁ দয়া করে", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "না ধন্যবাদ", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "দুঃখিত আমার বন্ধু", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "খাবার ভালো", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "খাবার খারাপ", "glosses": ["BAD", "FOOD"] }
+  ],
+  "grammarWords": {
+    "কি": "what",
+    "কোথায়": "where",
+    "কে": "who",
+    "কেন": "why",
+    "কিভাবে": "how",
+    "হয়": "is",
+    "আছেন": "are",
+    "আছি": "am",
+    "আমি": "I",
+    "আপনি": "you",
+    "তুমি": "you",
+    "আমার": "my",
+    "আপনার": "your",
+    "তোমার": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "নমস্কার!",
+    "THANK_YOU": "ধন্যবাদ!",
+    "PLEASE": "দয়া করে।",
+    "SORRY": "দুঃখিত।",
+    "GOODBYE": "বিদায়!",
+    "HOW_ARE_YOU": "কেমন আছেন?",
+    "YES": "হ্যাঁ।",
+    "NO": "না।",
+    "GOOD": "ভালো।",
+    "BAD": "খারাপ।",
+    "HELP": "সাহায্য করুন!",
+    "STOP": "থামুন।",
+    "EAT": "খাবার খান।",
+    "DRINK": "জল পান করুন।",
+    "WATER": "জল, দয়া করে।",
+    "FOOD": "খাবার, দয়া করে।",
+    "HOME": "বাড়ি।",
+    "FRIEND": "বন্ধু।",
+    "NAME": "নাম।",
+    "LOVE": "ভালোবাসা।",
+    "HELLO HOW_ARE_YOU": "নমস্কার, কেমন আছেন?",
+    "HOW_ARE_YOU GOOD": "কেমন আছেন? আমি ভালো আছি।",
+    "HOW_ARE_YOU BAD": "কেমন আছেন? আমার শরীর ভালো নেই।",
+    "GOOD THANK_YOU": "ভালো, ধন্যবাদ!",
+    "THANK_YOU FRIEND": "ধন্যবাদ, আমার বন্ধু!",
+    "HELLO FRIEND": "নমস্কার, আমার বন্ধু!",
+    "GOODBYE FRIEND": "বিদায়, আমার বন্ধু!",
+    "HELLO GOODBYE": "নমস্কার এবং বিদায়!",
+    "SORRY FRIEND": "দুঃখিত, আমার বন্ধু।",
+    "PLEASE HELP": "দয়া করে আমাকে সাহায্য করুন!",
+    "HELP PLEASE": "সাহায্য করুন, দয়া করে!",
+    "PLEASE STOP": "দয়া করে থামুন।",
+    "STOP PLEASE": "থামুন, দয়া করে।",
+    "SORRY PLEASE": "দুঃখিত, দয়া করে ক্ষমা করবেন।",
+    "YES PLEASE": "হ্যাঁ, দয়া করে।",
+    "NO THANK_YOU": "না, ধন্যবাদ।",
+    "YES THANK_YOU": "হ্যাঁ, অনেক ধন্যবাদ!",
+    "YES GOOD": "হ্যাঁ, এটি খুব ভালো।",
+    "NO BAD": "না, এটি খারাপ।",
+    "PLEASE WATER": "দয়া করে আমাকে জল দিন।",
+    "PLEASE FOOD": "দয়া করে আমাকে খাবার দিন।",
+    "EAT FOOD": "খাবার খান।",
+    "DRINK WATER": "জল পান করুন।",
+    "FOOD EAT": "খাবার খান।",
+    "WATER DRINK": "জল পান করুন।",
+    "GOOD FOOD": "খাবার খুব ভালো হয়েছে।",
+    "BAD FOOD": "খাবার খারাপ হয়েছে।",
+    "FRIEND HELP": "বন্ধু, দয়া করে সাহায্য করো!",
+    "HELP FRIEND": "বন্ধুকে সাহায্য করো!",
+    "FRIEND LOVE": "বন্ধুর জন্য অনেক ভালোবাসা!",
+    "LOVE FRIEND": "বন্ধুকে ভালোবাসি!",
+    "GOOD FRIEND": "তুমি খুব ভালো বন্ধু।",
+    "GOOD HOME": "বাড়িটি খুব সুন্দর।",
+    "LOVE HOME": "আমি আমার বাড়ি ভালোবাসি।",
+    "NAME FRIEND": "তোমার নাম কি, বন্ধু?",
+    "HELLO NAME": "নমস্কার, আমার নাম..."
+  }
+}

@@ -2,11 +2,14 @@
 import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { HandMetal, Home, ArrowLeft } from 'lucide-react';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export const NotFoundPage: React.FC = () => {
+  const { t } = useLocaleStore();
+
   useEffect(() => {
-    document.title = '404 Not Found — Ishara';
-  }, []);
+    document.title = `${t('notFound.title')}`;
+  }, [t]);
 
   return (
     <div className="min-h-screen bg-[#E9EEF7] flex items-center justify-center p-6 select-none">
@@ -17,13 +20,13 @@ export const NotFoundPage: React.FC = () => {
 
         <div className="space-y-2">
           <span className="text-xs font-black uppercase tracking-widest text-[#FF8A8A] px-3 py-1 rounded-full bg-[#FFE8E2] border border-[#FFB59E]/40">
-            Error 404
+            {t('notFound.code')}
           </span>
           <h1 className="text-3xl font-black text-[#2B2D42] tracking-tight pt-2">
-            Page Not Found
+            {t('notFound.heading')}
           </h1>
           <p className="text-xs font-semibold text-[#6E7387] leading-relaxed">
-            The page or gesture sequence you are looking for doesn't exist or has moved to a new route.
+            {t('notFound.message')}
           </p>
         </div>
 
@@ -33,14 +36,14 @@ export const NotFoundPage: React.FC = () => {
             className="clay-button w-full sm:w-auto px-6 py-3 text-xs font-black flex items-center justify-center gap-2 clay-focus"
           >
             <Home className="w-4 h-4" />
-            <span>Back to Home</span>
+            <span>{t('notFound.backHome')}</span>
           </NavLink>
           <NavLink
             to="/dashboard"
             className="clay-button clay-button-white w-full sm:w-auto px-6 py-3 text-xs font-black flex items-center justify-center gap-2 clay-focus"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Dashboard</span>
+            <span>{t('notFound.dashboard')}</span>
           </NavLink>
         </div>
       </div>

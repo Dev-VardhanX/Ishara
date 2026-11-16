@@ -3,10 +3,12 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { BottomTabBar } from './BottomTabBar';
 import { useLanguageStore } from '../store/useLanguageStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { Sparkles, Info } from 'lucide-react';
 
 export const AppLayout: React.FC = () => {
   const { language } = useLanguageStore();
+  const { t } = useLocaleStore();
   const location = useLocation();
 
   // Check if current route is lacking ASL model/lesson data in Phase 1-3
@@ -32,15 +34,15 @@ export const AppLayout: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-black">
-                  ASL Dataset & Model Coming Soon (Roadmap Phase 4)
+                  {t('dashboard.aslComingSoon')}
                 </p>
                 <p className="text-[11px] font-semibold text-[#6E7387]">
-                  Currently previewing ISL pipeline contracts while ASL models and lessons are being finalized.
+                  {t('dashboard.aslPreviewNote')}
                 </p>
               </div>
             </div>
             <span className="hidden sm:inline-block px-3 py-1 rounded-full bg-white text-[10px] font-black uppercase text-[#FF8A8A] shadow-sm">
-              Phase 4 Beta
+              {t('dashboard.phase4Beta')}
             </span>
           </div>
         )}

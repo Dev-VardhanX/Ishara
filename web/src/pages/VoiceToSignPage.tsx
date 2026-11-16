@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Header } from '../components/Header';
 import { AvatarStage } from '../components/AvatarStage';
 import { useLanguageStore } from '../store/useLanguageStore';
-import { useLocaleStore } from '../store/useLocaleStore';
+import { useLocaleStore, SUPPORTED_LOCALES, AppLocale } from '../store/useLocaleStore';
 import { parseTextToGlosses, getTextToGlossDetails, GlossToken, TextToGlossDetails } from '../lib/textToGloss';
+import { loadLexicon } from '../data/lexicons';
 import { addRecentConversation } from '../data/store';
 import { useSpeech } from '../lib/speech';
 import {
@@ -22,32 +23,58 @@ import {
   Volume2,
 } from 'lucide-react';
 
+const LOCALIZED_EXAMPLES: Record<AppLocale, string[]> = {
+  en: ['Hello, how are you?', 'Thank you very much.', 'Please help me.', 'Goodbye, my friend!', 'Yes, good friend.'],
+  hi: ['नमस्ते, आप कैसे हैं?', 'बहुत धन्यवाद।', 'कृपया मेरी मदद करें।', 'अलविदा मेरे दोस्त!', 'हाँ, अच्छा दोस्त।'],
+  bn: ['নমস্কার, আপনি কেমন আছেন?', 'অনেক ধন্যবাদ।', 'দয়া করে সাহায্য করুন।', 'বিদায় বন্ধু!', 'হ্যাঁ, ভালো বন্ধু।'],
+  mr: ['नमस्कार, तुम्ही कसे आहात?', 'खूप धन्यवाद।', 'कृपया मला मदत करा।', 'निरोप मित्रा!', 'हो, चांगला मित्र।'],
+  ta: ['வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?', 'மிக்க நன்றி.', 'தயவுசெய்து எனக்கு உதவுங்கள்.', 'போய் வருகிறேன் நண்பா!', 'ஆம், நல்ல நண்பன்.'],
+  te: ['నమస్కారం, మీరు ఎలా ఉన్నారు?', 'చాలా ధನ್ಯవాదాలు.', 'దయచేసి నాకు సహాయం చేయండి.', 'వీడ్కోలు స్నేహితుడా!', 'అవును, మంచి స్నేహితుడు.'],
+  gu: ['નમસ્તે, તમે કેમ છો?', 'ખૂબ ખૂબ આભાર.', 'કૃપા કરીને મને મદદ કરો.', 'આવજો મિત્ર!', 'હા, સારો મિત્ર.'],
+  kn: ['ನಮಸ್ಕಾರ, ನೀವು ಹೇಗಿದ್ದೀರಿ?', 'ತುಂಬಾ ಧನ್ಯವಾದಗಳು.', 'ದಯವಿಟ್ಟು ನನಗೆ ಸಹಾಯ ಮಾಡಿ.', 'ವಿದಾಯ ಗೆಳೆಯ!', 'ಹೌದು, ಒಳ್ಳೆಯ ಸ್ನೇಹಿತ.'],
+  ml: ['നമസ്കാരം, സുഖമാണോ?', 'വളരെ നന്ദി.', 'ദയവായി എന്നെ സഹായിക്കൂ.', 'വിട സുഹൃത്തേ!', 'അതെ, നല്ല സുഹൃത്ത്.'],
+  pa: ['ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?', 'ਬਹੁਤ ਬਹੁਤ ਧੰਨਵਾਦ।', 'ਕਿਰਪਾ ਕਰਕੇ ਮੇਰੀ ਮਦਦ ਕਰੋ।', 'ਅਲਵਿਦਾ ਮੇਰੇ ਦੋਸਤ!', 'ਹਾਂ, ਚੰਗਾ ਦੋਸਤ।'],
+};
+
 export const VoiceToSignPage: React.FC = () => {
   const { language } = useLanguageStore();
-  const { t, locale, voiceCode } = useLocaleStore();
+  const { t, locale, voiceCode, translationLocale, translationVoiceCode } = useLocaleStore();
   const speech = useSpeech();
 
+  const [inputLocale, setInputLocale] = useState<AppLocale>(translationLocale || locale || 'en');
+
+  useEffect(() => {
+    if (translationLocale) {
+      setInputLocale(translationLocale);
+      loadLexicon(translationLocale);
+    }
+  }, [translationLocale]);
+
+  const activeInputMeta = SUPPORTED_LOCALES.find((l) => l.code === inputLocale) || SUPPORTED_LOCALES[0];
+  const activeInputVoiceCode = activeInputMeta.voiceCode;
 
   // State
   const defaultSentence = 'Hello, how are you today?';
   const [inputText, setInputText] = useState(defaultSentence);
   const [parseDetails, setParseDetails] = useState<TextToGlossDetails>(() =>
-    getTextToGlossDetails(defaultSentence, language)
+    getTextToGlossDetails(defaultSentence, language, inputLocale)
   );
   const [tokens, setTokens] = useState<GlossToken[]>(() => parseDetails.tokens);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(1.0);
   const [playing, setPlaying] = useState<boolean>(false);
 
-  // Sync parsing when language changes
+  // Sync parsing when language or inputLocale changes
   useEffect(() => {
-    if (inputText.trim()) {
-      const details = getTextToGlossDetails(inputText.trim(), language);
-      setParseDetails(details);
-      setTokens(details.tokens);
-      setCurrentIndex(0);
-    }
-  }, [language]);
+    loadLexicon(inputLocale).then(() => {
+      if (inputText.trim()) {
+        const details = getTextToGlossDetails(inputText.trim(), language, inputLocale);
+        setParseDetails(details);
+        setTokens(details.tokens);
+        setCurrentIndex(0);
+      }
+    });
+  }, [language, inputLocale]);
 
   // Web Speech API state
   const [isListening, setIsListening] = useState<boolean>(false);
@@ -59,15 +86,15 @@ export const VoiceToSignPage: React.FC = () => {
 
   // Set document title
   useEffect(() => {
-    document.title = 'Voice to Sign — Ishara';
-  }, []);
+    document.title = `${t('voiceToSign.title')} — Ishara`;
+  }, [t]);
 
   // Parse text when submitted
   const handleSignSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!inputText.trim()) return;
 
-    const details = getTextToGlossDetails(inputText.trim(), language);
+    const details = getTextToGlossDetails(inputText.trim(), language, inputLocale);
     setParseDetails(details);
     setTokens(details.tokens);
     setCurrentIndex(0);
@@ -84,11 +111,15 @@ export const VoiceToSignPage: React.FC = () => {
           language,
           iconEmoji: 'voice',
           direction: 'voice_to_sign',
+          locale: inputLocale,
+          originalText: inputText.trim(),
+          englishText: details.englishOrderText,
+          glosses: details.tokens.map((t) => t.gloss).filter(Boolean) as string[],
         },
         {
           direction: 'voice_to_sign',
           text: inputText.trim(),
-          translatedText: details.tokens.map((t) => t.gloss).join(' '),
+          translatedText: details.tokens.map((t) => t.gloss).filter(Boolean).join(' '),
           emotion: 'neutral',
         }
       );
@@ -160,8 +191,10 @@ export const VoiceToSignPage: React.FC = () => {
 
   const handleSelectExample = (sentence: string) => {
     setInputText(sentence);
-    const parsed = parseTextToGlosses(sentence);
+    const parsed = parseTextToGlosses(sentence, language, inputLocale);
     setTokens(parsed);
+    const details = getTextToGlossDetails(sentence, language, inputLocale);
+    setParseDetails(details);
     setCurrentIndex(0);
     setPlaying(true);
 
@@ -175,11 +208,15 @@ export const VoiceToSignPage: React.FC = () => {
           language,
           iconEmoji: 'voice',
           direction: 'voice_to_sign',
+          locale: inputLocale,
+          originalText: sentence,
+          englishText: details.englishOrderText,
+          glosses: parsed.map((t) => t.gloss).filter(Boolean) as string[],
         },
         {
           direction: 'voice_to_sign',
           text: sentence,
-          translatedText: parsed.map((t) => t.gloss).join(' '),
+          translatedText: parsed.map((t) => t.gloss).filter(Boolean).join(' '),
           emotion: 'neutral',
         }
       );
@@ -212,7 +249,7 @@ export const VoiceToSignPage: React.FC = () => {
       const recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = voiceCode;
+      recognition.lang = activeInputVoiceCode;
 
       recognition.onstart = () => {
         setIsListening(true);
@@ -252,8 +289,8 @@ export const VoiceToSignPage: React.FC = () => {
     <div className="space-y-6 select-none">
       {/* Header with ISL / ASL SegmentedControl */}
       <Header
-        title="Voice to Sign"
-        subtitle="Translate spoken voice or typed text into 3D avatar sign gestures"
+        title={t('voiceToSign.title')}
+        subtitle={t('voiceToSign.subtitle')}
       />
 
       {/* Gentle Speech Output Voice Hint */}
@@ -261,7 +298,7 @@ export const VoiceToSignPage: React.FC = () => {
         <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/80 text-[#6E7387] text-xs font-semibold flex items-center justify-between shadow-sm animate-fade-in">
           <div className="flex items-center gap-2">
             <Volume2 className="w-3.5 h-3.5 text-[#6E7387] shrink-0" />
-            <p>Voice output unavailable in this browser. Avatar signing and text conversion continue working normally.</p>
+            <p>{t('voiceToSign.voiceOutputUnavailable')}</p>
           </div>
           <button
             type="button"
@@ -276,60 +313,91 @@ export const VoiceToSignPage: React.FC = () => {
 
       {/* Main 3D Stage Area */}
       <div className="space-y-4">
-        {/* Speed Selector Pill (Floating at top of stage card) */}
+        {/* Top Controls: Mode, Language Selector, Speed */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 border border-slate-200/50 text-xs font-black text-[#2B2D42] shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
-            <span>Mode: {language === 'ISL' ? 'Indian Sign Language (ISL)' : 'American Sign Language (ASL)'}</span>
+            <span>{t('voiceToSign.mode', { mode: language === 'ISL' ? t('voiceToSign.islFull') : t('voiceToSign.aslFull') })}</span>
           </div>
 
-          <div className="flex items-center p-1 bg-white/80 rounded-full border border-slate-200/60 shadow-sm backdrop-blur">
-            <span className="text-[10px] font-black uppercase text-[#6E7387] px-2.5">
-              Speed:
-            </span>
-            {[0.5, 1.0, 1.5].map((s) => (
-              <button
-                key={s}
-                type="button"
-                onClick={() => setSpeed(s)}
-                className={`px-3 py-1 rounded-full text-xs font-black transition-all clay-focus ${
-                  speed === s
-                    ? 'bg-[#7C9CFF] text-white shadow-clay-raised-sm'
-                    : 'text-[#6E7387] hover:text-[#2B2D42]'
-                }`}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Input Language Selector */}
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-white/80 rounded-full border border-slate-200/60 shadow-sm backdrop-blur">
+              <span className="text-[10px] font-black uppercase text-[#6E7387]">
+                {t('voiceToSign.inputLangLabel')}
+              </span>
+              <select
+                value={inputLocale}
+                onChange={(e) => {
+                  const newLoc = e.target.value as AppLocale;
+                  setInputLocale(newLoc);
+                  loadLexicon(newLoc);
+                }}
+                className="bg-transparent text-xs font-black text-[#2B2D42] focus:outline-none cursor-pointer"
+                title={t('voiceToSign.selectLangTitle')}
               >
-                {s}x
-              </button>
-            ))}
+                {SUPPORTED_LOCALES.map((loc) => (
+                  <option key={loc.code} value={loc.code}>
+                    {loc.nativeName} ({loc.name})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Speed Selector */}
+            <div className="flex items-center p-1 bg-white/80 rounded-full border border-slate-200/60 shadow-sm backdrop-blur">
+              <span className="text-[10px] font-black uppercase text-[#6E7387] px-2.5">
+                {t('voiceToSign.speedLabel')}
+              </span>
+              {[0.5, 1.0, 1.5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setSpeed(s)}
+                  className={`px-3 py-1 rounded-full text-xs font-black transition-all clay-focus ${
+                    speed === s
+                      ? 'bg-[#7C9CFF] text-white shadow-clay-raised-sm'
+                      : 'text-[#6E7387] hover:text-[#2B2D42]'
+                  }`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* ISL Word Order Conversion Telemetry */}
-        {language === 'ISL' && parseDetails.islOrderText && (
-          <div className="p-3.5 rounded-2xl bg-white/70 border border-slate-200/70 shadow-sm space-y-1.5 text-xs animate-fade-in">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-[#6E7387] uppercase text-[10px] tracking-wider shrink-0">
-                  English word order:
+        {/* Language & ISL Word Order Conversion Telemetry */}
+        <div className="p-3.5 rounded-2xl bg-white/70 border border-slate-200/70 shadow-sm space-y-1.5 text-xs animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-4">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-bold text-[#6E7387] uppercase text-[10px] tracking-wider shrink-0">
+                {t('voiceToSign.inputTelemetry', { lang: activeInputMeta.name })}
+              </span>
+              <span className="font-semibold text-[#2B2D42]">
+                {parseDetails.englishOrderText || t('voiceToSign.noSignYet')}
+              </span>
+              {parseDetails.detectedScript && parseDetails.detectedScript !== 'Latin' && (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase">
+                  {t('voiceToSign.scriptDetected', { script: parseDetails.detectedScript })}
                 </span>
-                <span className="font-semibold text-[#2B2D42]">
-                  {parseDetails.englishOrderText || '(none)'}
-                </span>
-              </div>
+              )}
+            </div>
+            {language === 'ISL' && parseDetails.islOrderText && (
               <div className="flex items-center gap-2">
                 <span className="font-black text-[#7C9CFF] uppercase text-[10px] tracking-wider shrink-0">
-                  ISL word order:
+                  {t('voiceToSign.islWordOrder')}
                 </span>
                 <span className="font-black text-[#2B2D42]">
                   {parseDetails.islOrderText}
                 </span>
               </div>
-            </div>
-            <p className="text-[10px] text-[#6E7387] italic">
-              Rules reviewed against ISL grammar; to be validated with ISL teachers.
-            </p>
+            )}
           </div>
-        )}
+          <p className="text-[10px] text-[#6E7387] italic">
+            {t('voiceToSign.annotationNote')}
+          </p>
+        </div>
 
         {/* AvatarStage Component */}
         <div className="relative">
@@ -345,11 +413,11 @@ export const VoiceToSignPage: React.FC = () => {
             <div className="px-5 py-3 rounded-2xl bg-[#2B2D42]/90 text-white backdrop-blur-md max-w-xl shadow-lg border border-white/20">
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                  Avatar Signing
+                  {t('voiceToSign.avatarSigning')}
                 </span>
                 {currentToken && !currentToken.hasSign && (
                   <span className="px-2 py-0.5 rounded-full bg-[#FF8A8A] text-white text-[9px] font-black uppercase">
-                    (no sign yet)
+                    {t('voiceToSign.notInVocabYet')}
                   </span>
                 )}
               </div>
@@ -369,16 +437,23 @@ export const VoiceToSignPage: React.FC = () => {
                         className={`cursor-pointer px-1.5 py-0.5 rounded-lg transition-all ${
                           isCurrent
                             ? 'bg-[#7C9CFF] text-white font-black shadow-sm scale-105 ring-2 ring-white/50'
+                            : !token.hasSign
+                            ? 'bg-[#FF8A8A]/30 text-white/90 border border-[#FF8A8A]/50 hover:bg-[#FF8A8A]/40'
                             : 'text-white/80 hover:text-white hover:bg-white/10'
                         }`}
-                        title={token.gloss || '(no sign yet)'}
+                        title={token.gloss ? t('voiceToSign.signTooltip', { gloss: token.gloss }) : t('voiceToSign.notInVocabTooltip', { text: token.originalText })}
                       >
                         {token.originalText}
+                        {!token.hasSign && (
+                          <span className="ml-1 text-[9px] text-[#FFB59E] font-bold">
+                            {t('voiceToSign.notInVocabYet')}
+                          </span>
+                        )}
                       </span>
                     );
                   })
                 ) : (
-                  <span className="italic text-white/50">Type something to translate...</span>
+                  <span className="italic text-white/50">{t('voiceToSign.typeSomething')}</span>
                 )}
               </div>
             </div>
@@ -390,7 +465,7 @@ export const VoiceToSignPage: React.FC = () => {
                 onClick={handlePrevious}
                 disabled={currentIndex === 0}
                 className="p-2.5 text-[#6E7387] hover:text-[#2B2D42] disabled:opacity-40 rounded-full clay-focus transition-colors"
-                title="Previous sign"
+                title={t('voiceToSign.prevSign')}
               >
                 <SkipBack className="w-4 h-4" />
               </button>
@@ -399,7 +474,7 @@ export const VoiceToSignPage: React.FC = () => {
                 type="button"
                 onClick={handleTogglePlay}
                 className="w-12 h-12 rounded-full bg-[#FF8A8A] hover:bg-[#FF7373] text-white flex items-center justify-center shadow-clay-raised-sm clay-focus transition-transform active:scale-95"
-                title={playing ? 'Pause' : 'Play'}
+                title={playing ? t('voiceToSign.pause') : t('voiceToSign.play')}
               >
                 {playing ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
               </button>
@@ -409,7 +484,7 @@ export const VoiceToSignPage: React.FC = () => {
                 onClick={handleNext}
                 disabled={currentIndex >= tokens.length - 1}
                 className="p-2.5 text-[#6E7387] hover:text-[#2B2D42] disabled:opacity-40 rounded-full clay-focus transition-colors"
-                title="Next sign"
+                title={t('voiceToSign.nextSign')}
               >
                 <SkipForward className="w-4 h-4" />
               </button>
@@ -418,16 +493,16 @@ export const VoiceToSignPage: React.FC = () => {
                 type="button"
                 onClick={handleReplay}
                 className="p-2.5 text-[#6E7387] hover:text-[#2B2D42] rounded-full clay-focus transition-colors"
-                title="Replay from start"
+                title={t('voiceToSign.replay')}
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
 
               <button
                 type="button"
-                onClick={() => speech.speak(inputText, { isUserClick: true, lang: language === 'ISL' ? 'en-IN' : 'en-US' })}
+                onClick={() => speech.speak(inputText, { isUserClick: true, lang: activeInputVoiceCode })}
                 className="p-2.5 text-[#6E7387] hover:text-[#7C9CFF] rounded-full clay-focus transition-colors"
-                title="Speak sentence aloud"
+                title={t('voiceToSign.speakAloud', { lang: activeInputMeta.name })}
               >
                 <Volume2 className="w-4 h-4" />
               </button>
@@ -445,7 +520,7 @@ export const VoiceToSignPage: React.FC = () => {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder="Type something to translate to sign..."
+              placeholder={t('voiceToSign.typePlaceholder')}
               className="clay-input w-full pr-10 text-sm font-bold"
             />
             {inputText && (
@@ -453,7 +528,7 @@ export const VoiceToSignPage: React.FC = () => {
                 type="button"
                 onClick={handleClearText}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6E7387] hover:text-[#2B2D42] p-1 rounded-full clay-focus"
-                title="Clear input"
+                title={t('voiceToSign.clearInput')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -470,7 +545,7 @@ export const VoiceToSignPage: React.FC = () => {
                   ? 'bg-[#FF8A8A] text-white shadow-clay-pressed animate-pulse ring-2 ring-red-400'
                   : 'bg-[#7C9CFF] text-white shadow-clay-raised hover:brightness-105'
               }`}
-              title={isListening ? 'Listening... click to stop' : 'Click to speak'}
+              title={isListening ? t('voiceToSign.micListening') : t('voiceToSign.micClick')}
             >
               {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
             </button>
@@ -481,23 +556,17 @@ export const VoiceToSignPage: React.FC = () => {
               disabled={!inputText.trim()}
               className="clay-button bg-[#2B2D42] text-white px-7 py-3.5 text-sm font-black clay-focus disabled:opacity-50"
             >
-              Sign This
+              {t('voiceToSign.signThis')}
             </button>
           </div>
         </form>
 
-        {/* 5 Quick-Pick Example Chips */}
+        {/* Quick-Pick Example Chips for active input language */}
         <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-200/50 mt-3">
           <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
-            Quick Examples:
+            {t('voiceToSign.quickExamples', { lang: activeInputMeta.nativeName })}
           </span>
-          {[
-            'Hello, how are you?',
-            'Thank you very much.',
-            'Please help me.',
-            'Goodbye, my friend!',
-            'Yes, good friend.',
-          ].map((sample) => (
+          {(LOCALIZED_EXAMPLES[inputLocale] || LOCALIZED_EXAMPLES.en).map((sample) => (
             <button
               key={sample}
               type="button"

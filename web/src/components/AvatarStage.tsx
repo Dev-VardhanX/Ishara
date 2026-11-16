@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, HandMetal } from 'lucide-react';
 import { SignIcon } from './SignIcon';
 import { SIGN_VOCABULARY } from '../ml';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 interface AvatarStageProps {
   currentGloss: string | null;
@@ -14,11 +15,15 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
   speed,
   playing,
 }) => {
+  const { t } = useLocaleStore();
+
   const normalizedGloss = currentGloss
     ? currentGloss.trim().toUpperCase().replace(/^(ISL_|ASL_)/, '')
     : null;
 
   const signDef = normalizedGloss ? SIGN_VOCABULARY[normalizedGloss] : null;
+  const localizedWord = normalizedGloss ? t(`signs.${normalizedGloss}.word`) : null;
+  const localizedDesc = normalizedGloss ? t(`signs.${normalizedGloss}.desc`) : null;
 
   return (
     <div className="clay-card p-6 relative overflow-hidden bg-gradient-to-b from-[#C4B5FD]/20 via-[#E0E7FF]/30 to-[#E9EEF7] min-h-[460px] flex flex-col justify-between select-none">
@@ -26,13 +31,13 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
       <div className="flex items-center justify-between z-10">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur border border-slate-200/60 text-xs font-black text-[#2B2D42] shadow-sm">
           <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
-          <span>Visual Sign Gesture Stage</span>
+          <span>{t('signToVoice.avatarStageTitle') !== 'signToVoice.avatarStageTitle' ? t('signToVoice.avatarStageTitle') : 'Stage'}</span>
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-1"></span>
         </div>
 
         <div className="flex items-center gap-2">
           <div className="px-3 py-1 rounded-full bg-white/80 backdrop-blur text-[11px] font-bold text-[#6E7387] border border-slate-200/60 shadow-sm">
-            {playing ? `Signing at ${speed}x` : 'Paused'}
+            {playing ? `${speed}x` : t('signToVoice.cameraPaused')}
           </div>
         </div>
       </div>
@@ -58,29 +63,35 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
         {/* Current Gloss ID & Word */}
         <div className="text-center space-y-1.5 max-w-md px-4">
           <p className="text-[10px] font-black uppercase text-[#6E7387] tracking-widest">
-            {normalizedGloss ? 'Active Sign Gloss' : 'Rest Position'}
+            {normalizedGloss ? t('signToVoice.activeGlosses') : 'NEUTRAL_REST'}
           </p>
           <div className="inline-block px-5 py-2 rounded-2xl bg-white/90 backdrop-blur shadow-clay-raised-sm border border-slate-100">
             <h2 className="text-2xl sm:text-3xl font-black text-[#2B2D42] tracking-tight">
-              {normalizedGloss ? normalizedGloss : 'NEUTRAL_REST'}
+              {localizedWord && localizedWord !== `signs.${normalizedGloss}.word` ? (
+                <div className="flex items-center gap-2 justify-center">
+                  <span>{localizedWord}</span>
+                  <span className="text-xs font-mono text-[#6E7387] uppercase">({normalizedGloss})</span>
+                </div>
+              ) : (
+                normalizedGloss || 'NEUTRAL_REST'
+              )}
             </h2>
           </div>
 
           {/* Gesture Kinematics & Execution Guide */}
           <p className="text-xs font-semibold text-[#6E7387] pt-1">
-            {signDef?.description ||
-              (normalizedGloss
-                ? `Perform gesture for sign "${normalizedGloss}".`
-                : 'Avatar hands in neutral resting pose awaiting input.')}
+            {localizedDesc && localizedDesc !== `signs.${normalizedGloss}.desc`
+              ? localizedDesc
+              : signDef?.description || ''}
           </p>
         </div>
       </div>
 
       {/* Footer Info */}
       <div className="z-10 flex items-center justify-between text-[11px] font-semibold text-[#6E7387] border-t border-slate-200/50 pt-3">
-        <span>Handshape & Kinematics Sync</span>
+        <span>{t('signToVoice.holdStability')}</span>
         <span className="font-mono text-[10px] text-[#7C9CFF]">
-          {signDef?.twoHanded ? '2-Handed Gesture' : '1-Handed Gesture'}
+          {signDef?.twoHanded ? '2H' : '1H'}
         </span>
       </div>
     </div>

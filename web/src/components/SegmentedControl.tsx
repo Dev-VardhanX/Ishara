@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguageStore } from '../store/useLanguageStore';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { Sparkles } from 'lucide-react';
 
 interface SegmentedControlProps {
@@ -9,6 +10,7 @@ interface SegmentedControlProps {
 
 export const SegmentedControl: React.FC<SegmentedControlProps> = ({ className = '', showBadge = true }) => {
   const { language, setLanguage } = useLanguageStore();
+  const { t } = useLocaleStore();
 
   return (
     <div className={`inline-flex items-center gap-1.5 ${className}`}>
@@ -40,7 +42,7 @@ export const SegmentedControl: React.FC<SegmentedControlProps> = ({ className = 
           <span>ASL</span>
           {showBadge && (
             <span className="ml-1 px-1.5 py-0.2 rounded-full text-[9px] font-black uppercase bg-[#FFE8E2] text-[#FF8A8A] border border-[#FFB59E]/40">
-              Beta
+              {t('common.beta')}
             </span>
           )}
         </button>

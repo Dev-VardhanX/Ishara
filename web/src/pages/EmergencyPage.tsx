@@ -355,7 +355,7 @@ export const EmergencyPage: React.FC = () => {
         badge={
           <span className="px-3 py-1 rounded-full bg-[#FFE8E2] border border-[#FF4D4D] text-[#D32F2F] text-xs font-black uppercase tracking-wider flex items-center gap-1.5 animate-pulse">
             <AlertTriangle className="w-3.5 h-3.5" />
-            <span>SOS ACTIVE</span>
+            <span>{t('emergency.sosActivePill')}</span>
           </span>
         }
       />
@@ -427,7 +427,7 @@ export const EmergencyPage: React.FC = () => {
                   {t('emergency.turnVolumeUp')}
                 </p>
                 <p className="text-xs text-[#6E7387] max-w-md mx-auto font-medium">
-                  Plays a high-decibel wailing siren via Web Audio, flashes a safe visual beacon, vibrates your phone, and keeps screen awake.
+                  {t('emergency.sirenExplanation')}
                 </p>
               </div>
             </div>
@@ -440,7 +440,7 @@ export const EmergencyPage: React.FC = () => {
           <a
             href="tel:112"
             className="min-h-[58px] p-4 rounded-[28px] bg-white/90 hover:bg-white border-2 border-emerald-300 text-emerald-800 font-black text-base flex items-center justify-center gap-3 shadow-clay-raised hover:scale-101 active:shadow-clay-pressed transition-all clay-focus"
-            title="Call 112 National Emergency Helpline"
+            title={t('emergency.call112Title')}
           >
             <div className="w-9 h-9 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm shrink-0">
               <PhoneCall className="w-4 h-4" />
@@ -466,7 +466,7 @@ export const EmergencyPage: React.FC = () => {
                 {locating ? t('emergency.locating') : t('emergency.locationBtn')}
               </span>
               <span className="block text-[10px] font-bold text-[#6E7387]">
-                Sends Google Maps Link via WhatsApp or SMS
+                {t('emergency.locationNote')}
               </span>
             </div>
           </button>
@@ -492,7 +492,7 @@ export const EmergencyPage: React.FC = () => {
           <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/80 text-[#6E7387] text-xs font-semibold flex items-center gap-2 shadow-sm">
             <Info className="w-4 h-4 text-[#7C9CFF] shrink-0" />
             <span>
-              Voice synthesis is not supported on this browser. Full-screen visual text cards and sirens work normally.
+              {t('emergency.noVoiceNotice')}
             </span>
           </div>
         )}
@@ -562,7 +562,7 @@ export const EmergencyPage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 backdrop-blur text-sm font-black uppercase tracking-wider">
               <Volume2 className="w-5 h-5 animate-pulse" />
-              <span>Speaking continuously every 6 seconds</span>
+              <span>{t('emergency.speakingContinuous')}</span>
             </div>
 
             <button

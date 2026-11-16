@@ -1,0 +1,231 @@
+{
+  "locale": "ta",
+  "languageName": "Tamil",
+  "nativeName": "தமிழ்",
+  "voiceCode": "ta-IN",
+  "script": "Tamil",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": ".",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "வணக்கம்",
+      "alternatives": ["ஹலோ", "நமஸ்காரம்", "வணக்கங்கள்", "வந்தனம்", "வணங்குகிறேன்"],
+      "romanized": ["vanakkam", "hello", "namaskaram", "vanakkangal"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "நன்றி",
+      "alternatives": ["மிக்க நன்றி", "ரொம்ப நன்றி", "தேங்க்ஸ்", "நன்றிகள்", "நன்றியுரை"],
+      "romanized": ["nandri", "mikka nandri", "romba nandri", "thanks"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "தயவுசெய்து",
+      "alternatives": ["ப்ளீஸ்", "தயவுபண்ணி", "கொஞ்சம்", "தயைகூர்ந்து", "பணிவோடு"],
+      "romanized": ["dayavuseithu", "thayavuseithu", "please", "konjam"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "மன்னிக்கவும்",
+      "alternatives": ["மன்னிப்பு", "ஸாரி", "மன்னிச்சுக்கோங்க", "தவறு", "மன்னிக்க வேண்டுகிறேன்"],
+      "romanized": ["mannikkavum", "mannippu", "sorry", "thavaru"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "வருகிறேன்",
+      "alternatives": ["போய் வருகிறேன்", "பை", "டாடா", "மீண்டும் சந்திப்போம்", "சென்று வருகிறேன்"],
+      "romanized": ["varugiren", "poi varugiren", "bye", "tata"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "எப்படி இருக்கிறீர்கள்",
+      "alternatives": ["எப்படி இருக்கீங்க", "நலமா", "சௌக்கியமா", "எப்படி இருக்கு", "நலமாக உள்ளீர்களா"],
+      "romanized": ["eppadi irukkireergal", "eppadi irukkeenga", "nalama", "soukiyama"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "ஆம்",
+      "alternatives": ["ஆமாம்", "சரி", "நிச்சயமாக", "ஆம்ங்க", "சரிதான்"],
+      "romanized": ["aam", "aamam", "sari", "nichayamaga"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "இல்லை",
+      "alternatives": ["இல்ல", "வேண்டாம்", "கூடாது", "இல்லீங்க", "இல்லவே இல்லை"],
+      "romanized": ["illai", "illa", "vendaam", "koodathu"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "நல்லது",
+      "alternatives": ["நன்று", "அருமை", "சிறப்பு", "நல்லா", "அற்புதம்"],
+      "romanized": ["nallathu", "nandru", "arumai", "nalla", "sirappu"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "கெட்டது",
+      "alternatives": ["மோசம்", "சரியில்லை", "கெட்ட", "பாழானது", "தவறானது"],
+      "romanized": ["kettathu", "mosam", "sariyillai", "ketta"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "உதவி",
+      "alternatives": ["உதவுங்கள்", "உதவி செய்யுங்கள்", "ஹெல்ப்", "காப்பாற்றுங்கள்", "ஆதரவு"],
+      "romanized": ["uthavi", "uthavungal", "help", "kaappattungal"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "நிறுத்துங்கள்",
+      "alternatives": ["நிறுத்து", "நில்", "நில்லுங்கள்", "போதும்", "நிற்கவும்"],
+      "romanized": ["niruthungal", "niruthe", "nil", "pothum"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "சாப்பிடுங்கள்",
+      "alternatives": ["சாப்பிடு", "சாப்பாடு", "உண்", "உண்ணுங்கள்", "சாப்பிடுகிறேன்"],
+      "romanized": ["saappidungal", "saappidu", "saappaadu", "un"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "குடியுங்கள்",
+      "alternatives": ["குடி", "அருந்துங்கள்", "தண்ணீர் குடி", "அருந்து", "பருகவும்"],
+      "romanized": ["kudiyungal", "kudi", "arunthungal", "arunthu"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "தண்ணீர்",
+      "alternatives": ["நீர்", "தண்ணி", "குடிநீர்", "சுடுதண்ணீர்", "குளிர்ந்த நீர்"],
+      "romanized": ["thanneer", "neer", "thanni", "water", "kudineer"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "உணவு",
+      "alternatives": ["சாப்பாடு", "சோறு", "ஆகாரம்", "தீவனம்", "உணவுப் பொருள்"],
+      "romanized": ["unavu", "saappaadu", "sooru", "aagaaram"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "வீடு",
+      "alternatives": ["இல்லம்", "மனை", "வீட்டுக்கு", "குடில்", "வாழிடம்"],
+      "romanized": ["veedu", "illam", "manai", "veettukku"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "நண்பர்",
+      "alternatives": ["நண்பன்", "தோழன்", "தோழி", "சிநேகிதர்", "நட்பு"],
+      "romanized": ["nanbar", "nanban", "thozhan", "thozi", "sinegithar"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "பெயர்",
+      "alternatives": ["பேர்", "நாமம்", "உன் பெயர்", "பெயர் என்ன", "அழைப்புப் பெயர்"],
+      "romanized": ["peyar", "per", "naamam", "identity"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "அன்பு",
+      "alternatives": ["காதல்", "பாசம்", "பிரியம்", "நேசம்", "அன்பான"],
+      "romanized": ["anbu", "kaadhal", "paasam", "nesam"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "வணக்கம் எப்படி இருக்கிறீர்கள்", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "எப்படி இருக்கிறீர்கள்", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "நான் நன்றாக உள்ளேன் நன்றி", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "தயவுசெய்து உதவி செய்யுங்கள்", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "உதவி செய்யுங்கள் தயவுசெய்து", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "நன்றி நண்பரே", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "வணக்கம் நண்பரே", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "போய் வருகிறேன் நண்பரே", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "எனக்கு தண்ணீர் வேண்டும்", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "தயவுசெய்து தண்ணீர் கொடுங்கள்", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "எனக்கு உணவு வேண்டும்", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "உங்கள் பெயர் என்ன", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "உன் பெயர் என்ன நண்பா", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "உணவு சாப்பிடுங்கள்", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "தண்ணீர் குடியுங்கள்", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "தயவுசெய்து நிறுத்துங்கள்", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "ஆம் தயவுசெய்து", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "இல்லை நன்றி", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "மன்னிக்கவும் என் நண்பரே", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "உணவு நன்றாக உள்ளது", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "உணவு மோசம்", "glosses": ["BAD", "FOOD"] }
+  ],
+  "grammarWords": {
+    "என்ன": "what",
+    "எங்கே": "where",
+    "யார்": "who",
+    "ஏன்": "why",
+    "எப்படி": "how",
+    "உள்ளது": "is",
+    "இருக்கின்றன": "are",
+    "நான்": "I",
+    "நீங்கள்": "you",
+    "நீ": "you",
+    "என்": "my",
+    "எனது": "my",
+    "உங்கள்": "your",
+    "உன்": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "வணக்கம்!",
+    "THANK_YOU": "நன்றி!",
+    "PLEASE": "தயவுசெய்து.",
+    "SORRY": "மன்னிக்கவும்.",
+    "GOODBYE": "வருகிறேன்!",
+    "HOW_ARE_YOU": "எப்படி இருக்கிறீர்கள்?",
+    "YES": "ஆம்.",
+    "NO": "இல்லை.",
+    "GOOD": "நல்லது.",
+    "BAD": "கெட்டது.",
+    "HELP": "உதவி செய்யுங்கள்!",
+    "STOP": "நிறுத்துங்கள்.",
+    "EAT": "உணவு சாப்பிடுங்கள்.",
+    "DRINK": "தண்ணீர் குடியுங்கள்.",
+    "WATER": "தண்ணீர், தயவுசெய்து.",
+    "FOOD": "உணவு, தயவுசெய்து.",
+    "HOME": "வீடு.",
+    "FRIEND": "நண்பர்.",
+    "NAME": "பெயர்.",
+    "LOVE": "அன்பு.",
+    "HELLO HOW_ARE_YOU": "வணக்கம், எப்படி இருக்கிறீர்கள்?",
+    "HOW_ARE_YOU GOOD": "எப்படி இருக்கிறீர்கள்? நான் நலமாக உள்ளேன்.",
+    "HOW_ARE_YOU BAD": "எப்படி இருக்கிறீர்கள்? எனக்கு உடம்பு சரியில்லை.",
+    "GOOD THANK_YOU": "நன்று, மிக்க நன்றி!",
+    "THANK_YOU FRIEND": "நன்றி, என் நண்பரே!",
+    "HELLO FRIEND": "வணக்கம், என் நண்பரே!",
+    "GOODBYE FRIEND": "போய் வருகிறேன், என் நண்பரே!",
+    "HELLO GOODBYE": "வணக்கம் மற்றும் விடைபெறுகிறேன்!",
+    "SORRY FRIEND": "மன்னிக்கவும், என் நண்பரே.",
+    "PLEASE HELP": "தயவுசெய்து எனக்கு உதவி செய்யுங்கள்!",
+    "HELP PLEASE": "உதவி செய்யுங்கள், தயவுசெய்து!",
+    "PLEASE STOP": "தயவுசெய்து நிறுத்துங்கள்.",
+    "STOP PLEASE": "நிறுத்துங்கள், தயவுசெய்து.",
+    "SORRY PLEASE": "மன்னிக்கவும், தயவுசெய்து பொறுத்துக் கொள்ளுங்கள்.",
+    "YES PLEASE": "ஆம், தயவுசெய்து.",
+    "NO THANK_YOU": "இல்லை, நன்றி.",
+    "YES THANK_YOU": "ஆம், மிக்க நன்றி!",
+    "YES GOOD": "ஆம், இது மிகவும் நல்லது.",
+    "NO BAD": "இல்லை, இது சரியில்லை.",
+    "PLEASE WATER": "தயவுசெய்து எனக்கு தண்ணீர் வேண்டும்.",
+    "PLEASE FOOD": "தயவுசெய்து எனக்கு உணவு வேண்டும்.",
+    "EAT FOOD": "உணவு சாப்பிடுங்கள்.",
+    "DRINK WATER": "தண்ணீர் குடியுங்கள்.",
+    "FOOD EAT": "உணவு சாப்பிடுங்கள்.",
+    "WATER DRINK": "தண்ணீர் குடியுங்கள்.",
+    "GOOD FOOD": "உணவு மிகவும் அருமையாக உள்ளது.",
+    "BAD FOOD": "உணவு மோசம்.",
+    "FRIEND HELP": "நண்பரே, தயவுசெய்து உதவுங்கள்!",
+    "HELP FRIEND": "நண்பருக்கு உதவி செய்யுங்கள்!",
+    "FRIEND LOVE": "நண்பர் மீது மிகுந்த அன்பு!",
+    "LOVE FRIEND": "நண்பரை நேசிக்கிறேன்!",
+    "GOOD FRIEND": "நீங்கள் ஒரு நல்ல நண்பர்.",
+    "GOOD HOME": "வீடு மிகவும் அழகாக உள்ளது.",
+    "LOVE HOME": "நான் என் வீட்டை நேசிக்கிறேன்.",
+    "NAME FRIEND": "உங்கள் பெயர் என்ன, நண்பரே?",
+    "HELLO NAME": "வணக்கம், என் பெயர்..."
+  }
+}

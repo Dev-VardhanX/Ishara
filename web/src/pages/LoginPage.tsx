@@ -3,6 +3,7 @@ import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { IsharaLogo } from '../components/IsharaLogo';
 import { LocaleSelector } from '../components/LocaleSelector';
+import { useLocaleStore } from '../store/useLocaleStore';
 import {
   HandMetal,
   Mail,
@@ -17,6 +18,7 @@ import {
 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
+  const { t } = useLocaleStore();
   const navigate = useNavigate();
   const location = useLocation();
   const { user, login, signup, resetPassword, isConfigured } = useAuth();
@@ -40,8 +42,8 @@ export const LoginPage: React.FC = () => {
 
   // Update page title
   useEffect(() => {
-    document.title = isSignUp ? 'Sign Up — Ishara' : 'Sign In — Ishara';
-  }, [isSignUp]);
+    document.title = isSignUp ? `${t('nav.signUp')} — Ishara` : `${t('nav.login')} — Ishara`;
+  }, [isSignUp, t]);
 
   // If already authenticated, redirect
   useEffect(() => {
@@ -129,7 +131,7 @@ export const LoginPage: React.FC = () => {
           <div className="w-full max-w-[320px] aspect-[3/4] rounded-[24px] overflow-hidden shadow-clay-raised mb-6 bg-slate-200 border-2 border-white/80">
             <img
               src="/login-character.jpg"
-              alt="Ishara 3D sign language avatar"
+              alt={t('login.avatarAlt')}
               width={896}
               height={1200}
               className="w-full h-full object-cover object-center"
@@ -141,10 +143,10 @@ export const LoginPage: React.FC = () => {
           </div>
 
           <h2 className="text-2xl lg:text-3xl font-black text-[#2B2D42] tracking-tight">
-            {isSignUp ? 'Join Ishara Today!' : 'Welcome Back!'}
+            {isSignUp ? t('login.joinToday') : t('login.welcomeBackHeader')}
           </h2>
           <p className="text-xs font-semibold text-[#6E7387] max-w-xs mt-2.5 leading-relaxed">
-            "Every gesture matters. We're here to help you connect with the world."
+            {t('login.quoteText')}
           </p>
         </div>
 
@@ -152,7 +154,7 @@ export const LoginPage: React.FC = () => {
         <div className="md:col-span-7 p-8 lg:p-12 flex flex-col justify-center bg-[#E9EEF7]">
           {/* Brand header */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
-            <NavLink to="/" className="flex items-center clay-focus rounded-xl" aria-label="Ishara Home">
+            <NavLink to="/" className="flex items-center clay-focus rounded-xl" aria-label={t('login.homeAria')}>
               <IsharaLogo size="sm" showWordmark={true} />
             </NavLink>
 
@@ -167,8 +169,8 @@ export const LoginPage: React.FC = () => {
               }`}
               title={
                 isConfigured
-                  ? 'Connected to live Supabase Auth instance'
-                  : 'Using offline mock authentication (accepts any email)'
+                  ? t('login.supabaseTooltip')
+                  : t('login.demoTooltip')
               }
             >
               <span
@@ -176,18 +178,18 @@ export const LoginPage: React.FC = () => {
                   isConfigured ? 'bg-emerald-500 animate-pulse' : 'bg-[#7C9CFF]'
                 }`}
               ></span>
-              <span>{isConfigured ? 'Supabase Auth' : 'Demo Mock Auth'}</span>
+              <span>{isConfigured ? t('login.supabaseAuth') : t('login.demoAuth')}</span>
             </div>
           </div>
         </div>
 
           <h1 className="text-2xl sm:text-3xl font-black text-[#2B2D42] tracking-tight">
-            {isSignUp ? 'Create an Account' : 'Sign In'}
+            {isSignUp ? t('login.createAccount') : t('login.loginTab')}
           </h1>
           <p className="text-xs font-semibold text-[#6E7387] mt-1 mb-6">
             {isSignUp
-              ? 'Enter your details to create your personal learning profile.'
-              : 'Enter your details to access your translator.'}
+              ? t('login.createAccountSubtitle')
+              : t('login.signInSubtitle')}
           </p>
 
           {/* Social Sign In (Visible but disabled) */}
@@ -196,7 +198,7 @@ export const LoginPage: React.FC = () => {
               type="button"
               disabled
               className="clay-button clay-button-white w-full py-3 flex items-center justify-center gap-3 text-xs font-bold opacity-60 cursor-not-allowed border border-slate-200/60"
-              title="Google Single Sign-On coming soon in v1.1"
+              title={t('login.googleTooltip')}
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
                 <path
@@ -216,9 +218,9 @@ export const LoginPage: React.FC = () => {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
                 />
               </svg>
-              <span>Continue with Google</span>
+              <span>{t('login.continueWithGoogle')}</span>
               <span className="text-[9px] uppercase tracking-wider font-black px-1.5 py-0.5 rounded bg-slate-100 text-slate-500">
-                Soon
+                {t('login.soonBadge')}
               </span>
             </button>
           </div>
@@ -227,7 +229,7 @@ export const LoginPage: React.FC = () => {
           <div className="relative flex py-1 items-center mb-6">
             <div className="flex-grow border-t border-slate-300"></div>
             <span className="flex-shrink mx-4 text-[10px] font-black uppercase text-[#6E7387] tracking-widest">
-              or with email
+              {t('login.orWithEmail')}
             </span>
             <div className="flex-grow border-t border-slate-300"></div>
           </div>
@@ -252,14 +254,14 @@ export const LoginPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-xs font-black text-[#2B2D42] mb-1.5">
-                Email Address
+                {t('login.emailLabel')}
               </label>
               <div className="relative">
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="name@example.com"
+                  placeholder={t('login.emailPlaceholder')}
                   className="clay-input w-full text-xs font-semibold pl-10"
                   required
                   disabled={isSubmitting}
@@ -271,7 +273,7 @@ export const LoginPage: React.FC = () => {
             <div>
               <div className="flex justify-between items-center mb-1.5">
                 <label className="block text-xs font-black text-[#2B2D42]">
-                  Password
+                  {t('login.passwordLabel')}
                 </label>
                 {!isSignUp && (
                   <button
@@ -280,7 +282,7 @@ export const LoginPage: React.FC = () => {
                     disabled={isSubmitting}
                     className="text-[11px] font-bold text-[#7C9CFF] hover:underline cursor-pointer"
                   >
-                    Forgot?
+                    {t('login.forgotPassword')}
                   </button>
                 )}
               </div>
@@ -289,7 +291,7 @@ export const LoginPage: React.FC = () => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 6 characters"
+                  placeholder={t('login.passwordPlaceholder')}
                   className="clay-input w-full text-xs font-semibold pl-10 pr-10"
                   required
                   disabled={isSubmitting}
@@ -299,7 +301,7 @@ export const LoginPage: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#6E7387] hover:text-[#2B2D42]"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -320,7 +322,7 @@ export const LoginPage: React.FC = () => {
                   htmlFor="keep-signed-in"
                   className="text-xs font-bold text-[#6E7387] cursor-pointer"
                 >
-                  Keep me signed in
+                  {t('login.keepSignedIn')}
                 </label>
               </div>
             )}
@@ -334,10 +336,10 @@ export const LoginPage: React.FC = () => {
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{isSignUp ? 'Creating Account...' : 'Signing In...'}</span>
+                  <span>{isSignUp ? t('login.creatingAccount') : t('login.signingIn')}</span>
                 </>
               ) : (
-                <span>{isSignUp ? 'Create an Account' : 'Sign In'}</span>
+                <span>{isSignUp ? t('login.createAccountBtn') : t('login.signInBtn')}</span>
               )}
             </button>
           </form>
@@ -346,7 +348,7 @@ export const LoginPage: React.FC = () => {
           <div className="text-center text-xs font-semibold text-[#6E7387] mt-6">
             {isSignUp ? (
               <p>
-                Already have an account?{' '}
+                {t('login.alreadyAccount')}{' '}
                 <button
                   type="button"
                   onClick={() => {
@@ -355,12 +357,12 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="text-[#7C9CFF] font-black hover:underline"
                 >
-                  Sign In
+                  {t('login.signInBtn')}
                 </button>
               </p>
             ) : (
               <p>
-                Don't have an account?{' '}
+                {t('login.noAccount')}{' '}
                 <button
                   type="button"
                   onClick={() => {
@@ -369,7 +371,7 @@ export const LoginPage: React.FC = () => {
                   }}
                   className="text-[#7C9CFF] font-black hover:underline"
                 >
-                  Create an account
+                  {t('login.createAccountBtn')}
                 </button>
               </p>
             )}
@@ -378,7 +380,7 @@ export const LoginPage: React.FC = () => {
           {/* Security note */}
           <div className="flex items-center justify-center gap-1.5 text-[11px] font-semibold text-[#6E7387] mt-6 pt-4 border-t border-slate-200/60">
             <ShieldCheck className="w-3.5 h-3.5 text-[#A8E6A1]" />
-            <span>Your data is processed securely and privately.</span>
+            <span>{t('login.securityNote')}</span>
           </div>
         </div>
       </div>

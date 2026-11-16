@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import enTranslations from '../locales/en.json';
+import { loadLexicon } from '../data/lexicons';
 
 export type AppLocale = 'en' | 'hi' | 'bn' | 'mr' | 'ta' | 'te' | 'gu' | 'kn' | 'ml' | 'pa';
 
@@ -44,6 +45,8 @@ const loadedTranslations: Record<string, Record<string, any>> = {
 };
 
 const STORAGE_KEY = 'ishara_app_locale';
+const TRANSLATION_LOCALE_STORAGE_KEY = 'ishara_translation_locale';
+const SUBTITLE_STORAGE_KEY = 'ishara_show_english_subtitle';
 
 // Helper to access nested keys like 'nav.dashboard'
 function getNestedValue(obj: any, path: string): any {
@@ -60,12 +63,19 @@ function getNestedValue(obj: any, path: string): any {
   return current;
 }
 
-interface LocaleState {
+export interface LocaleState {
   locale: AppLocale;
   voiceCode: string;
+  translationLocale: AppLocale;
+  translationVoiceCode: string;
+  showEnglishSubtitle: boolean;
   loading: boolean;
   setLocale: (locale: AppLocale) => Promise<void>;
+  setTranslationLocale: (locale: AppLocale) => Promise<void>;
+  setShowEnglishSubtitle: (show: boolean) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
+  formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions) => string;
+  formatNumber: (num: number, options?: Intl.NumberFormatOptions) => string;
 }
 
 const getInitialLocale = (): AppLocale => {
@@ -77,27 +87,51 @@ const getInitialLocale = (): AppLocale => {
   return 'en';
 };
 
+const getInitialTranslationLocale = (interfaceLoc: AppLocale): AppLocale => {
+  if (typeof window === 'undefined') return interfaceLoc;
+  const saved = localStorage.getItem(TRANSLATION_LOCALE_STORAGE_KEY) as AppLocale;
+  if (saved && SUPPORTED_LOCALES.some((l) => l.code === saved)) {
+    return saved;
+  }
+  return interfaceLoc;
+};
+
+const getInitialSubtitlePreference = (): boolean => {
+  if (typeof window === 'undefined') return true;
+  const saved = localStorage.getItem(SUBTITLE_STORAGE_KEY);
+  return saved !== null ? saved === 'true' : true;
+};
+
 export const useLocaleStore = create<LocaleState>((set, get) => {
   const initial = getInitialLocale();
+  const initialTransLocale = getInitialTranslationLocale(initial);
+  const initialSubtitles = getInitialSubtitlePreference();
 
   // Set document lang attribute on startup
   if (typeof document !== 'undefined') {
     document.documentElement.lang = initial;
   }
 
-  // Pre-fetch initial non-en locale if needed
+  // Pre-fetch initial non-en locale & lexicon
   if (initial !== 'en') {
-    localeLoaders[initial]().then((mod) => {
-      loadedTranslations[initial] = mod.default || mod;
-      set({ loading: false });
-    }).catch((err) => {
-      console.warn('Failed to load initial locale:', err);
-    });
+    localeLoaders[initial]()
+      .then((mod) => {
+        loadedTranslations[initial] = mod.default || mod;
+        set({ loading: false });
+      })
+      .catch((err) => {
+        console.warn('Failed to load initial locale:', err);
+      });
   }
+  loadLexicon(initialTransLocale).catch(() => {});
 
   return {
     locale: initial,
     voiceCode: SUPPORTED_LOCALES.find((l) => l.code === initial)?.voiceCode || 'en-IN',
+    translationLocale: initialTransLocale,
+    translationVoiceCode:
+      SUPPORTED_LOCALES.find((l) => l.code === initialTransLocale)?.voiceCode || 'en-IN',
+    showEnglishSubtitle: initialSubtitles,
     loading: false,
 
     setLocale: async (newLocale: AppLocale) => {
@@ -119,15 +153,51 @@ export const useLocaleStore = create<LocaleState>((set, get) => {
         }
 
         const meta = SUPPORTED_LOCALES.find((l) => l.code === newLocale);
+        const currentTrans = get().translationLocale;
+        // If user hasn't explicitly set a custom translation locale, follow interface locale
+        const savedExplicit =
+          typeof window !== 'undefined'
+            ? localStorage.getItem(TRANSLATION_LOCALE_STORAGE_KEY)
+            : null;
+        const nextTrans = savedExplicit ? currentTrans : newLocale;
+        const nextTransMeta = SUPPORTED_LOCALES.find((l) => l.code === nextTrans);
+
+        loadLexicon(nextTrans).catch(() => {});
+
         set({
           locale: newLocale,
           voiceCode: meta?.voiceCode || 'en-IN',
+          translationLocale: nextTrans,
+          translationVoiceCode: nextTransMeta?.voiceCode || meta?.voiceCode || 'en-IN',
           loading: false,
         });
       } catch (err) {
         console.error(`Failed to load locale '${newLocale}':`, err);
         set({ loading: false });
       }
+    },
+
+    setTranslationLocale: async (newLocale: AppLocale) => {
+      try {
+        await loadLexicon(newLocale);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(TRANSLATION_LOCALE_STORAGE_KEY, newLocale);
+        }
+        const meta = SUPPORTED_LOCALES.find((l) => l.code === newLocale);
+        set({
+          translationLocale: newLocale,
+          translationVoiceCode: meta?.voiceCode || 'en-IN',
+        });
+      } catch (err) {
+        console.error(`Failed to load lexicon for '${newLocale}':`, err);
+      }
+    },
+
+    setShowEnglishSubtitle: (show: boolean) => {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(SUBTITLE_STORAGE_KEY, String(show));
+      }
+      set({ showEnglishSubtitle: show });
     },
 
     t: (key: string, params?: Record<string, string | number>): string => {
@@ -153,10 +223,35 @@ export const useLocaleStore = create<LocaleState>((set, get) => {
 
       return val;
     },
+
+    formatDate: (date: Date | string | number, options?: Intl.DateTimeFormatOptions): string => {
+      try {
+        const d = typeof date === 'string' || typeof date === 'number' ? new Date(date) : date;
+        return new Intl.DateTimeFormat(get().locale, options).format(d);
+      } catch {
+        return String(date);
+      }
+    },
+
+    formatNumber: (num: number, options?: Intl.NumberFormatOptions): string => {
+      try {
+        return new Intl.NumberFormat(get().locale, options).format(num);
+      } catch {
+        return String(num);
+      }
+    },
   };
 });
 
 // Standalone non-hook translator for libraries / scripts
 export const t = (key: string, params?: Record<string, string | number>): string => {
   return useLocaleStore.getState().t(key, params);
+};
+
+export const formatDate = (date: Date | string | number, options?: Intl.DateTimeFormatOptions): string => {
+  return useLocaleStore.getState().formatDate(date, options);
+};
+
+export const formatNumber = (num: number, options?: Intl.NumberFormatOptions): string => {
+  return useLocaleStore.getState().formatNumber(num, options);
 };

@@ -1,6 +1,7 @@
 // src/context/ToastContext.tsx — Friendly Toast Notification & Offline Notice System
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle2, AlertCircle, Info, X, CloudOff } from 'lucide-react';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export type ToastType = 'success' | 'error' | 'info' | 'offline';
 
@@ -56,12 +57,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {showOfflineNotice && (
         <div className="fixed bottom-5 left-5 z-50 flex items-center gap-2.5 px-3.5 py-2 rounded-2xl bg-[#FFE8E2] border border-[#FFB59E] text-[#2B2D42] text-xs font-bold shadow-clay-raised animate-fade-in select-none">
           <CloudOff className="w-4 h-4 text-[#FF8A8A] shrink-0" />
-          <span>Offline, saved on this device</span>
+          <span>{useLocaleStore.getState().t('common.offlineSaved')}</span>
           <button
             type="button"
             onClick={() => setShowOfflineNotice(false)}
             className="p-1 hover:bg-black/5 rounded-lg text-[#6E7387]"
-            title="Dismiss notice"
+            title={useLocaleStore.getState().t('common.dismissNotice')}
           >
             <X className="w-3.5 h-3.5" />
           </button>

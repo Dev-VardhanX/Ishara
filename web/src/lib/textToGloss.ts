@@ -1,7 +1,17 @@
-// src/lib/textToGloss.ts — Text to Sign Language Gloss Parsing Engine
-// Normalizes natural speech/text into standard UPPERCASE_UNDERSCORE Gloss IDs.
+// src/lib/textToGloss.ts — Multilingual Text to Sign Language Gloss Parsing Engine
+// Normalizes natural speech/text into standard UPPERCASE_UNDERSCORE Gloss IDs across 10 Indian languages.
 // Includes rule-based ISL grammatical reordering (SOV order, question words at end,
 // dropping copulas and articles) while keeping ASL ordering intact.
+// Supports Unicode script detection, nukta/chandrabindu normalisation, romanized transliteration,
+// typo tolerance (1-edit distance for 4+ chars), and optional on-device Chrome translation.
+
+import {
+  getLoadedLexicon,
+  detectScriptAndLocale,
+  normalizeLinguisticText,
+  levenshteinDistance,
+  SupportedLocale,
+} from '../data/lexicons';
 
 export interface GlossToken {
   originalText: string;
@@ -9,6 +19,7 @@ export interface GlossToken {
   displayText: string;
   hasSign: boolean;
   isFingerspelled?: boolean;
+  isTranslatedOnDevice?: boolean;
 }
 
 export interface TextToGlossDetails {
@@ -16,472 +27,45 @@ export interface TextToGlossDetails {
   englishOrderText: string;
   islOrderText: string;
   reordered: boolean;
+  detectedScript?: string;
+  detectedLocale?: string;
+  translatedOnDevice?: boolean;
 }
 
 /**
  * Normalizes text by lowercasing and stripping punctuation, preserving all Unicode letters
  */
 export const normalizeText = (text: string): string => {
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return normalizeLinguisticText(text);
 };
 
-/**
- * Indic Vocabulary Table: Maps Hindi, Bengali, Marathi, Tamil, etc. words to Gloss IDs
- */
-export const INDIC_VOCABULARY_MAP: Record<string, string> = {
-  // Hindi
-  'नमस्ते': 'HELLO',
-  'हेलो': 'HELLO',
-  'प्रणाम': 'HELLO',
-  'धन्यवाद': 'THANK_YOU',
-  'शुक्रिया': 'THANK_YOU',
-  'कृपया': 'PLEASE',
-  'माफ़': 'SORRY',
-  'माफी': 'SORRY',
-  'सॉरी': 'SORRY',
-  'अलविदा': 'GOODBYE',
-  'हाँ': 'YES',
-  'हा': 'YES',
-  'नहीं': 'NO',
-  'ना': 'NO',
-  'अच्छा': 'GOOD',
-  'बढ़िया': 'GOOD',
-  'बुरा': 'BAD',
-  'खराब': 'BAD',
-  'मदद': 'HELP',
-  'सहायता': 'HELP',
-  'रुकिए': 'STOP',
-  'रोको': 'STOP',
-  'रुको': 'STOP',
-  'खाना': 'EAT',
-  'खाओ': 'EAT',
-  'खा': 'EAT',
-  'पीना': 'DRINK',
-  'पियो': 'DRINK',
-  'पी': 'DRINK',
-  'पानी': 'WATER',
-  'जल': 'WATER',
-  'भोजन': 'FOOD',
-  'घर': 'HOME',
-  'दोस्त': 'FRIEND',
-  'मित्र': 'FRIEND',
-  'नाम': 'NAME',
-  'प्यार': 'LOVE',
-  'प्रेम': 'LOVE',
-
+// Grammar stop words and copulas to drop in sign glossing across languages
+const ARTICLES_AND_COPULAS = new Set([
+  // English
+  'a', 'an', 'the', 'is', 'are', 'am', 'was', 'were', 'be', 'been', 'being', 'to', 'of', 'in', 'at',
+  // Hindi / Devanagari
+  'है', 'हैं', 'हूँ', 'हो', 'था', 'थी', 'थे', 'का', 'की', 'के', 'में', 'पर', 'को', 'से',
   // Bengali
-  'নমস্কার': 'HELLO',
-  'ধন্যবাদ': 'THANK_YOU',
-  'দয়া': 'PLEASE',
-  'দুঃখিত': 'SORRY',
-  'বিদায়': 'GOODBYE',
-  'হ্যাঁ': 'YES',
-  'না': 'NO',
-  'ভালো': 'GOOD',
-  'খারাপ': 'BAD',
-  'সাহায্য': 'HELP',
-  'থামুন': 'STOP',
-  'খাওয়া': 'EAT',
-  'পান': 'DRINK',
-  'জল': 'WATER',
-  'খাবার': 'FOOD',
-  'বাড়ি': 'HOME',
-  'বন্ধু': 'FRIEND',
-  'নাম': 'NAME',
-  'ভালোবাসা': 'LOVE',
-
-  // Marathi (Devanagari shared with Hindi)
-  'नमस्कार': 'HELLO',
-  'माफ': 'SORRY',
-  'निरोप': 'GOODBYE',
-  'होय': 'YES',
-  'नाही': 'NO',
-  'चांगले': 'GOOD',
-  'वाईट': 'BAD',
-  'थांबा': 'STOP',
-  'अन्न': 'FOOD',
-  'पाणी': 'WATER',
-  'नाव': 'NAME',
-
+  'হয়', 'আছেন', 'আছি', 'হলো', 'ছিল', 'এর', 'তে',
+  // Marathi
+  'आहे', 'आहेत', 'होता', 'होती', 'होते', 'च्या', 'ला',
   // Tamil
-  'வணக்கம்': 'HELLO',
-  'நன்றி': 'THANK_YOU',
-  'தயவுசெய்து': 'PLEASE',
-  'மன்னிக்கவும்': 'SORRY',
-  'வருகிறேன்': 'GOODBYE',
-  'ஆம்': 'YES',
-  'இல்லை': 'NO',
-  'நல்லது': 'GOOD',
-  'கெட்டது': 'BAD',
-  'உதவி': 'HELP',
-  'நிறுத்து': 'STOP',
-  'சாப்பிடு': 'EAT',
-  'குடி': 'DRINK',
-  'தண்ணீர்': 'WATER',
-  'உணவு': 'FOOD',
-  'வீடு': 'HOME',
-  'நண்பர்': 'FRIEND',
-  'பெயர்': 'NAME',
-  'அன்பு': 'LOVE',
-};
-
-/**
- * Full Sentence Phrase Table
- * Checked BEFORE word-by-word lookup (case and punctuation insensitive).
- */
-interface PhraseDefinition {
-  islTokens: { word: string; gloss: string }[];
-  aslTokens?: { word: string; gloss: string }[];
-}
-
-export const FULL_PHRASE_TABLE: Record<string, PhraseDefinition> = {
-  // "what is your name" -> ISL: YOUR NAME WHAT / ASL: YOUR NAME WHAT
-  'what is your name': {
-    islTokens: [
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
-      { word: 'what', gloss: 'WHAT' },
-    ],
-    aslTokens: [
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
-      { word: 'what', gloss: 'WHAT' },
-    ],
-  },
-  'what your name': {
-    islTokens: [
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
-      { word: 'what', gloss: 'WHAT' },
-    ],
-  },
-  'whats your name': {
-    islTokens: [
-      { word: 'your', gloss: 'YOUR' },
-      { word: 'name', gloss: 'NAME' },
-      { word: 'what', gloss: 'WHAT' },
-    ],
-  },
-
-  // "i eat food" -> ISL: I FOOD EAT / ASL: I EAT FOOD
-  'i eat food': {
-    islTokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'food', gloss: 'FOOD' },
-      { word: 'eat', gloss: 'EAT' },
-    ],
-    aslTokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'eat', gloss: 'EAT' },
-      { word: 'food', gloss: 'FOOD' },
-    ],
-  },
-
-  // "hello how are you"
-  'hello how are you': {
-    islTokens: [
-      { word: 'Hello', gloss: 'HELLO' },
-      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
-    ],
-  },
-  'hello how r you': {
-    islTokens: [
-      { word: 'Hello', gloss: 'HELLO' },
-      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
-    ],
-  },
-  'hi how are you': {
-    islTokens: [
-      { word: 'Hi', gloss: 'HELLO' },
-      { word: 'how are you', gloss: 'HOW_ARE_YOU' },
-    ],
-  },
-  'how are you': {
-    islTokens: [{ word: 'How are you', gloss: 'HOW_ARE_YOU' }],
-  },
-  'how r u': {
-    islTokens: [{ word: 'How are you', gloss: 'HOW_ARE_YOU' }],
-  },
-
-  // "thank you"
-  'thank you': {
-    islTokens: [{ word: 'Thank you', gloss: 'THANK_YOU' }],
-  },
-  'thank you very much': {
-    islTokens: [{ word: 'Thank you', gloss: 'THANK_YOU' }],
-  },
-  'thanks a lot': {
-    islTokens: [{ word: 'Thanks', gloss: 'THANK_YOU' }],
-  },
-
-  // "goodbye"
-  goodbye: {
-    islTokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
-  },
-  'good bye': {
-    islTokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
-  },
-  'bye bye': {
-    islTokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
-  },
-  bye: {
-    islTokens: [{ word: 'Goodbye', gloss: 'GOODBYE' }],
-  },
-  'goodbye friend': {
-    islTokens: [
-      { word: 'Goodbye', gloss: 'GOODBYE' },
-      { word: 'friend', gloss: 'FRIEND' },
-    ],
-  },
-  'hello friend': {
-    islTokens: [
-      { word: 'Hello', gloss: 'HELLO' },
-      { word: 'friend', gloss: 'FRIEND' },
-    ],
-  },
-
-  // "please help"
-  'please help': {
-    islTokens: [
-      { word: 'Please', gloss: 'PLEASE' },
-      { word: 'help', gloss: 'HELP' },
-    ],
-  },
-  'please help me': {
-    islTokens: [
-      { word: 'Please', gloss: 'PLEASE' },
-      { word: 'me', gloss: 'I' },
-      { word: 'help', gloss: 'HELP' },
-    ],
-    aslTokens: [
-      { word: 'Please', gloss: 'PLEASE' },
-      { word: 'help', gloss: 'HELP' },
-      { word: 'me', gloss: 'I' },
-    ],
-  },
-  'help me please': {
-    islTokens: [
-      { word: 'me', gloss: 'I' },
-      { word: 'help', gloss: 'HELP' },
-      { word: 'please', gloss: 'PLEASE' },
-    ],
-  },
-  'help me': {
-    islTokens: [
-      { word: 'me', gloss: 'I' },
-      { word: 'help', gloss: 'HELP' },
-    ],
-  },
-
-  // "sorry"
-  sorry: {
-    islTokens: [{ word: 'Sorry', gloss: 'SORRY' }],
-  },
-  'i am sorry': {
-    islTokens: [{ word: 'Sorry', gloss: 'SORRY' }],
-  },
-
-  // "yes" / "no"
-  yes: {
-    islTokens: [{ word: 'Yes', gloss: 'YES' }],
-  },
-  'yes please': {
-    islTokens: [
-      { word: 'Yes', gloss: 'YES' },
-      { word: 'please', gloss: 'PLEASE' },
-    ],
-  },
-  no: {
-    islTokens: [{ word: 'No', gloss: 'NO' }],
-  },
-  'no thank you': {
-    islTokens: [
-      { word: 'No', gloss: 'NO' },
-      { word: 'thank you', gloss: 'THANK_YOU' },
-    ],
-  },
-  'no thanks': {
-    islTokens: [
-      { word: 'No', gloss: 'NO' },
-      { word: 'thanks', gloss: 'THANK_YOU' },
-    ],
-  },
-
-  // Needs
-  'i want water': {
-    islTokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'water', gloss: 'WATER' },
-      { word: 'want', gloss: 'PLEASE' },
-    ],
-  },
-  'i need water': {
-    islTokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'water', gloss: 'WATER' },
-    ],
-  },
-  'drink water': {
-    islTokens: [
-      { word: 'water', gloss: 'WATER' },
-      { word: 'drink', gloss: 'DRINK' },
-    ],
-    aslTokens: [
-      { word: 'drink', gloss: 'DRINK' },
-      { word: 'water', gloss: 'WATER' },
-    ],
-  },
-  'eat food': {
-    islTokens: [
-      { word: 'food', gloss: 'FOOD' },
-      { word: 'eat', gloss: 'EAT' },
-    ],
-    aslTokens: [
-      { word: 'eat', gloss: 'EAT' },
-      { word: 'food', gloss: 'FOOD' },
-    ],
-  },
-  'i want food': {
-    islTokens: [
-      { word: 'I', gloss: 'I' },
-      { word: 'food', gloss: 'FOOD' },
-    ],
-  },
-
-  // Stop
-  'please stop': {
-    islTokens: [
-      { word: 'Please', gloss: 'PLEASE' },
-      { word: 'stop', gloss: 'STOP' },
-    ],
-  },
-  'stop please': {
-    islTokens: [
-      { word: 'Stop', gloss: 'STOP' },
-      { word: 'please', gloss: 'PLEASE' },
-    ],
-  },
-};
-
-// Pure filler words dropped in word-by-word analysis (articles and copulas)
-export const ARTICLES_AND_COPULAS = new Set([
-  'the',
-  'a',
-  'an',
-  'is',
-  'am',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'to',
-  'of',
-  'do',
-  'does',
-  'did',
+  'உள்ளது', 'இருக்கின்றன', 'இருக்கிறார்', 'இருந்தது', 'இல்',
+  // Telugu
+  'ఉంది', 'ఉన్నారు', 'ఉన్నాడు', 'ఉన్నది', 'లోని',
+  // Gujarati
+  'છે', 'છો', 'હતા', 'હતી', 'નું', 'માં',
+  // Kannada
+  'ಇದೆ', 'ಇದ್ದಾರೆ', 'ಇತ್ತು', 'ಅಲ್ಲಿ', 'ರ',
+  // Malayalam
+  'ആണ്', 'ആകുന്നു', 'ഉണ്ടായിരുന്നു', 'ൽ',
+  // Punjabi
+  'ਹੈ', 'ਹਨ', 'ਸੀ', 'ਸਨ', 'ਦਾ', 'ਦੀ', 'ਦੇ', 'ਵਿੱਚ',
 ]);
 
-// Multi-word phrase mapping for fallback chunking
-const SUB_PHRASE_DICTIONARY: Record<string, string> = {
-  'thank you': 'THANK_YOU',
-  'thanks a lot': 'THANK_YOU',
-  'how are you': 'HOW_ARE_YOU',
-  'good bye': 'GOODBYE',
-  'bye bye': 'GOODBYE',
-  'my name': 'NAME',
-  'your name': 'NAME',
-};
-
-// Single-word gloss dictionary
-const WORD_GLOSS_DICTIONARY: Record<string, string> = {
-  hello: 'HELLO',
-  hi: 'HELLO',
-  hey: 'HELLO',
-  namaste: 'HELLO',
-  thanks: 'THANK_YOU',
-  thank: 'THANK_YOU',
-  please: 'PLEASE',
-  sorry: 'SORRY',
-  apologies: 'SORRY',
-  apologize: 'SORRY',
-  yes: 'YES',
-  yeah: 'YES',
-  yep: 'YES',
-  no: 'NO',
-  nope: 'NO',
-  goodbye: 'GOODBYE',
-  bye: 'GOODBYE',
-  farewell: 'GOODBYE',
-  good: 'GOOD',
-  well: 'GOOD',
-  bad: 'BAD',
-  poor: 'BAD',
-  help: 'HELP',
-  helping: 'HELP',
-  stop: 'STOP',
-  halt: 'STOP',
-  eat: 'EAT',
-  eating: 'EAT',
-  drink: 'DRINK',
-  drinking: 'DRINK',
-  water: 'WATER',
-  food: 'FOOD',
-  meal: 'FOOD',
-  home: 'HOME',
-  house: 'HOME',
-  friend: 'FRIEND',
-  friends: 'FRIEND',
-  name: 'NAME',
-  love: 'LOVE',
-  caring: 'LOVE',
-  // Pronouns
-  i: 'I',
-  me: 'I',
-  my: 'MY',
-  you: 'YOU',
-  u: 'YOU',
-  your: 'YOUR',
-  ur: 'YOUR',
-  we: 'WE',
-  us: 'WE',
-  // Question words
-  what: 'WHAT',
-  where: 'WHERE',
-  who: 'WHO',
-  why: 'WHY',
-  when: 'WHEN',
-  how: 'HOW',
-  which: 'WHICH',
-  // Essentials
-  hospital: 'HOSPITAL',
-  doctor: 'DOCTOR',
-  police: 'POLICE',
-  ambulance: 'AMBULANCE',
-  family: 'FAMILY',
-};
-
-// Grammatical role sets for rule-based ISL reordering
-const QUESTION_GLOSSES = new Set(['WHAT', 'WHERE', 'WHO', 'WHY', 'WHEN', 'HOW', 'WHICH']);
-const VERB_GLOSSES = new Set(['EAT', 'DRINK', 'HELP', 'STOP', 'LOVE', 'NAME', 'SEE', 'MEET']);
-const OBJECT_NOUN_GLOSSES = new Set([
-  'FOOD',
-  'WATER',
-  'HOME',
-  'FRIEND',
-  'NAME',
-  'HOSPITAL',
-  'DOCTOR',
-  'POLICE',
-  'AMBULANCE',
-  'FAMILY',
-]);
-const SUBJECT_PRONOUNS = new Set(['I', 'YOU', 'YOUR', 'MY', 'WE', 'HE', 'SHE']);
+const QUESTION_GLOSSES = new Set(['HOW_ARE_YOU', 'NAME', 'HELP']);
+const VERB_GLOSSES = new Set(['EAT', 'DRINK', 'STOP', 'HELP', 'LOVE']);
+const OBJECT_NOUN_GLOSSES = new Set(['WATER', 'FOOD', 'HOME', 'FRIEND']);
 
 /**
  * Reorders an array of gloss tokens into ISL grammatical order:
@@ -507,8 +91,8 @@ export function reorderGlossTokensToISL(tokens: GlossToken[]): GlossToken[] {
   }
 
   // 2. SOV Reordering: If verb appears before an object noun, place object before verb
-  // e.g. [I, EAT, FOOD] -> [I, FOOD, EAT]; [DRINK, WATER] -> [WATER, DRINK]
-  let reorderedClause = [...nonQuestions];
+  // e.g. [EAT, FOOD] -> [FOOD, EAT]; [DRINK, WATER] -> [WATER, DRINK]
+  const reorderedClause = [...nonQuestions];
   for (let i = 0; i < reorderedClause.length - 1; i++) {
     const curr = reorderedClause[i];
     const next = reorderedClause[i + 1];
@@ -531,63 +115,167 @@ export function reorderGlossTokensToISL(tokens: GlossToken[]): GlossToken[] {
 }
 
 /**
- * Parses plain text input into sequential gloss tokens with fingerspelling fallback.
+ * Matches a single word token against a language lexicon.
+ * Tries:
+ * 1. Main spoken form
+ * 2. Alternative forms (synonyms, polite/casual, inflections)
+ * 3. Romanized forms
+ * 4. Typo tolerance (Levenshtein distance <= 1 for 4+ letter words)
  */
-function parseTokensRaw(rawTrimmed: string): GlossToken[] {
+function matchWordInLexicon(
+  token: string,
+  locale: string
+): { gloss: string; exact: boolean } | null {
+  const normToken = token.trim();
+  if (!normToken) return null;
+
+  const lex = getLoadedLexicon(locale);
+  if (!lex || !lex.glosses) return null;
+
+  // 1. Exact match on main, alternatives, or romanized
+  for (const [glossId, entry] of Object.entries(lex.glosses)) {
+    if (normalizeLinguisticText(entry.main) === normToken) {
+      return { gloss: glossId, exact: true };
+    }
+    if (entry.alternatives?.some((alt) => normalizeLinguisticText(alt) === normToken)) {
+      return { gloss: glossId, exact: true };
+    }
+    if (entry.romanized?.some((rom) => normalizeLinguisticText(rom) === normToken)) {
+      return { gloss: glossId, exact: true };
+    }
+  }
+
+  // 2. Typo tolerance: 1 character difference for words with 4+ characters
+  if (normToken.length >= 4) {
+    for (const [glossId, entry] of Object.entries(lex.glosses)) {
+      const candidates = [
+        normalizeLinguisticText(entry.main),
+        ...(entry.alternatives || []).map(normalizeLinguisticText),
+        ...(entry.romanized || []).map(normalizeLinguisticText),
+      ];
+
+      for (const cand of candidates) {
+        if (cand && Math.abs(cand.length - normToken.length) <= 1) {
+          if (levenshteinDistance(normToken, cand) <= 1) {
+            return { gloss: glossId, exact: false };
+          }
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Parses plain text input into sequential gloss tokens.
+ * Inspects phrase rules first, then individual word tokens with typo tolerance and fallback.
+ */
+function parseTokensInternal(
+  inputText: string,
+  targetLocale: string = 'en'
+): { tokens: GlossToken[]; detectedLocale?: string; detectedScript?: string } {
+  const rawTrimmed = inputText.trim();
+  if (!rawTrimmed) return { tokens: [] };
+
+  const { script, detectedLocale } = detectScriptAndLocale(rawTrimmed);
+  const effectiveLocale = (detectedLocale && detectedLocale !== 'en' ? detectedLocale : targetLocale) || 'en';
+
+  const normalizedInput = normalizeLinguisticText(rawTrimmed);
+  const lex = getLoadedLexicon(effectiveLocale);
+  const enLex = getLoadedLexicon('en');
+
+  // Check phrase rules first (longest match priority)
+  const allPhraseRules = [
+    ...(lex.phraseRules || []),
+    ...(effectiveLocale !== 'en' ? enLex.phraseRules || [] : []),
+  ];
+
+  // Try entire input exact phrase match
+  for (const rule of allPhraseRules) {
+    if (normalizeLinguisticText(rule.phrase) === normalizedInput) {
+      const tokens: GlossToken[] = rule.glosses.map((gloss) => ({
+        originalText: rawTrimmed,
+        gloss,
+        displayText: gloss,
+        hasSign: true,
+      }));
+      return { tokens, detectedLocale: effectiveLocale, detectedScript: script };
+    }
+  }
+
+  // Tokenize words
   const rawWords = rawTrimmed.split(/\s+/);
   const tokens: GlossToken[] = [];
   let i = 0;
 
   while (i < rawWords.length) {
-    // Check 2-word phrase chunk
-    if (i + 1 < rawWords.length) {
-      const norm1 = rawWords[i].toLowerCase().replace(/[^a-z0-9']/g, '');
-      const norm2 = rawWords[i + 1].toLowerCase().replace(/[^a-z0-9']/g, '');
-      const twoWord = `${norm1} ${norm2}`;
+    // Check 3-word and 2-word phrase chunks
+    let matchedChunk = false;
+    for (const chunkSize of [3, 2]) {
+      if (i + chunkSize <= rawWords.length) {
+        const chunkWords = rawWords.slice(i, i + chunkSize);
+        const chunkNorm = normalizeLinguisticText(chunkWords.join(' '));
 
-      if (SUB_PHRASE_DICTIONARY[twoWord]) {
-        const originalPhrase = `${rawWords[i]} ${rawWords[i + 1]}`;
-        const gloss = SUB_PHRASE_DICTIONARY[twoWord];
-        tokens.push({
-          originalText: originalPhrase,
-          gloss,
-          displayText: gloss,
-          hasSign: true,
-        });
-        i += 2;
-        continue;
+        for (const rule of allPhraseRules) {
+          if (normalizeLinguisticText(rule.phrase) === chunkNorm) {
+            for (const gloss of rule.glosses) {
+              tokens.push({
+                originalText: chunkWords.join(' '),
+                gloss,
+                displayText: gloss,
+                hasSign: true,
+              });
+            }
+            i += chunkSize;
+            matchedChunk = true;
+            break;
+          }
+        }
+        if (matchedChunk) break;
       }
     }
 
+    if (matchedChunk) continue;
+
     const rawWord = rawWords[i];
-    const normalizedWord = rawWord.toLowerCase().replace(/[^\p{L}\p{N}']/gu, '');
+    const normWord = normalizeLinguisticText(rawWord);
 
-    if (!normalizedWord) {
+    if (!normWord) {
       i++;
       continue;
     }
 
-    // Drop pure articles and copula forms ("is", "are", "the", "a")
-    if (ARTICLES_AND_COPULAS.has(normalizedWord)) {
+    // Drop copulas and grammatical articles
+    if (ARTICLES_AND_COPULAS.has(normWord)) {
       i++;
       continue;
     }
 
-    // Check single word dictionary (English or Indic language tables)
-    const matchedGloss =
-      WORD_GLOSS_DICTIONARY[normalizedWord] || INDIC_VOCABULARY_MAP[normalizedWord];
+    // 1. Try effective locale lexicon
+    let match = matchWordInLexicon(normWord, effectiveLocale);
 
-    if (matchedGloss) {
+    // 2. If not found and not English, check English lexicon
+    if (!match && effectiveLocale !== 'en') {
+      match = matchWordInLexicon(normWord, 'en');
+    }
+
+    // 3. If still not found and Devanagari, cross-check Hindi / Marathi
+    if (!match && script === 'Devanagari') {
+      match = matchWordInLexicon(normWord, effectiveLocale === 'hi' ? 'mr' : 'hi');
+    }
+
+    if (match) {
       tokens.push({
         originalText: rawWord,
-        gloss: matchedGloss,
-        displayText: matchedGloss,
+        gloss: match.gloss,
+        displayText: match.gloss,
         hasSign: true,
       });
     } else {
-      // Fingerspelling fallback for names/unrecognized words in Latin script
-      if (normalizedWord.length <= 8 && /^[a-z]+$/.test(normalizedWord)) {
-        for (const letter of normalizedWord.toUpperCase()) {
+      // Fingerspelling fallback for names/unrecognized Latin words
+      if (normWord.length <= 8 && /^[a-z]+$/.test(normWord)) {
+        for (const letter of normWord.toUpperCase()) {
           tokens.push({
             originalText: letter,
             gloss: letter,
@@ -597,6 +285,7 @@ function parseTokensRaw(rawTrimmed: string): GlossToken[] {
           });
         }
       } else {
+        // Required contract: show "<word> (not in vocabulary yet)" and never guess
         tokens.push({
           originalText: rawWord,
           gloss: null,
@@ -609,7 +298,19 @@ function parseTokensRaw(rawTrimmed: string): GlossToken[] {
     i++;
   }
 
-  return tokens;
+  return { tokens, detectedLocale: effectiveLocale, detectedScript: script };
+}
+
+/**
+ * Public parser: converts natural language input string into ordered gloss tokens.
+ */
+export function parseTextToGlosses(
+  text: string,
+  language: 'ISL' | 'ASL' = 'ISL',
+  targetLocale: string = 'en'
+): GlossToken[] {
+  const { tokens } = parseTokensInternal(text, targetLocale);
+  return language === 'ISL' ? reorderGlossTokensToISL(tokens) : tokens;
 }
 
 /**
@@ -617,7 +318,8 @@ function parseTokensRaw(rawTrimmed: string): GlossToken[] {
  */
 export function getTextToGlossDetails(
   inputText: string,
-  language: 'ISL' | 'ASL' = 'ISL'
+  language: 'ISL' | 'ASL' = 'ISL',
+  targetLocale: string = 'en'
 ): TextToGlossDetails {
   if (!inputText || !inputText.trim()) {
     return {
@@ -628,70 +330,27 @@ export function getTextToGlossDetails(
     };
   }
 
-  const rawTrimmed = inputText.trim();
-  const normalized = normalizeText(rawTrimmed);
+  const { tokens, detectedLocale, detectedScript } = parseTokensInternal(inputText, targetLocale);
 
-  // Check Full Phrase Table
-  if (FULL_PHRASE_TABLE[normalized]) {
-    const entry = FULL_PHRASE_TABLE[normalized];
-    const phraseTokens =
-      language === 'ASL' && entry.aslTokens ? entry.aslTokens : entry.islTokens;
+  const englishOrderTokens = [...tokens];
+  const islOrderTokens = reorderGlossTokensToISL(tokens);
 
-    const tokens: GlossToken[] = phraseTokens.map((t) => ({
-      originalText: t.word,
-      gloss: t.gloss,
-      displayText: t.gloss,
-      hasSign: true,
-    }));
-
-    const englishOrder = (entry.aslTokens || entry.islTokens).map((t) => t.gloss).join(' ');
-    const islOrder = entry.islTokens.map((t) => t.gloss).join(' ');
-
-    return {
-      tokens,
-      englishOrderText: englishOrder,
-      islOrderText: islOrder,
-      reordered: englishOrder !== islOrder,
-    };
-  }
-
-  // Parse raw English-ordered tokens
-  const englishTokens = parseTokensRaw(rawTrimmed);
-  const englishOrderText = englishTokens
-    .map((t) => t.gloss || t.originalText)
-    .filter(Boolean)
+  const englishOrderText = englishOrderTokens
+    .map((t) => t.gloss || `[${t.originalText}]`)
+    .join(' ');
+  const islOrderText = islOrderTokens
+    .map((t) => t.gloss || `[${t.originalText}]`)
     .join(' ');
 
-  if (language === 'ISL') {
-    const islTokens = reorderGlossTokensToISL(englishTokens);
-    const islOrderText = islTokens
-      .map((t) => t.gloss || t.originalText)
-      .filter(Boolean)
-      .join(' ');
+  const reordered = language === 'ISL' && englishOrderText !== islOrderText;
+  const finalTokens = language === 'ISL' ? islOrderTokens : englishOrderTokens;
 
-    return {
-      tokens: islTokens,
-      englishOrderText,
-      islOrderText,
-      reordered: englishOrderText !== islOrderText,
-    };
-  }
-
-  // ASL remains in natural direct order
   return {
-    tokens: englishTokens,
+    tokens: finalTokens,
     englishOrderText,
-    islOrderText: englishOrderText,
-    reordered: false,
+    islOrderText,
+    reordered,
+    detectedScript,
+    detectedLocale,
   };
 }
-
-/**
- * Main parser entry point returning sequential GlossToken array for the avatar stage.
- */
-export const parseTextToGlosses = (
-  inputText: string,
-  language: 'ISL' | 'ASL' = 'ISL'
-): GlossToken[] => {
-  return getTextToGlossDetails(inputText, language).tokens;
-};

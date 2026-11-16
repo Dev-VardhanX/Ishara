@@ -1,0 +1,230 @@
+{
+  "locale": "kn",
+  "languageName": "Kannada",
+  "nativeName": "ಕನ್ನಡ",
+  "voiceCode": "kn-IN",
+  "script": "Kannada",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": ".",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "ನಮಸ್ಕಾರ",
+      "alternatives": ["ಹಲೋ", "ನಮಸ್ತೆ", "ವಂದನೆಗಳು", "ಶರಣು", "ಶುಭೋದಯ"],
+      "romanized": ["namaskara", "namaste", "hello", "vandanegalu", "sharanu"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "ಧನ್ಯವಾದಗಳು",
+      "alternatives": ["ತುಂಬಾ ಧನ್ಯವಾದ", "ಥ್ಯಾಂಕ್ಸ್", "ಕೃತಜ್ಞತೆಗಳು", "ಥ್ಯಾಂಕ್ ಯೂ", "ಅನಂತ ಧನ್ಯವಾದ"],
+      "romanized": ["dhanyavadagalu", "thanks", "kruthagnathegalu", "thank you"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "ದಯವಿಟ್ಟು",
+      "alternatives": ["ಪ್ಲೀಸ್", "ದಯಮಾಡಿ", "ಸ್ವಲ್ಪ", "ಕೃಪೆ ತೋರಿ", "ವಿನಂತಿ"],
+      "romanized": ["dayavittu", "dayamaadi", "please", "svalpa", "vinanti"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "ಕ್ಷಮಿಸಿ",
+      "alternatives": ["ಸಾರಿ", "ಕ್ಷಮೆ ಇರಲಿ", "ತಪ್ಪಾಯಿತು", "ಕ್ಷಮೆಯಾಚನೆ", "ಕ್ಷಮಿಸಬೇಕು"],
+      "romanized": ["kshamisi", "sorry", "kshame irali", "tappayitu", "kshamisu"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "ಹೋಗಿ ಬರುತ್ತೇನೆ",
+      "alternatives": ["ಬೈ", "ಮತ್ತೆ ಸಿಗೋಣ", "ಟಾಟಾ", "ಹೋಗಿ ಬರ್ತೀನಿ", "ಶುಭ ವಿದಾಯ"],
+      "romanized": ["hogi baruttene", "bye", "matte sigona", "tata", "hogi bartini"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "ಹೇಗಿದ್ದೀರಿ",
+      "alternatives": ["ಹೇಗಿದ್ದೀಯ", "ಆರಾಮಾಗಿದ್ದೀರಾ", "ಹೇಗಿದೆ", "ಏನು ಸಮಾಚಾರ", "ಕ್ಷೇಮವೇ"],
+      "romanized": ["hegiddiri", "hegiddiya", "aaramagiddira", "hegide", "kshemave"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "ಹೌದು",
+      "alternatives": ["ಸರಿ", "ಖಂಡಿತ", "ಹೌದ್ರಿ", "ಆಯಿತು", "ಖಂಡಿತವಾಗಿಯೂ"],
+      "romanized": ["haudu", "sari", "khanditha", "aayitu", "houdri"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "ಇಲ್ಲ",
+      "alternatives": ["ಬೇಡ", "ಅಲ್ಲ", "ಇಲ್ಲರೀ", "ಖಂಡಿತ ಇಲ್ಲ", "ಸಾಕು"],
+      "romanized": ["illa", "beda", "alla", "illari", "bekagilla"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "ಒಳ್ಳೆಯದು",
+      "alternatives": ["ಚೆನ್ನಾಗಿದೆ", "ಉತ್ತಮ", "ತುಂಬಾ ಒಳ್ಳೆಯದು", "ಸೂಪರ್", "ಅತ್ಯುತ್ತಮ"],
+      "romanized": ["olleyadu", "chennagide", "uttama", "channa", "super"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "ಕೆಟ್ಟದು",
+      "alternatives": ["ಸರಿಯಿಲ್ಲ", "ಹಾಳಾಗಿದೆ", "ಬೇಡವಾದದ್ದು", "ಅಹಿತಕರ", "ಕೆಟ್ಟ"],
+      "romanized": ["kettadu", "sariyilla", "haalagide", "mosam", "ketta"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "ಸಹಾಯ",
+      "alternatives": ["ಸಹಾಯ ಮಾಡಿ", "ಹೆಲ್ಪ್", "ಕಾಪಾಡಿ", "ನೆರವು", "ಸಹಾಯ ಬೇಕು"],
+      "romanized": ["sahaya", "sahaya maadi", "help", "kapadi", "neravu"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "ನಿಲ್ಲಿಸಿ",
+      "alternatives": ["ನಿಲ್ಲು", "ಸಾಕು", "ತಡೆಹಿಡಿ", "ರೋಕಿ", "ತಡೆಯಿರಿ"],
+      "romanized": ["nillisi", "nillu", "saaku", "tade", "nilli"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "ತಿನ್ನಿ",
+      "alternatives": ["ತಿನ್ನು", "ಊಟ ಮಾಡಿ", "ತಿನ್ನುವುದು", "ಊಟ", "ಸೇವಿಸಿ"],
+      "romanized": ["tinni", "tinnu", "oota maadi", "oota", "tinnuvudu"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "ಕುಡಿಯಿರಿ",
+      "alternatives": ["ಕುಡಿ", "ನೀರು ಕುಡಿಯಿರಿ", "ಪಾನೀಯ", "ಕುಡಿಯುವುದು", "ಕುಡಿದುಕೊಳ್ಳಿ"],
+      "romanized": ["kudiyiri", "kudi", "neeru kudiyiri", "paaneeya"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "ನೀರು",
+      "alternatives": ["ಕುಡಿಯುವ ನೀರು", "ಜಲ", "ತಣ್ಣೀರು", "ವಾಟರ್", "ಬಿಸಿ ನೀರು"],
+      "romanized": ["neeru", "kudiyuva neeru", "jala", "tanneeru", "water"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "ಆಹಾರ",
+      "alternatives": ["ಊಟ", "ತಿಂಡಿ", "ಅನ್ನ", "ಭೋಜನ", "ತಿಂಡಿ ತಿನಿಸು"],
+      "romanized": ["aahara", "oota", "tindi", "anna", "bhojana"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "ಮನೆ",
+      "alternatives": ["ನಿವಾಸ", "ಗೃಹ", "ಮನೆಗೆ", "ಕೊಠಡಿ", "ಮನೆಯವರು"],
+      "romanized": ["mane", "nivasa", "gruha", "manege", "maneyalli"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "ಸ್ನೇಹಿತ",
+      "alternatives": ["ಗೆಳೆಯ", "ಮಿತ್ರ", "ದೋಸ್ತ್", "ಗೆಳತಿ", "ಆಪ್ತ"],
+      "romanized": ["snehita", "geleya", "mitra", "dost", "geley"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "ಹೆಸರು",
+      "alternatives": ["ನಿಮ್ಮ ಹೆಸರು", "ನನ್ನ ಹೆಸರು", "ಹೆಸರೇನು", "ನಾಮ", "ನಾಮಧೇಯ"],
+      "romanized": ["hesaru", "nimma hesaru", "nanna hesaru", "hesarenu", "nama"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "ಪ್ರೀತಿ",
+      "alternatives": ["ಸ್ನೇಹ", "ಅನುರಾಗ", "ವಾತ್ಸಲ್ಯ", "ಮಮತೆ", "ಪ್ರೇಮ"],
+      "romanized": ["preeti", "priti", "sneha", "anuraaga", "vatsalya"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "ನಮಸ್ಕಾರ ಹೇಗಿದ್ದೀರಿ", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "ಹೇಗಿದ್ದೀರಿ", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "ನಾನು ಆರಾಮಾಗಿದ್ದೇನೆ ಧನ್ಯವಾದ", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "ದಯವಿಟ್ಟು ಸಹಾಯ ಮಾಡಿ", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "ಸಹಾಯ ಮಾಡಿ ದಯವಿಟ್ಟು", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "ಧನ್ಯವಾದಗಳು ನನ್ನ ಸ್ನೇಹಿತ", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "ನಮಸ್ಕಾರ ನನ್ನ ಸ್ನೇಹಿತ", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "ಹೋಗಿ ಬರುತ್ತೇನೆ ಗೆಳೆಯ", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "ನನಗೆ ನೀರು ಬೇಕು", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "ದಯವಿಟ್ಟು ನೀರು ಕೊಡಿ", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "ನನಗೆ ಊಟ ಬೇಕು", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "ನಿಮ್ಮ ಹೆಸರೇನು", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "ನಿನ್ನ ಹೆಸರು ಏನು ಗೆಳೆಯ", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "ಆಹಾರ ತಿನ್ನಿ", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "ನೀರು ಕುಡಿಯಿರಿ", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "ದಯವಿಟ್ಟು ನಿಲ್ಲಿಸಿ", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "ಹೌದು ದಯವಿಟ್ಟು", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "ಬೇಡ ಧನ್ಯವಾದಗಳು", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "ಕ್ಷಮಿಸಿ ನನ್ನ ಸ್ನೇಹಿತ", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "ಊಟ ಚೆನ್ನಾಗಿದೆ", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "ಊಟ ಸರಿಯಿಲ್ಲ", "glosses": ["BAD", "FOOD"] }
+  ],
+  "grammarWords": {
+    "ಏನು": "what",
+    "ಎಲ್ಲಿ": "where",
+    "ಯಾರು": "who",
+    "ಏಕೆ": "why",
+    "ಹೇಗೆ": "how",
+    "ಇದೆ": "is",
+    "ಇದ್ದಾರೆ": "are",
+    "ನಾನು": "I",
+    "ನೀವು": "you",
+    "ನೀನು": "you",
+    "ನನ್ನ": "my",
+    "ನಿಮ್ಮ": "your",
+    "ನಿನ್ನ": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "ನಮಸ್ಕಾರ!",
+    "THANK_YOU": "ಧನ್ಯವಾದಗಳು!",
+    "PLEASE": "ದಯವಿಟ್ಟು.",
+    "SORRY": "ಕ್ಷಮಿಸಿ.",
+    "GOODBYE": "ಹೋಗಿ ಬರುತ್ತೇನೆ!",
+    "HOW_ARE_YOU": "ಹೇಗಿದ್ದೀರಿ?",
+    "YES": "ಹೌದು.",
+    "NO": "ಇಲ್ಲ.",
+    "GOOD": "ಒಳ್ಳೆಯದು.",
+    "BAD": "ಕೆಟ್ಟದು.",
+    "HELP": "ಸಹಾಯ ಮಾಡಿ!",
+    "STOP": "ನಿಲ್ಲಿಸಿ.",
+    "EAT": "ಊಟ ಮಾಡಿ.",
+    "DRINK": "ನೀರು ಕುಡಿಯಿರಿ.",
+    "WATER": "ನೀರು, ದಯವಿಟ್ಟು.",
+    "FOOD": "ಆಹಾರ, ದಯವಿಟ್ಟು.",
+    "HOME": "ಮನೆ.",
+    "FRIEND": "ಸ್ನೇಹಿತ.",
+    "NAME": "ಹೆಸರು.",
+    "LOVE": "ಪ್ರೀತಿ.",
+    "HELLO HOW_ARE_YOU": "ನಮಸ್ಕಾರ, ಹೇಗಿದ್ದೀರಿ?",
+    "HOW_ARE_YOU GOOD": "ಹೇಗಿದ್ದೀರಿ? ನಾನು ಆರಾಮಾಗಿದ್ದೇನೆ.",
+    "HOW_ARE_YOU BAD": "ಹೇಗಿದ್ದೀರಿ? ನನಗೆ ಹುಷಾರಿಲ್ಲ.",
+    "GOOD THANK_YOU": "ಚೆನ್ನಾಗಿದೆ, ತುಂಬಾ ಧನ್ಯವಾದಗಳು!",
+    "THANK_YOU FRIEND": "ಧನ್ಯವಾದಗಳು, ನನ್ನ ಸ್ನೇಹಿತ!",
+    "HELLO FRIEND": "ನಮಸ್ಕಾರ, ನನ್ನ ಸ್ನೇಹಿತ!",
+    "GOODBYE FRIEND": "ಹೋಗಿ ಬರುತ್ತೇನೆ, ನನ್ನ ಸ್ನೇಹಿತ!",
+    "HELLO GOODBYE": "ನಮಸ್ಕಾರ ಮತ್ತು ವಿದಾಯ!",
+    "SORRY FRIEND": "ಕ್ಷಮಿಸಿ, ನನ್ನ ಸ್ನೇಹಿತ.",
+    "PLEASE HELP": "ದಯವಿಟ್ಟು ನನಗೆ ಸಹಾಯ ಮಾಡಿ!",
+    "HELP PLEASE": "ಸಹಾಯ ಮಾಡಿ, ದಯವಿಟ್ಟು!",
+    "PLEASE STOP": "ದಯವಿಟ್ಟು ನಿಲ್ಲಿಸಿ.",
+    "STOP PLEASE": "ನಿಲ್ಲಿಸಿ, ದಯವಿಟ್ಟು.",
+    "SORRY PLEASE": "ಕ್ಷಮಿಸಿ, ದಯವಿಟ್ಟು ಕ್ಷಮೆಯಿರಲಿ.",
+    "YES PLEASE": "ಹೌದು, ದಯವಿಟ್ಟು.",
+    "NO THANK_YOU": "ಬೇಡ, ಧನ್ಯವಾದಗಳು.",
+    "YES THANK_YOU": "ಹೌದು, ತುಂಬಾ ಧನ್ಯವಾದಗಳು!",
+    "YES GOOD": "ಹೌದು, ಇದು ತುಂಬಾ ಒಳ್ಳೆಯದು.",
+    "NO BAD": "ಇಲ್ಲ, ಇದು ಸರಿಯಿಲ್ಲ.",
+    "PLEASE WATER": "ದಯವಿಟ್ಟು ನನಗೆ ನೀರು ಕೊಡಿ.",
+    "PLEASE FOOD": "ದಯವಿಟ್ಟು ನನಗೆ ಆಹಾರ ಬೇಕು.",
+    "EAT FOOD": "ಆಹಾರ ಸೇವಿಸಿ.",
+    "DRINK WATER": "ನೀರು ಕುಡಿಯಿರಿ.",
+    "FOOD EAT": "ಆಹಾರ ಸೇವಿಸಿ.",
+    "WATER DRINK": "ನೀರು ಕುಡಿಯಿರಿ.",
+    "GOOD FOOD": "ಊಟ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ.",
+    "BAD FOOD": "ಊಟ ಸರಿಯಿಲ್ಲ.",
+    "FRIEND HELP": "ಗೆಳೆಯಾ, ದಯವಿಟ್ಟು ಸಹಾಯ ಮಾಡು!",
+    "HELP FRIEND": "ಸ್ನೇಹಿತನಿಗೆ ಸಹಾಯ ಮಾಡಿ!",
+    "FRIEND LOVE": "ಸ್ನೇಹಿತನ ಮೇಲೆ ಅಪಾರ ಪ್ರೀತಿ!",
+    "LOVE FRIEND": "ಸ್ನೇಹಿತನನ್ನು ಪ್ರೀತಿಸುತ್ತೇನೆ!",
+    "GOOD FRIEND": "ನೀವು ತುಂಬಾ ಒಳ್ಳೆಯ ಸ್ನೇಹಿತ.",
+    "GOOD HOME": "ಮನೆ ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ.",
+    "LOVE HOME": "ನನಗೆ ನನ್ನ ಮನೆ ಎಂದರೆ ತುಂಬಾ ಇಷ್ಟ.",
+    "NAME FRIEND": "ನಿಮ್ಮ ಹೆಸರೇನು, ಗೆಳೆಯಾ?",
+    "HELLO NAME": "ನಮಸ್ಕಾರ, ನನ್ನ ಹೆಸರು..."
+  }
+}

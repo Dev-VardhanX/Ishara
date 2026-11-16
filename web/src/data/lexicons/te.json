@@ -1,0 +1,230 @@
+{
+  "locale": "te",
+  "languageName": "Telugu",
+  "nativeName": "తెలుగు",
+  "voiceCode": "te-IN",
+  "script": "Telugu",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": ".",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "నమస్కారం",
+      "alternatives": ["హలో", "నమస్తే", "బాగున్నారా", "వందనాలు", "ప్రణామం"],
+      "romanized": ["namaskaram", "namaste", "hello", "vandanalu", "bagunnara"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "ధన్యవాదాలు",
+      "alternatives": ["కృతజ్ఞతలు", "థాంక్స్", "చాలా ధన్యవాదాలు", "థాంక్యూ", "అభినందనలు"],
+      "romanized": ["dhanyavadalu", "kruthagnathalu", "thanks", "thank you"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "దయచేసి",
+      "alternatives": ["ప్లీజ్", "దయవుంచి", "కొంచెం", "కృపతో", "అభ్యర్థన"],
+      "romanized": ["dayachesi", "please", "dayavunchi", "koncham"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "క్షమించండి",
+      "alternatives": ["సారీ", "క్షమాపణ", "నన్ను క్షమించండి", "తప్పు", "మన్నించండి"],
+      "romanized": ["kshaminchandi", "sorry", "kshamapana", "thappu", "manninchandi"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "వెళ్ళివస్తాను",
+      "alternatives": ["బై", "టాటా", "మళ్ళీ కలుద్దాం", "సెలవు", "వెళ్తాను"],
+      "romanized": ["vellivastanu", "bye", "tata", "malli kaluddam", "selavu"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "ఎలా ఉన్నారు",
+      "alternatives": ["ఎలా ఉన్నావు", "కుశలమా", "బాగున్నారా", "ఏంటి విశేషాలు", "క్షేమమా"],
+      "romanized": ["ela unnaru", "ela unnavu", "kushalama", "bagunnara"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "అవును",
+      "alternatives": ["సరే", "అవునండి", "నిజమే", "తప్పకుండా", "సరేనండి"],
+      "romanized": ["avunu", "sare", "avunandi", "nijame", "thappakunda"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "కాదు",
+      "alternatives": ["లేదు", "వద్దు", "కాదండి", "లేదండి", "అస్సలు కాదు"],
+      "romanized": ["kaadu", "ledu", "vaddu", "kaadandi", "ledandi"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "మంచిది",
+      "alternatives": ["బాగుంది", "చాలా మంచిది", "ఉత్తమ", "మేలు", "అద్భుతం"],
+      "romanized": ["manchidi", "bagundi", "chala manchidi", "melu", "adbhutam"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "చెడు",
+      "alternatives": ["చెడ్డది", "బాగాలేదు", "సరికాదు", "పనికిరాదు", "రోగం"],
+      "romanized": ["chedu", "cheddadi", "bagaledu", "sarikaadu"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "సహాయం",
+      "alternatives": ["సహాయం చేయండి", "హెల్ప్", "కాపాడండి", "తోడ్పాటు", "రక్షించండి"],
+      "romanized": ["sahayam", "sahayam cheyandi", "help", "kapadandi", "rakshinchandi"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "ఆగండి",
+      "alternatives": ["ఆగు", "నిలపండి", "చాలు", "ఆపండి", "నిలవండి"],
+      "romanized": ["aagandi", "aagu", "aapandi", "chaalu", "nilapandi"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "తినండి",
+      "alternatives": ["తిను", "భోజనం చేయండి", "తినడం", "తిన్నారు", "ఆరగించండి"],
+      "romanized": ["thinandi", "thinu", "bhojanam cheyandi", "thinedi"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "తాగండి",
+      "alternatives": ["తాగు", "నీరు తాగండి", "తాగడం", "తాగవద్దు", "స్వీకరించండి"],
+      "romanized": ["thaagandi", "thaagu", "neeru thaagandi", "thaagadam"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "నీళ్ళు",
+      "alternatives": ["నీరు", "మంచినీళ్ళు", "జలము", "వాటర్", "చల్లని నీరు"],
+      "romanized": ["neellu", "neeru", "manchineellu", "jalamu", "water"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "ఆహారం",
+      "alternatives": ["భోజనం", "అన్నం", "తిండి", "కూడు", "సాంబారు అన్నం"],
+      "romanized": ["aahaaram", "bhojanam", "annam", "thindi"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "ఇల్లు",
+      "alternatives": ["గృహం", "భవనం", "నివాసం", "ఇంటికి", "గూడు"],
+      "romanized": ["illu", "gruham", "nivasam", "intiki"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "స్నేహితుడు",
+      "alternatives": ["మిత్రుడు", "దోస్త్", "స్నేహితురాలు", "నెచ్చెలి", "సహచరుడు"],
+      "romanized": ["snehithudu", "mithrudu", "dost", "snehithuralu"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "పేరు",
+      "alternatives": ["మీ పేరు", "నా పేరు", "నామధేయం", "పేరేంటి", "పిలుపు"],
+      "romanized": ["peru", "mee peru", "naa peru", "naamadheyam", "identity"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "ప్రేమ",
+      "alternatives": ["ఇష్టం", "అనురాగం", "మమకారం", "స్నేహం", "ఆప్యాయత"],
+      "romanized": ["prema", "ishtam", "anuraagam", "mamakaaram"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "నమస్కారం ఎలా ఉన్నారు", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "ఎలా ఉన్నారు", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "నేను బాగున్నాను ధన్యవాదాలు", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "దయచేసి సహాయం చేయండి", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "సహాయం చేయండి దయచేసి", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "ధన్యవాదాలు మిత్రమా", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "నమస్కారం మిత్రమా", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "వెళ్ళివస్తాను మిత్రమా", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "నాకు నీళ్ళు కావాలి", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "దయచేసి నీళ్ళు ఇవ్వండి", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "నాకు ఆహారం కావాలి", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "మీ పేరు ఏమిటి", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "నీ పేరు ఏమిటి మిత్రమా", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "భోజనం చేయండి", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "నీరు తాగండి", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "దయచేసి ఆగండి", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "అవును దయచేసి", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "వద్దు ధన్యవాదాలు", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "క్షమించండి నా మిత్రమా", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "ఆహారం బాగుంది", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "ఆహారం బాగాలేదు", "glosses": ["BAD", "FOOD"] }
+  ],
+  "grammarWords": {
+    "ఏమిటి": "what",
+    "ఎక్కడ": "where",
+    "ఎవరు": "who",
+    "ఎందుకు": "why",
+    "ఎలా": "how",
+    "ఉంది": "is",
+    "ఉన్నారు": "are",
+    "నేను": "I",
+    "మీరు": "you",
+    "నువ్వు": "you",
+    "నా": "my",
+    "మీ": "your",
+    "నీ": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "నమస్కారం!",
+    "THANK_YOU": "ధన్యవాదాలు!",
+    "PLEASE": "దయచేసి.",
+    "SORRY": "క్షమించండి.",
+    "GOODBYE": "వెళ్ళివస్తాను!",
+    "HOW_ARE_YOU": "ఎలా ఉన్నారు?",
+    "YES": "అవును.",
+    "NO": "కాదు.",
+    "GOOD": "మంచిది.",
+    "BAD": "చెడు.",
+    "HELP": "సహాయం చేయండి!",
+    "STOP": "ఆగండి.",
+    "EAT": "ఆహారం తినండి.",
+    "DRINK": "నీరు తాగండి.",
+    "WATER": "నీళ్ళు, దయచేసి.",
+    "FOOD": "ఆహారం, దయచేసి.",
+    "HOME": "ఇల్లు.",
+    "FRIEND": "స్నేహితుడు.",
+    "NAME": "పేరు.",
+    "LOVE": "ప్రేమ.",
+    "HELLO HOW_ARE_YOU": "నమస్కారం, ఎలా ఉన్నారు?",
+    "HOW_ARE_YOU GOOD": "ఎలా ఉన్నారు? నేను చాలా బాగున్నాను.",
+    "HOW_ARE_YOU BAD": "ఎలా ఉన్నారు? నా ఆరోగ్యం బాగాలేదు.",
+    "GOOD THANK_YOU": "బాగుంది, చాలా ధన్యవాదాలు!",
+    "THANK_YOU FRIEND": "ధన్యవాదాలు, నా మిత్రమా!",
+    "HELLO FRIEND": "నమస్కారం, నా మిత్రమా!",
+    "GOODBYE FRIEND": "వెళ్ళివస్తాను, నా మిత్రమా!",
+    "HELLO GOODBYE": "నమస్కారం మరియు వెళ్ళివస్తాను!",
+    "SORRY FRIEND": "క్షమించండి, నా మిత్రమా.",
+    "PLEASE HELP": "దయచేసి నాకు సహాయం చేయండి!",
+    "HELP PLEASE": "సహాయం చేయండి, దయచేసి!",
+    "PLEASE STOP": "దయచేసి ఆగండి.",
+    "STOP PLEASE": "ఆగండి, దయచేసి.",
+    "SORRY PLEASE": "క్షమించండి, దయచేసి మన్నించండి.",
+    "YES PLEASE": "అవును, దయచేసి.",
+    "NO THANK_YOU": "వద్దు, ధన్యవాదాలు.",
+    "YES THANK_YOU": "అవును, చాలా ధన్యవాదాలు!",
+    "YES GOOD": "అవును, ఇది చాలా మంచిది.",
+    "NO BAD": "కాదు, ఇది బాగాలేదు.",
+    "PLEASE WATER": "దయచేసి నాకు నీళ్ళు కావాలి.",
+    "PLEASE FOOD": "దయచేసి నాకు ఆహారం కావాలి.",
+    "EAT FOOD": "భోజనం చేయండి.",
+    "DRINK WATER": "నీరు తాగండి.",
+    "FOOD EAT": "ఆహారం తినండి.",
+    "WATER DRINK": "నీళ్ళు తాగండి.",
+    "GOOD FOOD": "ఆహారం చాలా బాగుంది.",
+    "BAD FOOD": "ఆహారం బాగాలేదు.",
+    "FRIEND HELP": "మిత్రమా, దయచేసి సహాయం చేయి!",
+    "HELP FRIEND": "స్నేహితుడికి సహాయం చేయండి!",
+    "FRIEND LOVE": "మిత్రుడిపై ఎంతో ప్రేమ!",
+    "LOVE FRIEND": "స్నేహితుడిని ప్రేమిస్తున్నాను!",
+    "GOOD FRIEND": "నువ్వు చాలా మంచి స్నేహితుడివి.",
+    "GOOD HOME": "ఇల్లు చాలా బాగుంది.",
+    "LOVE HOME": "నాకు నా ఇల్లు అంటే చాలా ఇష్టం.",
+    "NAME FRIEND": "మీ పేరు ఏమిటి, మిత్రమా?",
+    "HELLO NAME": "నమస్కారం, నా పేరు..."
+  }
+}
