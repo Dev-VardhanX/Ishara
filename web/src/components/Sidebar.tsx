@@ -103,7 +103,7 @@ export const Sidebar: React.FC = () => {
     <aside className="w-64 min-h-screen bg-transparent p-6 flex flex-col justify-between select-none shrink-0 border-r border-slate-200/40">
       <div>
         {/* Brand Header with Unified Ishara Logo */}
-        <NavLink to="/" className="flex items-center px-3 py-2 mb-8 group clay-focus rounded-2xl" aria-label="Ishara Home">
+        <NavLink to="/" className="flex items-center px-3 py-2 mb-8 group clay-focus rounded-2xl" aria-label={t('nav.homeTitle')}>
           <IsharaLogo size="md" showWordmark={true} subtitle={`${language} Translator`} />
         </NavLink>
 
@@ -140,9 +140,9 @@ export const Sidebar: React.FC = () => {
                           ? 'bg-white/20 text-white'
                           : 'bg-[#FFE8E2] text-[#FF8A8A]'
                       }`}
-                      title="ASL vision model is in Phase 4 Roadmap"
+                      title={t('dashboard.aslComingSoon')}
                     >
-                      Beta
+                      {t('common.beta')}
                     </span>
                   )}
                 </>

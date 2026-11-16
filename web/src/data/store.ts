@@ -14,6 +14,10 @@ export interface RecentConversation {
   language: 'ISL' | 'ASL';
   iconEmoji: string;
   direction?: 'sign_to_voice' | 'voice_to_sign';
+  locale?: string;
+  originalText?: string;
+  englishText?: string;
+  glosses?: string[];
 }
 
 export interface HistoryGroup {

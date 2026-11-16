@@ -1,0 +1,237 @@
+{
+  "locale": "hi",
+  "languageName": "Hindi",
+  "nativeName": "हिन्दी",
+  "voiceCode": "hi-IN",
+  "script": "Devanagari",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": "।",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "नमस्ते",
+      "alternatives": ["हेलो", "प्रणाम", "नमस्कार", "राम राम", "जय हिन्द"],
+      "romanized": ["namaste", "hello", "pranam", "namaskar", "ram ram"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "धन्यवाद",
+      "alternatives": ["शुक्रिया", "बहुत धन्यवाद", "थैंक यू", "आभार", "कोटि धन्यवाद"],
+      "romanized": ["dhanyavaad", "dhanyavad", "shukriya", "thank you", "aabhar"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "कृपया",
+      "alternatives": ["कृपा करके", "प्लीज", "जरा", "मेहरबानी करके", "अनुरोध"],
+      "romanized": ["kripya", "kripaya", "please", "meherbani", "jara"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "माफ़ कीजिए",
+      "alternatives": ["माफ़", "माफ़ी", "सॉरी", "क्षमा करें", "माफ करना"],
+      "romanized": ["maaf kijiye", "maaf", "sorry", "kshama", "maafi"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "अलविदा",
+      "alternatives": ["बाय", "फिर मिलेंगे", "नमस्ते", "टाटा", "चलता हूँ"],
+      "romanized": ["alvida", "bye", "phir milenge", "tata", "namaste"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "आप कैसे हैं",
+      "alternatives": ["कैसे हो", "क्या हाल है", "सब ठीक है", "कैसी हो", "क्या चल रहा है"],
+      "romanized": ["aap kaise hain", "kaise ho", "kya haal hai", "kaisa hai", "sab theek"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "हाँ",
+      "alternatives": ["हा", "जी हाँ", "बिलकुल", "हाँजी", "ज़रूर"],
+      "romanized": ["haan", "ha", "ji haan", "bilkul", "haanji"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "नहीं",
+      "alternatives": ["ना", "जी नहीं", "न", "मत", "कदापि नहीं"],
+      "romanized": ["nahi", "nahin", "na", "ji nahi", "mat"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "अच्छा",
+      "alternatives": ["बढ़िया", "ठीक", "उत्तम", "अच्छी", "सुंदर"],
+      "romanized": ["achha", "achha", "badhiya", "theek", "shandar"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "बुरा",
+      "alternatives": ["खराब", "गलत", "बेकार", "बुरी", "अनुचित"],
+      "romanized": ["bura", "kharab", "galat", "bekar", "anuchit"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "मदद",
+      "alternatives": ["सहायता", "मदद कीजिए", "हेल्प", "बचाओ", "सहयोग"],
+      "romanized": ["madad", "sahayata", "help", "bachao", "madad karo"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "रुकिए",
+      "alternatives": ["रुको", "रोको", "ठहरो", "बस", "थम जाओ"],
+      "romanized": ["rukiye", "ruko", "roko", "thehro", "bas"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "खाना",
+      "alternatives": ["खाओ", "खाइए", "खा", "खाते हैं", "भोजन करना"],
+      "romanized": ["khana", "khao", "khaiye", "khat", "kha"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "पीना",
+      "alternatives": ["पियो", "पीजिए", "पी", "पीते हैं", "जलपान"],
+      "romanized": ["peena", "piyo", "pijiye", "pee", "peete"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "पानी",
+      "alternatives": ["जल", "नीर", "वॉटर", "ठंडा पानी", "पीने का पानी"],
+      "romanized": ["paani", "pani", "jal", "water", "neer"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "खाना",
+      "alternatives": ["भोजन", "रोटी", "आहार", "अन्न", "व्यंजन"],
+      "romanized": ["khana", "bhojan", "roti", "food", "aahar"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "घर",
+      "alternatives": ["मकान", "गृह", "निवास", "डेरा", "आशियाना"],
+      "romanized": ["ghar", "makaan", "home", "grih", "nivas"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "दोस्त",
+      "alternatives": ["मित्र", "यार", "सखा", "सहेली", "साथी"],
+      "romanized": ["dost", "mitra", "yaar", "sakha", "saathi"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "नाम",
+      "alternatives": ["पहचान", "नाम क्या", "पुकार", "उपनाम", "शीर्षक"],
+      "romanized": ["naam", "nam", "identity", "naav"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "प्यार",
+      "alternatives": ["प्रेम", "मोहब्बत", "स्नेह", "दुलार", "चाहत"],
+      "romanized": ["pyaar", "pyar", "prem", "mohabbat", "sneha"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "नमस्ते आप कैसे हैं", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "आप कैसे हैं", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "मैं ठीक हूँ धन्यवाद", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "कृपया मेरी मदद कीजिए", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "मदद कीजिए कृपया", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "धन्यवाद मेरे दोस्त", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "नमस्ते मेरे दोस्त", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "अलविदा मेरे दोस्त", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "मुझे पानी चाहिए", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "कृपया पानी दीजिए", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "मुझे खाना चाहिए", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "तुम्हारा नाम क्या है", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "आपका नाम क्या है", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "खाना खाओ", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "पानी पियो", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "कृपया रुकिए", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "हाँ कृपया", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "नहीं धन्यवाद", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "माफ़ करना मेरे दोस्त", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "खाना अच्छा है", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "खाना खराब है", "glosses": ["BAD", "FOOD"] },
+    { "phrase": "namaste kaise ho", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "madad karo please", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "paani chahiye", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "khana chahiye", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "aapka naam kya hai", "glosses": ["NAME", "FRIEND"] }
+  ],
+  "grammarWords": {
+    "क्या": "what",
+    "कहाँ": "where",
+    "कौन": "who",
+    "क्यों": "why",
+    "कैसे": "how",
+    "है": "is",
+    "हैं": "are",
+    "हूँ": "am",
+    "मैं": "I",
+    "आप": "you",
+    "तुम": "you",
+    "मेरा": "my",
+    "मेरी": "my",
+    "आपका": "your",
+    "तुम्हारा": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "नमस्ते!",
+    "THANK_YOU": "धन्यवाद!",
+    "PLEASE": "कृपया।",
+    "SORRY": "माफ़ कीजिए।",
+    "GOODBYE": "अलविदा!",
+    "HOW_ARE_YOU": "आप कैसे हैं?",
+    "YES": "हाँ।",
+    "NO": "नहीं।",
+    "GOOD": "अच्छा।",
+    "BAD": "बुरा।",
+    "HELP": "मदद कीजिए!",
+    "STOP": "रुकिए।",
+    "EAT": "खाना खाइए।",
+    "DRINK": "पानी पीजिए।",
+    "WATER": "पानी, कृपया।",
+    "FOOD": "खाना, कृपया।",
+    "HOME": "घर।",
+    "FRIEND": "दोस्त।",
+    "NAME": "नाम।",
+    "LOVE": "प्यार।",
+    "HELLO HOW_ARE_YOU": "नमस्ते, आप कैसे हैं?",
+    "HOW_ARE_YOU GOOD": "आप कैसे हैं? मैं ठीक हूँ।",
+    "HOW_ARE_YOU BAD": "आप कैसे हैं? मेरी तबीयत ठीक नहीं है।",
+    "GOOD THANK_YOU": "अच्छा, धन्यवाद!",
+    "THANK_YOU FRIEND": "धन्यवाद, मेरे दोस्त!",
+    "HELLO FRIEND": "नमस्ते, मेरे दोस्त!",
+    "GOODBYE FRIEND": "अलविदा, मेरे दोस्त!",
+    "HELLO GOODBYE": "नमस्ते और अलविदा!",
+    "SORRY FRIEND": "माफ़ करना, मेरे दोस्त।",
+    "PLEASE HELP": "कृपया मेरी मदद कीजिए!",
+    "HELP PLEASE": "मदद कीजिए, कृपया!",
+    "PLEASE STOP": "कृपया रुकिए।",
+    "STOP PLEASE": "रुकिए, कृपया।",
+    "SORRY PLEASE": "माफ़ कीजिए, कृपया क्षमा करें।",
+    "YES PLEASE": "हाँ, कृपया।",
+    "NO THANK_YOU": "नहीं, धन्यवाद।",
+    "YES THANK_YOU": "हाँ, बहुत धन्यवाद!",
+    "YES GOOD": "हाँ, यह बहुत अच्छा है।",
+    "NO BAD": "नहीं, यह खराब है।",
+    "PLEASE WATER": "कृपया, मुझे पानी चाहिए।",
+    "PLEASE FOOD": "कृपया, मुझे खाना चाहिए।",
+    "EAT FOOD": "खाना खाओ।",
+    "DRINK WATER": "पानी पियो।",
+    "FOOD EAT": "खाना खाओ।",
+    "WATER DRINK": "पानी पियो।",
+    "GOOD FOOD": "खाना बहुत अच्छा है।",
+    "BAD FOOD": "खाना खराब है।",
+    "FRIEND HELP": "दोस्त, कृपया मदद करो!",
+    "HELP FRIEND": "दोस्त की मदद करो!",
+    "FRIEND LOVE": "दोस्त से बहुत प्यार!",
+    "LOVE FRIEND": "दोस्त से प्यार है!",
+    "GOOD FRIEND": "तुम बहुत अच्छे दोस्त हो।",
+    "GOOD HOME": "घर बहुत अच्छा है।",
+    "LOVE HOME": "मुझे अपने घर से प्यार है।",
+    "NAME FRIEND": "तुम्हारा नाम क्या है, दोस्त?",
+    "HELLO NAME": "नमस्ते, मेरा नाम..."
+  }
+}

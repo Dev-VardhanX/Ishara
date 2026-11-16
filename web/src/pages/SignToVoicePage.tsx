@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Header } from '../components/Header';
 import { Badge } from '../components/Badge';
 import { useLanguageStore } from '../store/useLanguageStore';
-import { useLocaleStore } from '../store/useLocaleStore';
+import { useLocaleStore, SUPPORTED_LOCALES, AppLocale } from '../store/useLocaleStore';
 import {
   HAND_CONNECTIONS,
   Landmark,
@@ -18,9 +18,10 @@ import {
   SentenceTranslationResult,
   AlternativeCandidate,
   buildSentenceFromGlosses,
+  glossToWord,
 } from '../ml';
 import { addRecentConversation } from '../data/store';
-import { useSpeech, SpeechEmotion, recordUserInteraction } from '../lib/speech';
+import { useSpeech, SpeechEmotion, recordUserInteraction, getBestVoice } from '../lib/speech';
 import {
   Video,
   Play,
@@ -35,6 +36,8 @@ import {
   AlertCircle,
   ShieldCheck,
   Eye,
+  EyeOff,
+  Globe,
   RefreshCw,
   ExternalLink,
   ChevronDown,
@@ -68,7 +71,25 @@ const EMOTION_PRESETS: Record<EmotionType, EmotionPreset> = {
 
 export const SignToVoicePage: React.FC = () => {
   const { language } = useLanguageStore();
-  const { t, locale, voiceCode } = useLocaleStore();
+  const {
+    t,
+    locale,
+    voiceCode,
+    translationLocale,
+    translationVoiceCode,
+    setTranslationLocale,
+    showEnglishSubtitle,
+    setShowEnglishSubtitle,
+  } = useLocaleStore();
+
+  const [outputLocale, setOutputLocale] = useState<AppLocale>(translationLocale || 'en');
+  const [englishSentence, setEnglishSentence] = useState<string>('');
+
+  useEffect(() => {
+    if (translationLocale) {
+      setOutputLocale(translationLocale);
+    }
+  }, [translationLocale]);
 
   // Video & Canvas references
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -129,7 +150,7 @@ export const SignToVoicePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    document.title = 'Sign to Voice — Ishara';
+    document.title = `${t('signToVoice.title')} — Ishara`;
     loadModel();
 
     return () => {
@@ -137,7 +158,7 @@ export const SignToVoicePage: React.FC = () => {
       closeHandTracker();
       recognizerRef.current.destroy();
     };
-  }, [loadModel]);
+  }, [loadModel, t]);
 
   // Synchronize language (ISL / ASL) with active recognizer
   useEffect(() => {
@@ -280,51 +301,76 @@ export const SignToVoicePage: React.FC = () => {
     animationFrameRef.current = requestAnimationFrame(runDetection);
   }, [cameraActive, isPaused]);
 
+  const activeOutputVoiceCode =
+    SUPPORTED_LOCALES.find((l) => l.code === outputLocale)?.voiceCode || 'en-IN';
+  const outputLocaleMeta = SUPPORTED_LOCALES.find((l) => l.code === outputLocale);
+  const outputLocaleName = outputLocaleMeta?.nativeName || 'English';
+  const hasVoiceForOutput = !!getBestVoice(activeOutputVoiceCode);
+
+  // Synchronize translated sentences whenever rawGlosses, language, or outputLocale change
+  useEffect(() => {
+    if (rawGlosses.length > 0) {
+      const res = buildSentenceFromGlosses(rawGlosses, language, outputLocale);
+      setNaturalSentence(res.naturalSentence);
+      setEnglishSentence(res.englishSentence);
+    } else {
+      setNaturalSentence('');
+      setEnglishSentence('');
+    }
+  }, [rawGlosses, language, outputLocale]);
+
   // Wire ISLRecognizer callbacks for sentence building & optional speech
   useEffect(() => {
     recognizerRef.current.setCallbacks({
       onWordRecognized: (_gloss: string, text: string, confidence: number = 0.95) => {
         if (autoSpeak && confidence >= 0.85) {
-          speech.speak(text, {
+          const wordToSpeak = glossToWord(_gloss, outputLocale) || text;
+          speech.speak(wordToSpeak, {
             emotion: currentEmotion,
-            lang: voiceCode,
+            lang: activeOutputVoiceCode,
             isAutoSpeak: true,
           });
         }
       },
       onSentenceUpdated: (fullText: string, words: string[], translation?: SentenceTranslationResult) => {
         setAcceptedWords(words);
-        setRawGlosses(translation?.rawGlosses || []);
+        const nextRaw = translation?.rawGlosses || [];
+        setRawGlosses(nextRaw);
         setDistinctGlosses(translation?.distinctGlosses || []);
-        const finalSentence =
-          translation?.rawGlosses && translation.rawGlosses.length > 0
-            ? buildSentenceFromGlosses(translation.rawGlosses, language, locale).naturalSentence
-            : translation?.naturalSentence || fullText;
-        setNaturalSentence(finalSentence);
+        const res =
+          nextRaw.length > 0
+            ? buildSentenceFromGlosses(nextRaw, language, outputLocale)
+            : { naturalSentence: fullText, englishSentence: fullText };
+        setNaturalSentence(res.naturalSentence);
+        setEnglishSentence(res.englishSentence);
 
         const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const newEntry = {
           id: String(Date.now()),
           time: timeStr,
-          text: finalSentence,
+          text: res.naturalSentence,
         };
         setTranscripts((prev) => [newEntry, ...prev.slice(0, 4)]);
 
         try {
           addRecentConversation(
             {
-              title: `Sign: "${finalSentence.slice(0, 24)}${finalSentence.length > 24 ? '...' : ''}"`,
+              title: `Sign: "${res.naturalSentence.slice(0, 24)}${res.naturalSentence.length > 24 ? '...' : ''}"`,
               mode: `Sign to Voice (${language})`,
               timestamp: 'Just now',
-              snippet: finalSentence,
+              snippet: res.naturalSentence,
               language,
               iconEmoji: 'sign',
               direction: 'sign_to_voice',
+              locale: outputLocale,
+              originalText: res.naturalSentence,
+              englishText: res.englishSentence,
+              glosses: translation?.distinctGlosses || [],
             },
             {
               direction: 'sign_to_voice',
-              text: finalSentence,
-              translatedText: finalSentence,
+              text: res.naturalSentence,
+              translatedText: res.englishSentence || res.naturalSentence,
               emotion: currentEmotion,
             }
           );
@@ -346,7 +392,7 @@ export const SignToVoicePage: React.FC = () => {
         setHoldProgress(progress);
       },
     });
-  }, [autoSpeak, currentEmotion, language, speech]);
+  }, [autoSpeak, currentEmotion, language, speech, outputLocale, activeOutputVoiceCode]);
 
   // Start / restart detection loop
   useEffect(() => {
@@ -379,9 +425,28 @@ export const SignToVoicePage: React.FC = () => {
       return;
     }
     recordUserInteraction();
-    speech.speak(translatedSentence, {
+    if (hasVoiceForOutput || outputLocale === 'en') {
+      speech.speak(translatedSentence, {
+        emotion: currentEmotion,
+        lang: activeOutputVoiceCode,
+        isUserClick: true,
+      });
+    } else {
+      speech.speak(englishSentence || translatedSentence, {
+        emotion: currentEmotion,
+        lang: 'en-IN',
+        isUserClick: true,
+      });
+    }
+  };
+
+  // Fallback to speak English reference sentence
+  const handleSpeakEnglish = () => {
+    if (!englishSentence) return;
+    recordUserInteraction();
+    speech.speak(englishSentence, {
       emotion: currentEmotion,
-      lang: voiceCode,
+      lang: 'en-IN',
       isUserClick: true,
     });
   };
@@ -406,14 +471,27 @@ export const SignToVoicePage: React.FC = () => {
 
     // Persist to central history store
     try {
-      addRecentConversation({
-        title: `Sign: "${translatedSentence.slice(0, 24)}${translatedSentence.length > 24 ? '...' : ''}"`,
-        mode: `Sign to Voice (${language})`,
-        timestamp: 'Just now',
-        snippet: translatedSentence,
-        language,
-        iconEmoji: 'sign',
-      });
+      addRecentConversation(
+        {
+          title: `Sign: "${translatedSentence.slice(0, 24)}${translatedSentence.length > 24 ? '...' : ''}"`,
+          mode: `Sign to Voice (${language})`,
+          timestamp: 'Just now',
+          snippet: translatedSentence,
+          language,
+          iconEmoji: 'sign',
+          direction: 'sign_to_voice',
+          locale: outputLocale,
+          originalText: translatedSentence,
+          englishText: englishSentence,
+          glosses: distinctGlosses,
+        },
+        {
+          direction: 'sign_to_voice',
+          text: translatedSentence,
+          translatedText: englishSentence || translatedSentence,
+          emotion: currentEmotion,
+        }
+      );
     } catch (err) {
       console.warn('Failed to save to history', err);
     }
@@ -435,14 +513,14 @@ export const SignToVoicePage: React.FC = () => {
     <div className="space-y-6 select-none">
       {/* Header with offline indicator and ISL/ASL switcher */}
       <Header
-        title="Live Translator"
-        subtitle="Real-time in-browser sign language classification into speech and subtitles"
+        title={t('signToVoice.title')}
+        subtitle={t('signToVoice.subtitle')}
         badge={
           <Badge
             tooltip={`Real-time ${language} 20-sign geometric & kinematic recognition with natural sentence formation.`}
             variant="blue"
           >
-            {language} • 20 Signs
+            {language} {t('signToVoice.signsCountBadge', { count: 20 })}
           </Badge>
         }
       />
@@ -461,7 +539,7 @@ export const SignToVoicePage: React.FC = () => {
               className="clay-button clay-button-white px-3 py-1.5 text-xs font-black flex items-center gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5 text-[#7C9CFF]" />
-              <span>Retry Camera</span>
+              <span>{t('signToVoice.retryCamera')}</span>
             </button>
             <button
               type="button"
@@ -471,7 +549,7 @@ export const SignToVoicePage: React.FC = () => {
               }}
               className="clay-button px-3 py-1.5 text-xs font-black"
             >
-              Use Gesture Simulator
+              {t('signToVoice.useSimulator')}
             </button>
           </div>
         </div>
@@ -483,7 +561,7 @@ export const SignToVoicePage: React.FC = () => {
           <div className="flex items-center gap-3">
             <AlertCircle className="w-5 h-5 text-[#FF8A8A] shrink-0" />
             <div>
-              <p className="text-xs font-black text-[#2B2D42]">HandLandmarker Offline Load Error</p>
+              <p className="text-xs font-black text-[#2B2D42]">{t('signToVoice.modelErrorTitle')}</p>
               <p className="text-xs font-medium text-[#6E7387]">{modelError}</p>
             </div>
           </div>
@@ -494,7 +572,7 @@ export const SignToVoicePage: React.FC = () => {
               className="clay-button clay-button-white px-3 py-1.5 text-xs font-black flex items-center gap-1.5"
             >
               <RefreshCw className="w-3.5 h-3.5 text-[#7C9CFF]" />
-              <span>Retry Model</span>
+              <span>{t('signToVoice.retryModel')}</span>
             </button>
             <button
               type="button"
@@ -504,7 +582,7 @@ export const SignToVoicePage: React.FC = () => {
               }}
               className="clay-button px-3 py-1.5 text-xs font-black"
             >
-              Use Gesture Simulator
+              {t('signToVoice.useSimulator')}
             </button>
           </div>
         </div>
@@ -524,7 +602,7 @@ export const SignToVoicePage: React.FC = () => {
                     cameraActive && !isPaused ? 'bg-[#FF8A8A] animate-pulse' : 'bg-slate-400'
                   }`}
                 ></span>
-                <span>{cameraActive ? (isPaused ? 'PAUSED' : 'LIVE • STREAMING') : 'OFFLINE'}</span>
+                <span>{cameraActive ? (isPaused ? t('signToVoice.pausedBadge') : t('signToVoice.liveBadge')) : t('signToVoice.offlineBadge')}</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -538,15 +616,15 @@ export const SignToVoicePage: React.FC = () => {
                   }`}
                 >
                   {modelError ? (
-                    'Model Failed'
+                    t('signToVoice.modelFailed')
                   ) : modelLoading ? (
                     <span className="flex items-center gap-1.5">
                       <RefreshCw className="w-3 h-3 animate-spin" />
-                      <span>Loading MediaPipe (Offline WASM)...</span>
+                      <span>{t('signToVoice.loadingModel')}</span>
                     </span>
                   ) : (
                     <span>
-                      MediaPipe Ready (Offline{modelDelegate ? ` • ${modelDelegate}` : ''})
+                      {t('signToVoice.modelReady', { delegate: modelDelegate || 'WASM' })}
                     </span>
                   )}
                 </div>
@@ -559,9 +637,9 @@ export const SignToVoicePage: React.FC = () => {
               {modelLoading && (
                 <div className="absolute inset-0 z-20 rounded-[22px] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-fade-in">
                   <div className="w-10 h-10 rounded-full border-3 border-[#7C9CFF]/30 border-t-[#7C9CFF] animate-spin mb-3"></div>
-                  <p className="text-sm font-black text-white">Loading HandLandmarker Model...</p>
+                  <p className="text-sm font-black text-white">{t('signToVoice.loadingHandLandmarker')}</p>
                   <p className="text-xs text-white/70 mt-1 max-w-xs">
-                    Initializing MediaPipe WASM runtime & loading /models/hand_landmarker.task
+                    {t('signToVoice.initializingRuntime')}
                   </p>
                 </div>
               )}
@@ -570,7 +648,7 @@ export const SignToVoicePage: React.FC = () => {
               {modelError && !cameraActive && !modelLoading && (
                 <div className="absolute inset-0 z-20 rounded-[22px] bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center animate-fade-in">
                   <AlertCircle className="w-10 h-10 text-[#FF8A8A] mb-2" />
-                  <p className="text-xs font-black text-white">Model Load Failed</p>
+                  <p className="text-xs font-black text-white">{t('signToVoice.modelLoadFailed')}</p>
                   <p className="text-[11px] text-white/70 mt-1 max-w-xs leading-relaxed">
                     {modelError}
                   </p>
@@ -579,7 +657,7 @@ export const SignToVoicePage: React.FC = () => {
                     onClick={loadModel}
                     className="clay-button clay-button-coral text-xs font-black px-4 py-2 mt-3"
                   >
-                    Retry Loading Model
+                    {t('signToVoice.retryLoadModel')}
                   </button>
                 </div>
               )}
@@ -623,7 +701,7 @@ export const SignToVoicePage: React.FC = () => {
                     onClick={startCamera}
                     className="clay-button clay-button-coral text-xs font-black px-4 py-2 mt-4 clay-focus"
                   >
-                    Start Camera
+                    {t('signToVoice.startDetection')}
                   </button>
                 </div>
               )}
@@ -632,7 +710,7 @@ export const SignToVoicePage: React.FC = () => {
               {cameraActive && (
                 <div className="absolute inset-4 border-2 border-dashed border-white/20 rounded-[28px] pointer-events-none flex items-center justify-center">
                   <span className="absolute top-3 text-[10px] font-black text-white/40 uppercase tracking-widest">
-                    Frame your hands and upper body
+                    {t('common.frameGuide')}
                   </span>
                 </div>
               )}
@@ -642,7 +720,7 @@ export const SignToVoicePage: React.FC = () => {
             <div className="flex items-center justify-between z-10 pt-2 border-t border-white/10">
               <span className="text-[11px] font-bold text-white/60 flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-[#A8E6A1]" />
-                <span>Video never leaves your device</span>
+                <span>{t('common.videoPrivate')}</span>
               </span>
 
               <div className="flex items-center gap-3">
@@ -652,7 +730,7 @@ export const SignToVoicePage: React.FC = () => {
                   onClick={togglePause}
                   disabled={!cameraActive}
                   className="w-11 h-11 rounded-full bg-white/80 hover:bg-white text-[#2B2D42] flex items-center justify-center shadow-md clay-focus disabled:opacity-40"
-                  title={isPaused ? 'Resume Camera' : 'Pause Camera'}
+                  title={isPaused ? t('signToVoice.resumeCamera') : t('signToVoice.pauseCamera')}
                 >
                   {isPaused ? <Play className="w-4 h-4 ml-0.5" /> : <Pause className="w-4 h-4" />}
                 </button>
@@ -664,7 +742,7 @@ export const SignToVoicePage: React.FC = () => {
                   className={`w-14 h-14 rounded-full flex items-center justify-center shadow-clay-raised clay-focus transition-all active:scale-95 ${
                     cameraActive ? 'bg-[#FF8A8A] text-white' : 'bg-[#7C9CFF] text-white'
                   }`}
-                  title={cameraActive ? 'Stop Stream' : 'Start Stream'}
+                  title={cameraActive ? t('signToVoice.stopStream') : t('signToVoice.startStream')}
                 >
                   {cameraActive ? (
                     <div className="w-5 h-5 rounded-md bg-white"></div>
@@ -682,9 +760,9 @@ export const SignToVoicePage: React.FC = () => {
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <div>
                   <span className="text-[11px] font-black uppercase text-[#6E7387]">
-                    Gesture Simulator ({language} — {Object.keys(SIGN_VOCABULARY).length} Signs)
+                    {t('signToVoice.simTitle', { lang: language, count: Object.keys(SIGN_VOCABULARY).length })}
                   </span>
-                  <p className="text-[10px] text-[#6E7387] mt-0.5">Click signs to test recognition & natural sentence builder</p>
+                  <p className="text-[10px] text-[#6E7387] mt-0.5">{t('signToVoice.simSubtitle')}</p>
                 </div>
                 {/* Category filters */}
                 <div className="flex gap-1">
@@ -699,7 +777,7 @@ export const SignToVoicePage: React.FC = () => {
                           : 'bg-slate-100 hover:bg-slate-200 text-[#6E7387]'
                       }`}
                     >
-                      {cat}
+                      {cat === 'all' ? t('signToVoice.categoryAll') : cat === 'greetings' ? t('signToVoice.categoryGreetings') : cat === 'basic' ? t('signToVoice.categoryBasic') : cat === 'needs' ? t('signToVoice.categoryNeeds') : t('signToVoice.categorySocial')}
                     </button>
                   ))}
                 </div>
@@ -709,6 +787,8 @@ export const SignToVoicePage: React.FC = () => {
                   .filter((item) => simCategory === 'all' || item.category === simCategory)
                   .map((item) => {
                     const gloss = language === 'ISL' ? item.islGloss : item.aslGloss;
+                    const translatedWord = t(`signs.${gloss}.word`);
+                    const wordDisplay = translatedWord && translatedWord !== `signs.${gloss}.word` ? translatedWord : item.label;
                     return (
                       <button
                         key={item.id}
@@ -718,7 +798,7 @@ export const SignToVoicePage: React.FC = () => {
                         title={item.description}
                       >
                         <span className="text-[10px] font-bold text-[#7C9CFF] font-mono">{gloss}</span>
-                        <span>{item.label}</span>
+                        <span>{wordDisplay}</span>
                       </button>
                     );
                   })}
@@ -731,7 +811,7 @@ export const SignToVoicePage: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
-                  Live Recognition
+                  {t('signToVoice.liveTranslator')}
                 </p>
                 <div className="flex items-baseline gap-2 mt-0.5">
                   <p className="text-xl sm:text-2xl font-black text-[#2B2D42]">
@@ -739,7 +819,7 @@ export const SignToVoicePage: React.FC = () => {
                       <span className="text-[#7C9CFF]">{liveCandidate}</span>
                     ) : (
                       <span className="text-slate-400 font-semibold text-lg italic">
-                        Waiting for hand gesture...
+                        {t('signToVoice.waitingGesture')}
                       </span>
                     )}
                   </p>
@@ -758,6 +838,7 @@ export const SignToVoicePage: React.FC = () => {
                     const preset = EMOTION_PRESETS[emoKey];
                     const isSelected = currentEmotion === emoKey;
                     const IconComp = preset.icon;
+                    const emoDisplayName = t(`emotions.${emoKey}`) && t(`emotions.${emoKey}`) !== `emotions.${emoKey}` ? t(`emotions.${emoKey}`) : preset.name;
                     return (
                       <button
                         key={emoKey}
@@ -768,11 +849,11 @@ export const SignToVoicePage: React.FC = () => {
                             ? `${preset.bgClass} ${preset.textClass} shadow-clay-raised-sm ring-1 ring-black/10`
                             : 'bg-white/70 text-[#6E7387] hover:bg-white'
                         }`}
-                        title={preset.name}
-                        aria-label={`Select ${preset.name} emotion`}
+                        title={emoDisplayName}
+                        aria-label={t('signToVoice.selectEmotionAria', { name: emoDisplayName })}
                       >
                         <IconComp className="w-3.5 h-3.5" />
-                        <span className="hidden sm:inline">{preset.name}</span>
+                        <span className="hidden sm:inline">{emoDisplayName}</span>
                       </button>
                     );
                   })}
@@ -784,7 +865,7 @@ export const SignToVoicePage: React.FC = () => {
             {liveCandidate && (
               <div className="space-y-1 pt-1">
                 <div className="flex justify-between text-[10px] font-black text-[#6E7387]">
-                  <span>Hold Stability (Snappy 100ms Detection)</span>
+                  <span>{t('signToVoice.holdStability')}</span>
                   <span>{Math.round(holdProgress * 100)}%</span>
                 </div>
                 <div className="h-2 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
@@ -803,11 +884,11 @@ export const SignToVoicePage: React.FC = () => {
               <div className="flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-[#7C9CFF]" />
                 <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
-                  Similar Glosses (Alternative Candidates)
+                  {t('signToVoice.similarGlosses')}
                 </span>
               </div>
               <span className="text-[10px] font-bold text-[#6E7387]/80">
-                {language} Vocabulary
+                {language}
               </span>
             </div>
 
@@ -834,7 +915,7 @@ export const SignToVoicePage: React.FC = () => {
                     )}
                     {/* Confidence percentage chip */}
                     <span className="px-1.5 py-0.5 rounded-full bg-slate-100 text-[#6E7387] font-mono text-[10px] font-bold">
-                      {Math.round(cand.confidence * 100)}% match
+                      {t('signToVoice.matchPercentage', { percent: Math.round(cand.confidence * 100) })}
                     </span>
                   </div>
                 ))}
@@ -842,10 +923,10 @@ export const SignToVoicePage: React.FC = () => {
             ) : (
               <div className="py-2.5 px-3 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center">
                 <p className="text-xs font-bold text-[#6E7387]">
-                  No close alternative gestures detected
+                  {t('signToVoice.noAlternativeGestures')}
                 </p>
                 <p className="text-[10px] text-slate-400 mt-0.5">
-                  Hold gesture steady in camera view to display alternative candidate rankings
+                  {t('signToVoice.holdGestureHint')}
                 </p>
               </div>
             )}
@@ -856,10 +937,34 @@ export const SignToVoicePage: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           {/* Translated Output Card */}
           <div className="clay-card p-7 space-y-6">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
-                Translated Output (English)
-              </span>
+            <div className="flex items-center justify-between flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
+                  {t('signToVoice.translatedOutput')}
+                </span>
+                {/* Small Output Language Selector */}
+                <div className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-slate-200 shadow-xs">
+                  <Globe className="w-3.5 h-3.5 text-[#7C9CFF] shrink-0" />
+                  <select
+                    id="output-locale-select"
+                    value={outputLocale}
+                    onChange={(e) => {
+                      const next = e.target.value as AppLocale;
+                      setOutputLocale(next);
+                      setTranslationLocale(next);
+                    }}
+                    className="bg-transparent text-xs font-black text-[#2B2D42] focus:outline-none cursor-pointer"
+                    aria-label={t('signToVoice.selectOutputLangAria')}
+                  >
+                    {SUPPORTED_LOCALES.map((l) => (
+                      <option key={l.code} value={l.code}>
+                        {l.nativeName} ({l.name})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2">
                 {/* Auto-Speak Toggle */}
                 <button
@@ -870,10 +975,10 @@ export const SignToVoicePage: React.FC = () => {
                       ? 'bg-[#A8E6A1]/40 text-emerald-800 border border-emerald-300'
                       : 'bg-slate-200 text-slate-600'
                   }`}
-                  title="Toggle automatic speech synthesis when gestures are recognized"
+                  title={t('signToVoice.toggleAutoSpeakTitle')}
                 >
                   {autoSpeak ? <Volume2 className="w-3 h-3" /> : <VolumeX className="w-3 h-3" />}
-                  <span>Auto-Speak {autoSpeak ? 'ON' : 'OFF'}</span>
+                  <span>{autoSpeak ? t('signToVoice.autoSpeakOn') : t('signToVoice.autoSpeakOff')}</span>
                 </button>
 
                 <button
@@ -881,24 +986,41 @@ export const SignToVoicePage: React.FC = () => {
                   onClick={handleResetWords}
                   className="text-xs font-bold text-[#6E7387] hover:text-[#FF8A8A]"
                 >
-                  Clear
+                  {t('signToVoice.clearBtn')}
                 </button>
               </div>
             </div>
+
+            {/* Gentle hint when device lacks TTS voice for chosen language */}
+            {!hasVoiceForOutput && outputLocale !== 'en' && translatedSentence && !translatedSentence.includes('Frame your hands') && (
+              <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex items-center justify-between gap-2 shadow-xs">
+                <div className="flex items-center gap-1.5">
+                  <VolumeX className="w-3.5 h-3.5 text-amber-700 shrink-0" />
+                  <span>{t('signToVoice.noVoiceNotice', { lang: outputLocaleName })}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleSpeakEnglish}
+                  className="px-2.5 py-1 rounded-xl bg-white border border-amber-300 text-amber-900 text-xs font-black hover:bg-amber-100 shrink-0"
+                >
+                  {t('signToVoice.speakEnglishLine')}
+                </button>
+              </div>
+            )}
 
             {/* Gentle One-Line Voice Hint when voice synthesis is unavailable */}
             {speech.errorMessage && (
               <div className="p-3 rounded-2xl bg-white/70 border border-slate-200/80 text-[#6E7387] text-xs font-semibold flex items-center justify-between gap-3 shadow-sm animate-fadeIn">
                 <div className="flex items-center gap-2">
                   <VolumeX className="w-3.5 h-3.5 text-[#6E7387] shrink-0" />
-                  <span>Voice synthesis unavailable on this device. Subtitles and live text translation continue working normally.</span>
+                  <span>{t('signToVoice.voiceSynthesisUnavailable')}</span>
                 </div>
                 <button
                   type="button"
                   onClick={speech.clearError}
                   className="text-[#7C9CFF] hover:underline font-bold text-xs shrink-0"
                 >
-                  Dismiss
+                  {t('common.dismiss')}
                 </button>
               </div>
             )}
@@ -913,7 +1035,7 @@ export const SignToVoicePage: React.FC = () => {
                     {language}
                   </span>
                   <span className="text-[10px] uppercase font-black text-[#6E7387] tracking-wider">
-                    Sign Glosses:
+                    {t('signToVoice.activeGlosses')}
                   </span>
                   {distinctGlosses.map((gloss, idx) => (
                     <React.Fragment key={idx}>
@@ -928,23 +1050,39 @@ export const SignToVoicePage: React.FC = () => {
 
               {/* Sentence quote box */}
               <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 shadow-sm min-h-[90px] flex flex-col justify-center">
-                <span className="text-[10px] uppercase font-black text-[#6E7387] mb-1 tracking-wider">
-                  Natural English Translation
-                </span>
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] uppercase font-black text-[#6E7387] tracking-wider">
+                    {t('signToVoice.translationOutput', { lang: outputLocaleName })}
+                  </span>
+                  {outputLocale !== 'en' && (
+                    <button
+                      type="button"
+                      onClick={() => setShowEnglishSubtitle(!showEnglishSubtitle)}
+                      className="text-[11px] font-bold text-[#7C9CFF] hover:underline"
+                    >
+                      {showEnglishSubtitle ? t('signToVoice.hideEnglish') : t('signToVoice.showEnglish')}
+                    </button>
+                  )}
+                </div>
                 <h2 className="text-xl sm:text-2xl font-black text-[#2B2D42] leading-snug">
                   "{translatedSentence}"
                 </h2>
+                {outputLocale !== 'en' && showEnglishSubtitle && englishSentence && englishSentence !== translatedSentence && (
+                  <p className="mt-1.5 text-xs sm:text-sm font-semibold text-[#6E7387] italic">
+                    <span className="font-bold text-[#7C9CFF] not-italic mr-1">{t('common.enSecondary', { text: englishSentence }) || `EN: "${englishSentence}"`}</span>
+                  </p>
+                )}
               </div>
             </div>
 
             {/* Voice player preview with Waveform and Emotion Tuning */}
             <div className="p-4 rounded-2xl bg-white/70 border border-slate-200/60 space-y-3">
               <div className="flex items-center justify-between text-xs font-bold text-[#6E7387]">
-                <span>Voice Output ({speech.voiceCount > 0 ? `${speech.voiceCount} voices ready` : selectedVoice})</span>
+                <span>{t('signToVoice.emotionVoice')} ({speech.voiceCount > 0 ? t('signToVoice.voiceCountReady', { count: speech.voiceCount }) : selectedVoice})</span>
                 <span className="text-[#FF8A8A] font-extrabold flex items-center gap-1.5">
                   {React.createElement(EMOTION_PRESETS[currentEmotion].icon, { className: 'w-3.5 h-3.5' })}
-                  <span>{EMOTION_PRESETS[currentEmotion].name}</span>
-                  <span className="text-[#6E7387] font-semibold text-[10px]">• Pitch {EMOTION_PRESETS[currentEmotion].pitch}x</span>
+                  <span>{t(`emotions.${currentEmotion}`) && t(`emotions.${currentEmotion}`) !== `emotions.${currentEmotion}` ? t(`emotions.${currentEmotion}`) : EMOTION_PRESETS[currentEmotion].name}</span>
+                  <span className="text-[#6E7387] font-semibold text-[10px]">{t('signToVoice.pitchModifier', { pitch: EMOTION_PRESETS[currentEmotion].pitch })}</span>
                 </span>
               </div>
 
@@ -968,7 +1106,7 @@ export const SignToVoicePage: React.FC = () => {
                 className="clay-button w-full py-3 text-xs font-black flex items-center justify-center gap-2 clay-focus shadow-clay-raised-sm"
               >
                 <Volume2 className="w-4 h-4" />
-                <span>{speech.isSpeaking ? 'Speaking...' : 'Speak Translation'}</span>
+                <span>{speech.isSpeaking ? t('signToVoice.speaking') : t('signToVoice.speak')}</span>
               </button>
             </div>
 
@@ -980,7 +1118,7 @@ export const SignToVoicePage: React.FC = () => {
                 className="clay-button clay-button-white flex-1 py-3 text-xs font-black flex items-center justify-center gap-2 clay-focus"
               >
                 {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                <span>{copied ? 'Copied!' : 'Copy'}</span>
+                <span>{copied ? t('signToVoice.copied') : t('signToVoice.copyBtn')}</span>
               </button>
 
               <button
@@ -989,7 +1127,7 @@ export const SignToVoicePage: React.FC = () => {
                 className="clay-button clay-button-white flex-1 py-3 text-xs font-black flex items-center justify-center gap-2 clay-focus"
               >
                 <Bookmark className="w-4 h-4 text-[#7C9CFF]" />
-                <span>Save Note</span>
+                <span>{t('signToVoice.saveNoteBtn')}</span>
               </button>
             </div>
           </div>
@@ -998,9 +1136,9 @@ export const SignToVoicePage: React.FC = () => {
           <div className="clay-card p-6 space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black uppercase text-[#6E7387] tracking-wider">
-                Transcript History
+                {t('signToVoice.transcriptHistory')}
               </h3>
-              <span className="text-[10px] font-bold text-[#7C9CFF]">Live Session</span>
+              <span className="text-[10px] font-bold text-[#7C9CFF]">{t('signToVoice.liveSession')}</span>
             </div>
 
             <div className="space-y-2.5 text-xs">
@@ -1013,7 +1151,7 @@ export const SignToVoicePage: React.FC = () => {
                     {item.time}
                   </span>
                   <div>
-                    <strong className="text-[#2B2D42]">You:</strong>{' '}
+                    <strong className="text-[#2B2D42]">{t('signToVoice.youLabel')}</strong>{' '}
                     <span className="text-[#6E7387] italic">"{item.text}"</span>
                   </div>
                 </div>
@@ -1025,7 +1163,7 @@ export const SignToVoicePage: React.FC = () => {
                 href="/history"
                 className="text-xs font-black text-[#7C9CFF] hover:underline inline-flex items-center gap-1"
               >
-                <span>View Full Transcript</span>
+                <span>{t('signToVoice.viewFullTranscript')}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>

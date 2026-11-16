@@ -36,6 +36,7 @@ import { useLocaleStore } from '../store/useLocaleStore';
 export const DashboardPage: React.FC = () => {
   const { user } = useAuth();
   const { language } = useLanguageStore();
+  const { t } = useLocaleStore();
 
   // Local & Supabase data store state
   const [conversations, setConversations] = useState<RecentConversation[]>([]);
@@ -47,8 +48,8 @@ export const DashboardPage: React.FC = () => {
 
   // Set document title
   useEffect(() => {
-    document.title = 'Dashboard — Ishara';
-  }, []);
+    document.title = `${t('nav.dashboard')} — Ishara`;
+  }, [t]);
 
   // Load data from centralized store on mount
   useEffect(() => {
@@ -83,9 +84,9 @@ export const DashboardPage: React.FC = () => {
   // Compute time-appropriate greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('dashboard.greetingMorning');
+    if (hour < 17) return t('dashboard.greetingAfternoon');
+    return t('dashboard.greetingEvening');
   };
 
   const userName = user?.name || user?.email?.split('@')[0] || 'Ananya';
@@ -95,9 +96,9 @@ export const DashboardPage: React.FC = () => {
   const featureCards = [
     {
       id: 'sign-to-voice',
-      title: 'Sign to Voice',
-      desc: 'Real-time camera translation for ISL gestures into text and audio.',
-      actionText: 'Open Translator',
+      title: t('nav.signToVoice'),
+      desc: t('dashboard.cardSignToVoiceDesc'),
+      actionText: t('dashboard.cardSignToVoiceAction'),
       link: '/sign-to-voice',
       icon: Video,
       iconColor: 'text-[#7C9CFF]',
@@ -105,9 +106,9 @@ export const DashboardPage: React.FC = () => {
     },
     {
       id: 'voice-to-sign',
-      title: 'Voice to Sign',
-      desc: 'Input text or voice and see our 3D avatar perform the translation.',
-      actionText: 'View Avatar',
+      title: t('nav.voiceToSign'),
+      desc: t('dashboard.cardVoiceToSignDesc'),
+      actionText: t('dashboard.cardVoiceToSignAction'),
       link: '/voice-to-sign',
       icon: MessageSquare,
       iconColor: 'text-[#FF8A8A]',
@@ -115,9 +116,9 @@ export const DashboardPage: React.FC = () => {
     },
     {
       id: 'learn-sign',
-      title: 'Learn Sign',
-      desc: 'Master Indian Sign Language with interactive daily lessons.',
-      actionText: 'Continue Lesson',
+      title: t('nav.learn'),
+      desc: t('dashboard.cardLearnDesc'),
+      actionText: t('dashboard.cardLearnAction'),
       link: '/learn',
       icon: GraduationCap,
       iconColor: 'text-[#5ECB82]',
@@ -125,9 +126,9 @@ export const DashboardPage: React.FC = () => {
     },
     {
       id: 'history',
-      title: 'History',
-      desc: 'Review your past translations and saved conversations.',
-      actionText: 'See Activity',
+      title: t('nav.history'),
+      desc: t('dashboard.cardHistoryDesc'),
+      actionText: t('dashboard.cardHistoryAction'),
       link: '/history',
       icon: HistoryIcon,
       iconColor: 'text-[#B39DDB]',
@@ -135,9 +136,9 @@ export const DashboardPage: React.FC = () => {
     },
     {
       id: 'settings',
-      title: 'Settings',
-      desc: 'Customize accessibility, voice types, and profile details.',
-      actionText: 'Preferences & Account',
+      title: t('nav.settings'),
+      desc: t('dashboard.cardSettingsDesc'),
+      actionText: t('dashboard.cardSettingsAction'),
       link: '/settings',
       icon: SettingsIcon,
       iconColor: 'text-[#2B2D42]',
@@ -152,8 +153,8 @@ export const DashboardPage: React.FC = () => {
         title={`${getGreeting()}, ${userName}!`}
         subtitle={
           userEmail
-            ? `${userEmail} • Ready to break some barriers today with ${language}?`
-            : `Ready to break some barriers today with ${language}?`
+            ? `${userEmail} • ${t('dashboard.readySubtitle', { lang: language })}`
+            : t('dashboard.readySubtitle', { lang: language })
         }
       />
 
@@ -174,7 +175,7 @@ export const DashboardPage: React.FC = () => {
 
                   {language === 'ASL' && !card.hasAsl && (
                     <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase bg-[#FFE8E2] text-[#FF8A8A] border border-[#FFB59E]/40 tracking-wider">
-                      Coming soon
+                      {t('common.comingSoon')}
                     </span>
                   )}
                 </div>
@@ -203,13 +204,13 @@ export const DashboardPage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-black text-[#2B2D42]">Learning Progress</h3>
+                <h3 className="text-lg font-black text-[#2B2D42]">{t('dashboard.learningProgress')}</h3>
                 <p className="text-xs font-semibold text-[#6E7387]">
-                  Mastery across current sign vocabulary modules
+                  {t('dashboard.learningProgressSub')}
                 </p>
               </div>
               <span className="px-3 py-1 rounded-full bg-[#E2EBFF] text-[#7C9CFF] text-xs font-black uppercase tracking-wider shadow-sm">
-                Level {progress?.level || 14}
+                {t('common.level', { level: progress?.level || 14 })}
               </span>
             </div>
 
@@ -237,13 +238,13 @@ export const DashboardPage: React.FC = () => {
 
           <div className="pt-6 mt-6 border-t border-slate-200/60 flex items-center justify-between">
             <span className="text-xs font-bold text-[#6E7387]">
-              Current Streak: <strong className="text-[#FF8A8A] inline-flex items-center gap-1">{progress?.streakDays || 12} Days <Flame className="w-3.5 h-3.5 text-[#FF8A8A]" /></strong>
+              {t('dashboard.currentStreak')} <strong className="text-[#FF8A8A] inline-flex items-center gap-1">{t('common.daysCount', { count: progress?.streakDays || 12 })} <Flame className="w-3.5 h-3.5 text-[#FF8A8A]" /></strong>
             </span>
             <NavLink
               to="/learn"
               className="text-xs font-black text-[#7C9CFF] hover:underline flex items-center gap-1"
             >
-              <span>Go to Lessons</span>
+              <span>{t('dashboard.goToLessons')}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </NavLink>
           </div>
@@ -254,16 +255,16 @@ export const DashboardPage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-black text-[#2B2D42]">Recent Conversations</h3>
+                <h3 className="text-lg font-black text-[#2B2D42]">{t('dashboard.recentConversations')}</h3>
                 <p className="text-xs font-semibold text-[#6E7387]">
-                  Quick access to translation transcripts
+                  {t('dashboard.recentConversationsSub')}
                 </p>
               </div>
               <NavLink
                 to="/history"
                 className="text-xs font-black text-[#7C9CFF] hover:underline"
               >
-                View All
+                {t('dashboard.viewAllHistory')}
               </NavLink>
             </div>
 
@@ -287,7 +288,7 @@ export const DashboardPage: React.FC = () => {
               </div>
             ) : conversations.length === 0 ? (
               <div className="p-6 text-center text-xs font-semibold text-[#6E7387] bg-white/40 rounded-2xl border border-slate-200/40">
-                No recent conversations recorded yet. Start translating to see activity here!
+                {t('dashboard.noRecentConv')}
               </div>
             ) : (
               <div className="space-y-3">
@@ -333,14 +334,14 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="pt-4 mt-4 border-t border-slate-200/60 flex items-center justify-between text-xs text-[#6E7387] font-semibold">
-            <span>{isOffline ? 'Offline, saved on this device' : 'Synced with Supabase Cloud'}</span>
+            <span>{isOffline ? t('common.offlineSaved') : t('dashboard.syncedSupabase')}</span>
             <span
               className={`${
                 isOffline ? 'text-amber-600' : 'text-emerald-600'
               } font-bold flex items-center gap-1`}
             >
               <Check className="w-3.5 h-3.5" />
-              <span>{isOffline ? 'Offline Cache' : 'Up to date'}</span>
+              <span>{isOffline ? t('dashboard.offlineCache') : t('dashboard.upToDate')}</span>
             </span>
           </div>
         </div>
@@ -355,7 +356,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="w-9 h-9 rounded-xl bg-[#7C9CFF] text-white flex items-center justify-center shadow-sm">
                   <SettingsIcon className="w-5 h-5" />
                 </div>
-                <h3 className="text-lg font-black text-[#2B2D42]">Translator Preferences</h3>
+                <h3 className="text-lg font-black text-[#2B2D42]">{t('dashboard.prefsTitle')}</h3>
               </div>
               <button
                 type="button"
@@ -369,7 +370,7 @@ export const DashboardPage: React.FC = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-black text-[#2B2D42] mb-1.5">
-                  Voice Synthesis Output
+                  {t('dashboard.voiceOutput')}
                 </label>
                 <select
                   value={settings.preferredVoice}
@@ -379,15 +380,15 @@ export const DashboardPage: React.FC = () => {
                   }}
                   className="clay-input w-full text-xs font-bold"
                 >
-                  <option value="Standard Male">Standard Male (Deep Calm)</option>
-                  <option value="Standard Female">Standard Female (Warm Friendly)</option>
-                  <option value="Expressive Neutral">Expressive Neutral</option>
+                  <option value="Standard Male">{t('dashboard.voiceMale') || 'Standard Male (Deep Calm)'}</option>
+                  <option value="Standard Female">{t('dashboard.voiceFemale') || 'Standard Female (Warm Friendly)'}</option>
+                  <option value="Expressive Neutral">{t('dashboard.voiceNeutral') || 'Expressive Neutral'}</option>
                 </select>
               </div>
 
               <div>
                 <div className="flex justify-between text-xs font-black text-[#2B2D42] mb-1.5">
-                  <span>Speech Rate</span>
+                  <span>{t('signToVoice.speechSpeed')}</span>
                   <span>{settings.speechRate}x</span>
                 </div>
                 <input
@@ -406,8 +407,8 @@ export const DashboardPage: React.FC = () => {
 
               <div className="flex items-center justify-between p-3.5 rounded-2xl bg-white/60 border border-slate-200/50">
                 <div>
-                  <p className="text-xs font-black text-[#2B2D42]">Haptic / Audio Chimes</p>
-                  <p className="text-[11px] text-[#6E7387]">Play soft cues when sign recognition locks</p>
+                  <p className="text-xs font-black text-[#2B2D42]">{t('dashboard.hapticTitle')}</p>
+                  <p className="text-[11px] text-[#6E7387]">{t('dashboard.hapticSub')}</p>
                 </div>
                 <input
                   type="checkbox"
@@ -427,7 +428,7 @@ export const DashboardPage: React.FC = () => {
                 onClick={() => setIsSettingsOpen(false)}
                 className="clay-button w-full py-3 text-xs font-black clay-focus"
               >
-                Save & Close
+                {t('dashboard.saveClose')}
               </button>
             </div>
           </div>

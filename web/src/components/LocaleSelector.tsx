@@ -11,7 +11,7 @@ export const LocaleSelector: React.FC<LocaleSelectorProps> = ({
   className = '',
   variant = 'compact',
 }) => {
-  const { locale, setLocale, loading } = useLocaleStore();
+  const { locale, setLocale, loading, t } = useLocaleStore();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -72,7 +72,7 @@ export const LocaleSelector: React.FC<LocaleSelectorProps> = ({
         type="button"
         onClick={() => setOpen(!open)}
         className="clay-button px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 clay-focus bg-white/80 hover:bg-white border border-slate-200/60 shadow-clay-raised-sm"
-        aria-label="Select Interface Language"
+        aria-label={t('settings.interfaceLanguage')}
         aria-expanded={open}
       >
         <Globe className="w-3.5 h-3.5 text-[#7C9CFF]" />
@@ -85,7 +85,7 @@ export const LocaleSelector: React.FC<LocaleSelectorProps> = ({
       {open && (
         <div className="absolute right-0 mt-2 w-48 max-h-72 overflow-y-auto rounded-2xl bg-white/95 backdrop-blur-md border border-slate-200/80 shadow-clay-raised p-1.5 z-50 animate-scaleUp">
           <div className="px-2.5 py-1 text-[9px] font-black uppercase text-[#6E7387] tracking-wider border-b border-slate-100 mb-1">
-            Interface Language
+            {t('settings.interfaceLanguage')}
           </div>
           {SUPPORTED_LOCALES.map((item) => {
             const isSelected = item.code === locale;

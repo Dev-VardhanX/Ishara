@@ -63,7 +63,7 @@ export const BottomTabBar: React.FC = () => {
   return (
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#E9EEF7]/95 backdrop-blur border-t border-slate-200/80 px-2 py-2 flex items-center justify-around shadow-clay-raised select-none"
-      aria-label="Mobile Navigation"
+      aria-label={t('nav.mobileNav')}
     >
       {tabItems.map((item) => (
         <NavLink
@@ -86,9 +86,9 @@ export const BottomTabBar: React.FC = () => {
               {language === 'ASL' && !item.hasAsl && (
                 <span
                   className="absolute -top-1 -right-1 px-1 py-0.2 rounded-full text-[8px] font-black uppercase bg-[#FF8A8A] text-white"
-                  title="ASL coming soon"
+                  title={t('common.comingSoon')}
                 >
-                  Soon
+                  {t('common.soon')}
                 </span>
               )}
             </>

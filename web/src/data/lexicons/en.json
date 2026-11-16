@@ -1,0 +1,229 @@
+{
+  "locale": "en",
+  "languageName": "English",
+  "nativeName": "English",
+  "voiceCode": "en-IN",
+  "script": "Latin",
+  "annotation": "Standard English reference lexicon",
+  "punctuation": {
+    "sentenceEnd": ".",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "Hello",
+      "alternatives": ["hi", "hey", "greetings", "good morning", "good day"],
+      "romanized": ["hello", "hi", "hey", "greetings"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "Thank you",
+      "alternatives": ["thanks", "many thanks", "thank you very much", "thank you so much", "grateful"],
+      "romanized": ["thank you", "thanks", "thx"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "Please",
+      "alternatives": ["kindly", "if you please", "pray", "do", "request"],
+      "romanized": ["please", "kindly", "pls"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "Sorry",
+      "alternatives": ["pardon", "excuse me", "my apologies", "forgive me", "apologies"],
+      "romanized": ["sorry", "apologies", "pardon"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "Goodbye",
+      "alternatives": ["bye", "see you", "farewell", "bye bye", "take care"],
+      "romanized": ["goodbye", "bye", "see you"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "How are you",
+      "alternatives": ["how are you doing", "how do you do", "how is it going", "how have you been", "are you well"],
+      "romanized": ["how are you", "how are you doing", "how r u"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "Yes",
+      "alternatives": ["yeah", "yep", "sure", "correct", "affirmative"],
+      "romanized": ["yes", "yeah", "yep", "sure"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "No",
+      "alternatives": ["nope", "nah", "not", "negative", "never"],
+      "romanized": ["no", "nope", "nah"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "Good",
+      "alternatives": ["fine", "great", "nice", "well", "excellent"],
+      "romanized": ["good", "fine", "great", "nice"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "Bad",
+      "alternatives": ["terrible", "awful", "unwell", "poor", "not good"],
+      "romanized": ["bad", "terrible", "awful", "poor"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "Help",
+      "alternatives": ["assist", "aid", "support", "help me", "emergency"],
+      "romanized": ["help", "assist", "aid"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "Stop",
+      "alternatives": ["halt", "pause", "wait", "cease", "hold on"],
+      "romanized": ["stop", "halt", "pause", "wait"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "Eat",
+      "alternatives": ["eating", "ate", "have food", "consume", "dine"],
+      "romanized": ["eat", "eating", "ate"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "Drink",
+      "alternatives": ["drinking", "drank", "sip", "have water", "quench"],
+      "romanized": ["drink", "drinking", "drank"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "Water",
+      "alternatives": ["drinking water", "cold water", "fresh water", "aqua", "glass of water"],
+      "romanized": ["water", "drinking water"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "Food",
+      "alternatives": ["meal", "lunch", "dinner", "snack", "groceries"],
+      "romanized": ["food", "meal", "dinner"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "Home",
+      "alternatives": ["house", "my place", "residence", "homeland", "apartment"],
+      "romanized": ["home", "house", "residence"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "Friend",
+      "alternatives": ["buddy", "pal", "companion", "mate", "partner"],
+      "romanized": ["friend", "buddy", "pal", "mate"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "Name",
+      "alternatives": ["named", "identity", "called", "first name", "title"],
+      "romanized": ["name", "named", "identity"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "Love",
+      "alternatives": ["loving", "adore", "affection", "fondness", "care for"],
+      "romanized": ["love", "loving", "adore"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "hello how are you", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "how are you doing", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "i am good thank you", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "please help me", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "help me please", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "thank you my friend", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "hello my friend", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "goodbye my friend", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "i need water", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "please give me water", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "i need food", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "what is your name", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "what is your name my friend", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "eat food", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "drink water", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "please stop", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "yes please", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "no thank you", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "sorry my friend", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "the food is good", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "the food is bad", "glosses": ["BAD", "FOOD"] }
+  ],
+  "grammarWords": {
+    "what": "what",
+    "where": "where",
+    "who": "who",
+    "why": "why",
+    "how": "how",
+    "is": "is",
+    "are": "are",
+    "am": "am",
+    "i": "I",
+    "you": "you",
+    "my": "my",
+    "your": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "Hello!",
+    "THANK_YOU": "Thank you!",
+    "PLEASE": "Please.",
+    "SORRY": "Sorry.",
+    "GOODBYE": "Goodbye!",
+    "HOW_ARE_YOU": "How are you?",
+    "YES": "Yes.",
+    "NO": "No.",
+    "GOOD": "Good.",
+    "BAD": "Bad.",
+    "HELP": "Help!",
+    "STOP": "Stop.",
+    "EAT": "Eat.",
+    "DRINK": "Drink.",
+    "WATER": "Water, please.",
+    "FOOD": "Food, please.",
+    "HOME": "Home.",
+    "FRIEND": "Friend.",
+    "NAME": "Name.",
+    "LOVE": "Love.",
+    "HELLO HOW_ARE_YOU": "Hello, how are you?",
+    "HOW_ARE_YOU GOOD": "How are you? I am good.",
+    "HOW_ARE_YOU BAD": "How are you? I am not feeling good.",
+    "GOOD THANK_YOU": "Good, thank you!",
+    "THANK_YOU FRIEND": "Thank you, my friend!",
+    "HELLO FRIEND": "Hello, my friend!",
+    "GOODBYE FRIEND": "Goodbye, my friend!",
+    "HELLO GOODBYE": "Hello and goodbye!",
+    "SORRY FRIEND": "Sorry, my friend.",
+    "PLEASE HELP": "Please, help me!",
+    "HELP PLEASE": "Help, please!",
+    "PLEASE STOP": "Please stop.",
+    "STOP PLEASE": "Stop, please.",
+    "SORRY PLEASE": "Sorry, please forgive me.",
+    "YES PLEASE": "Yes, please.",
+    "NO THANK_YOU": "No, thank you.",
+    "YES THANK_YOU": "Yes, thank you!",
+    "YES GOOD": "Yes, that is good.",
+    "NO BAD": "No, that is bad.",
+    "PLEASE WATER": "Please, I need water.",
+    "PLEASE FOOD": "Please, I need food.",
+    "EAT FOOD": "Eat food.",
+    "DRINK WATER": "Drink water.",
+    "FOOD EAT": "Eat food.",
+    "WATER DRINK": "Drink water.",
+    "GOOD FOOD": "The food is good.",
+    "BAD FOOD": "The food is bad.",
+    "FRIEND HELP": "Friend, please help!",
+    "HELP FRIEND": "Help my friend!",
+    "FRIEND LOVE": "Much love to my friend!",
+    "LOVE FRIEND": "Love my friend!",
+    "GOOD FRIEND": "You are a good friend.",
+    "GOOD HOME": "Good home.",
+    "LOVE HOME": "I love home.",
+    "NAME FRIEND": "What is your name, my friend?",
+    "HELLO NAME": "Hello, my name is..."
+  }
+}

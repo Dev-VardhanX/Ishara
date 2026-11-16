@@ -1,0 +1,235 @@
+{
+  "locale": "pa",
+  "languageName": "Punjabi",
+  "nativeName": "ਪੰਜਾਬੀ",
+  "voiceCode": "pa-IN",
+  "script": "Gurmukhi",
+  "annotation": "Needs review by a native speaker",
+  "punctuation": {
+    "sentenceEnd": "।",
+    "questionEnd": "?"
+  },
+  "glosses": {
+    "HELLO": {
+      "gloss": "HELLO",
+      "main": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ",
+      "alternatives": ["ਹੈਲੋ", "ਨਮਸਤੇ", "ਸਲਾਮ", "ਰਾਮ ਰਾਮ", "ਵਾਹਿਗੁਰੂ ਜੀ ਕਾ ਖਾਲਸਾ"],
+      "romanized": ["sat sri akaal", "sat sri akal", "hello", "namaste", "salam"]
+    },
+    "THANK_YOU": {
+      "gloss": "THANK_YOU",
+      "main": "ਧੰਨਵਾਦ",
+      "alternatives": ["ਬਹੁਤ ਧੰਨਵਾਦ", "ਸ਼ੁਕਰੀਆ", "ਥੈਂਕ ਯੂ", "ਮਿਹਰਬਾਨੀ", "ਲੱਖ ਲੱਖ ਧੰਨਵਾਦ"],
+      "romanized": ["dhanvaad", "dhanwad", "shukriya", "thank you", "meherbani"]
+    },
+    "PLEASE": {
+      "gloss": "PLEASE",
+      "main": "ਕਿਰਪਾ ਕਰਕੇ",
+      "alternatives": ["ਪਲੀਜ਼", "ਮਿਹਰਬਾਨੀ ਕਰਕੇ", "ਜ਼ਰਾ", "ਬੇਨਤੀ", "ਕਿਰਪਾ ਕਰਿਓ"],
+      "romanized": ["kirpa karke", "please", "meherbani karke", "zara", "benti"]
+    },
+    "SORRY": {
+      "gloss": "SORRY",
+      "main": "ਮਾਫ਼ ਕਰਨਾ",
+      "alternatives": ["ਸੌਰੀ", "ਮਾਫ਼ੀ", "ਖਿਮਾ ਕਰਨਾ", "ਗ਼ਲਤੀ ਹੋ ਗਈ", "ਮੁਆਫ਼ ਕਰਿਓ"],
+      "romanized": ["maaf karna", "sorry", "maafi", "khima karna", "muaf"]
+    },
+    "GOODBYE": {
+      "gloss": "GOODBYE",
+      "main": "ਅਲਵਿਦਾ",
+      "alternatives": ["ਬਾਏ", "ਫਿਰ ਮਿਲਾਂਗੇ", "ਰੱਬ ਰਾਖਾ", "ਟਾਟਾ", "ਚੰਗਾ ਜੀ"],
+      "romanized": ["alvida", "bye", "phir milange", "rabb rakha", "tata", "changa ji"]
+    },
+    "HOW_ARE_YOU": {
+      "gloss": "HOW_ARE_YOU",
+      "main": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ",
+      "alternatives": ["ਕਿਵੇਂ ਹੋ", "ਕੀ ਹਾਲ ਹੈ", "ਸਭ ਠੀਕ ਹੈ", "ਕੀ ਚੱਲ ਰਿਹਾ", "ਰਾਜ਼ੀ ਬਾਜ਼ੀ"],
+      "romanized": ["tusi kiven ho", "kiven ho", "ki haal hai", "sabh theek hai", "kiddan"]
+    },
+    "YES": {
+      "gloss": "YES",
+      "main": "ਹਾਂਜੀ",
+      "alternatives": ["ਹਾਂ", "ਬਿਲਕੁਲ", "ਜ਼ਰੂਰ", "ਠੀਕ ਹੈ", "ਆਹੋ"],
+      "romanized": ["haanji", "haan", "bilkul", "zaroor", "aaho"]
+    },
+    "NO": {
+      "gloss": "NO",
+      "main": "ਨਹੀਂ",
+      "alternatives": ["ਨਾ", "ਨਹੀਂ ਜੀ", "ਕਦੇ ਨਹੀਂ", "ਨਾ ਜੀ", "ਮੂਲੋਂ ਨਹੀਂ"],
+      "romanized": ["nahi", "nahin", "na", "nahi ji", "na ji"]
+    },
+    "GOOD": {
+      "gloss": "GOOD",
+      "main": "ਚੰਗਾ",
+      "alternatives": ["ਵਧੀਆ", "ਬਹੁਤ ਵਧੀਆ", "ਠੀਕ", "ਸੋਹਣਾ", "ਸ਼ਾਨਦਾਰ"],
+      "romanized": ["changa", "vadhiya", "bahut vadhiya", "theek", "sohna"]
+    },
+    "BAD": {
+      "gloss": "BAD",
+      "main": "ਮਾੜਾ",
+      "alternatives": ["ਖ਼ਰਾਬ", "ਗ਼ਲਤ", "ਬੇਕਾਰ", "ਮੰਦਾ", "ਭੈੜਾ"],
+      "romanized": ["maada", "kharab", "galat", "bekar", "manda"]
+    },
+    "HELP": {
+      "gloss": "HELP",
+      "main": "ਮਦਦ",
+      "alternatives": ["ਮਦਦ ਕਰੋ", "ਸਹਾਇਤਾ", "ਹੈਲਪ", "ਬਚਾਓ", "ਮਦਦ ਚਾਹੀਦੀ ਹੈ"],
+      "romanized": ["madad", "madad karo", "sahayata", "help", "bachao"]
+    },
+    "STOP": {
+      "gloss": "STOP",
+      "main": "ਰੁਕੋ",
+      "alternatives": ["ਰੁਕ ਜਾਓ", "ਠਹਿਰੋ", "ਬੱਸ", "ਰੋਕੋ", "ਖਲੋ ਜਾਓ"],
+      "romanized": ["ruko", "ruk jao", "thehro", "bas", "roko"]
+    },
+    "EAT": {
+      "gloss": "EAT",
+      "main": "ਖਾਓ",
+      "alternatives": ["ਖਾਣਾ", "ਰੋਟੀ ਖਾਓ", "ਛਕੋ", "ਖਾ ਲਓ", "ਭੋਜਨ ਛਕੋ"],
+      "romanized": ["khao", "khana", "roti khao", "chhako", "khaa"]
+    },
+    "DRINK": {
+      "gloss": "DRINK",
+      "main": "ਪੀਓ",
+      "alternatives": ["ਪੀਣਾ", "ਪਾਣੀ ਪੀਓ", "ਪੀ ਲਓ", "ਘੁੱਟ", "ਜਲ ਛਕੋ"],
+      "romanized": ["peeo", "peena", "pani peeo", "pee lao"]
+    },
+    "WATER": {
+      "gloss": "WATER",
+      "main": "ਪਾਣੀ",
+      "alternatives": ["ਜਲ", "ਠੰਢਾ ਪਾਣੀ", "ਵਾਟਰ", "ਪੀਣ ਵਾਲਾ ਪਾਣੀ", "ਜਲ ਛਕਣਾ"],
+      "romanized": ["paani", "pani", "jal", "water", "thandha pani"]
+    },
+    "FOOD": {
+      "gloss": "FOOD",
+      "main": "ਖਾਣਾ",
+      "alternatives": ["ਰੋਟੀ", "ਭੋਜਨ", "ਲੰਗਰ", "ਅੰਨ", "ਪ੍ਰਸ਼ਾਦਾ"],
+      "romanized": ["khana", "roti", "bhojan", "langar", "prashada"]
+    },
+    "HOME": {
+      "gloss": "HOME",
+      "main": "ਘਰ",
+      "alternatives": ["ਮਕਾਨ", "ਡੇਰਾ", "ਨਿਵਾਸ", "ਘਰੇ", "ਆਲ੍ਹਣਾ"],
+      "romanized": ["ghar", "makaan", "dera", "ghare", "home"]
+    },
+    "FRIEND": {
+      "gloss": "FRIEND",
+      "main": "ਦੋਸਤ",
+      "alternatives": ["ਮਿੱਤਰ", "ਯਾਰ", "ਬੇਲੀ", "ਸੱਜਣ", "ਸਹੇਲੀ"],
+      "romanized": ["dost", "mittar", "yaar", "beli", "sajjan"]
+    },
+    "NAME": {
+      "gloss": "NAME",
+      "main": "ਨਾਮ",
+      "alternatives": ["ਤੁਹਾਡਾ ਨਾਮ", "ਮੇਰਾ ਨਾਮ", "ਨਾਂ", "ਪਛਾਣ", "ਸ਼ੁਭ ਨਾਮ"],
+      "romanized": ["naam", "tuhada naam", "mera naam", "naa", "identity"]
+    },
+    "LOVE": {
+      "gloss": "LOVE",
+      "main": "ਪਿਆਰ",
+      "alternatives": ["ਮੁਹੱਬਤ", "ਇਸ਼ਕ", "ਪ੍ਰੇਮ", "ਸਨੇਹ", "ਲਾਡ"],
+      "romanized": ["pyaar", "pyar", "muhabbat", "ishq", "prem"]
+    }
+  },
+  "phraseRules": [
+    { "phrase": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "ਮੈਂ ਠੀਕ ਹਾਂ ਧੰਨਵਾਦ", "glosses": ["GOOD", "THANK_YOU"] },
+    { "phrase": "ਕਿਰਪਾ ਕਰਕੇ ਮਦਦ ਕਰੋ", "glosses": ["PLEASE", "HELP"] },
+    { "phrase": "ਮਦਦ ਕਰੋ ਕਿਰਪਾ ਕਰਕੇ", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "ਧੰਨਵਾਦ ਮੇਰੇ ਦੋਸਤ", "glosses": ["THANK_YOU", "FRIEND"] },
+    { "phrase": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਮੇਰੇ ਦੋਸਤ", "glosses": ["HELLO", "FRIEND"] },
+    { "phrase": "ਅਲਵਿਦਾ ਮੇਰੇ ਦੋਸਤ", "glosses": ["GOODBYE", "FRIEND"] },
+    { "phrase": "ਮੈਨੂੰ ਪਾਣੀ ਚਾਹੀਦਾ ਹੈ", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "ਕਿਰਪਾ ਕਰਕੇ ਪਾਣੀ ਦਿਓ", "glosses": ["PLEASE", "WATER"] },
+    { "phrase": "ਮੈਨੂੰ ਖਾਣਾ ਚਾਹੀਦਾ ਹੈ", "glosses": ["PLEASE", "FOOD"] },
+    { "phrase": "ਤੁਹਾਡਾ ਨਾਮ ਕੀ ਹੈ", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "ਤੇਰਾ ਨਾਮ ਕੀ ਹੈ ਯਾਰ", "glosses": ["NAME", "FRIEND"] },
+    { "phrase": "ਖਾਣਾ ਖਾਓ", "glosses": ["EAT", "FOOD"] },
+    { "phrase": "ਪਾਣੀ ਪੀਓ", "glosses": ["DRINK", "WATER"] },
+    { "phrase": "ਕਿਰਪਾ ਕਰਕੇ ਰੁਕੋ", "glosses": ["PLEASE", "STOP"] },
+    { "phrase": "ਹਾਂਜੀ ਕਿਰਪਾ ਕਰਕੇ", "glosses": ["YES", "PLEASE"] },
+    { "phrase": "ਨਹੀਂ ਧੰਨਵਾਦ", "glosses": ["NO", "THANK_YOU"] },
+    { "phrase": "ਮਾਫ਼ ਕਰਨਾ ਮੇਰੇ ਦੋਸਤ", "glosses": ["SORRY", "FRIEND"] },
+    { "phrase": "ਖਾਣਾ ਬਹੁਤ ਵਧੀਆ ਹੈ", "glosses": ["GOOD", "FOOD"] },
+    { "phrase": "ਖਾਣਾ ਖ਼ਰਾਬ ਹੈ", "glosses": ["BAD", "FOOD"] },
+    { "phrase": "sat sri akal kiddan", "glosses": ["HELLO", "HOW_ARE_YOU"] },
+    { "phrase": "kiddan", "glosses": ["HOW_ARE_YOU"] },
+    { "phrase": "madad karo please", "glosses": ["HELP", "PLEASE"] },
+    { "phrase": "pani chahiye", "glosses": ["PLEASE", "WATER"] }
+  ],
+  "grammarWords": {
+    "ਕੀ": "what",
+    "ਕਿੱਥੇ": "where",
+    "ਕੌਣ": "who",
+    "ਕਿਉਂ": "why",
+    "ਕਿਵੇਂ": "how",
+    "ਹੈ": "is",
+    "ਹਨ": "are",
+    "ਹਾਂ": "am",
+    "ਮੈਂ": "I",
+    "ਤੁਸੀਂ": "you",
+    "ਤੂੰ": "you",
+    "ਮੇਰਾ": "my",
+    "ਤੁਹਾਡਾ": "your",
+    "ਤੇਰਾ": "your"
+  },
+  "sentenceTemplates": {
+    "HELLO": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ!",
+    "THANK_YOU": "ਧੰਨਵਾਦ!",
+    "PLEASE": "ਕਿਰਪਾ ਕਰਕੇ।",
+    "SORRY": "ਮਾਫ਼ ਕਰਨਾ।",
+    "GOODBYE": "ਅਲਵਿਦਾ!",
+    "HOW_ARE_YOU": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?",
+    "YES": "ਹਾਂਜੀ।",
+    "NO": "ਨਹੀਂ।",
+    "GOOD": "ਚੰਗਾ।",
+    "BAD": "ਮਾੜਾ।",
+    "HELP": "ਮਦਦ ਕਰੋ!",
+    "STOP": "ਰੁਕੋ।",
+    "EAT": "ਖਾਣਾ ਖਾਓ।",
+    "DRINK": "ਪਾਣੀ ਪੀਓ।",
+    "WATER": "ਪਾਣੀ, ਕਿਰਪਾ ਕਰਕੇ।",
+    "FOOD": "ਖਾਣਾ, ਕਿਰਪਾ ਕਰਕੇ।",
+    "HOME": "ਘਰ।",
+    "FRIEND": "ਦੋਸਤ।",
+    "NAME": "ਨਾਮ।",
+    "LOVE": "ਪਿਆਰ।",
+    "HELLO HOW_ARE_YOU": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?",
+    "HOW_ARE_YOU GOOD": "ਕਿਵੇਂ ਹੋ? ਮੈਂ ਬਿਲਕੁਲ ਠੀਕ ਹਾਂ।",
+    "HOW_ARE_YOU BAD": "ਕਿਵੇਂ ਹੋ? ਮੇਰੀ ਸਿਹਤ ਠੀਕ ਨਹੀਂ ਹੈ।",
+    "GOOD THANK_YOU": "ਵਧੀਆ, ਬਹੁਤ ਧੰਨਵਾਦ!",
+    "THANK_YOU FRIEND": "ਧੰਨਵਾਦ, ਮੇਰੇ ਦੋਸਤ!",
+    "HELLO FRIEND": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੇਰੇ ਦੋਸਤ!",
+    "GOODBYE FRIEND": "ਅਲਵਿਦਾ, ਮੇਰੇ ਦੋਸਤ!",
+    "HELLO GOODBYE": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਅਤੇ ਅਲਵਿਦਾ!",
+    "SORRY FRIEND": "ਮਾਫ਼ ਕਰਨਾ, ਮੇਰੇ ਦੋਸਤ।",
+    "PLEASE HELP": "ਕਿਰਪਾ ਕਰਕੇ ਮੇਰੀ ਮਦਦ ਕਰੋ!",
+    "HELP PLEASE": "ਮਦਦ ਕਰੋ, ਕਿਰਪਾ ਕਰਕੇ!",
+    "PLEASE STOP": "ਕਿਰਪਾ ਕਰਕੇ ਰੁਕੋ।",
+    "STOP PLEASE": "ਰੁਕੋ, ਕਿਰਪਾ ਕਰਕੇ।",
+    "SORRY PLEASE": "ਮਾਫ਼ ਕਰਨਾ, ਕਿਰਪਾ ਕਰਕੇ ਖਿਮਾ ਕਰਿਓ।",
+    "YES PLEASE": "ਹਾਂਜੀ, ਕਿਰਪਾ ਕਰਕੇ।",
+    "NO THANK_YOU": "ਨਹੀਂ, ਧੰਨਵਾਦ।",
+    "YES THANK_YOU": "ਹਾਂਜੀ, ਬਹੁਤ ਬਹੁਤ ਧੰਨਵਾਦ!",
+    "YES GOOD": "ਹਾਂਜੀ, ਇਹ ਬਹੁਤ ਵਧੀਆ ਹੈ।",
+    "NO BAD": "ਨਹੀਂ, ਇਹ ਮਾੜਾ ਹੈ।",
+    "PLEASE WATER": "ਕਿਰਪਾ ਕਰਕੇ ਮੈਨੂੰ ਪਾਣੀ ਦਿਓ।",
+    "PLEASE FOOD": "ਕਿਰਪਾ ਕਰਕੇ ਮੈਨੂੰ ਖਾਣਾ ਚਾਹੀਦਾ ਹੈ।",
+    "EAT FOOD": "ਰੋਟੀ ਖਾਓ।",
+    "DRINK WATER": "ਪਾਣੀ ਪੀਓ।",
+    "FOOD EAT": "ਰੋਟੀ ਖਾਓ।",
+    "WATER DRINK": "ਪਾਣੀ ਪੀਓ।",
+    "GOOD FOOD": "ਖਾਣਾ ਬਹੁਤ ਸਵਾਦਿਸ਼ਟ ਹੈ।",
+    "BAD FOOD": "ਖਾਣਾ ਚੰਗਾ ਨਹੀਂ ਹੈ।",
+    "FRIEND HELP": "ਦੋਸਤ, ਕਿਰਪਾ ਕਰਕੇ ਮਦਦ ਕਰ!",
+    "HELP FRIEND": "ਦੋਸਤ ਦੀ ਮਦਦ ਕਰੋ!",
+    "FRIEND LOVE": "ਦੋਸਤ ਲਈ ਬਹੁਤ ਪਿਆਰ!",
+    "LOVE FRIEND": "ਦੋਸਤ ਨੂੰ ਪਿਆਰ ਕਰਦਾ ਹਾਂ!",
+    "GOOD FRIEND": "ਤੁਸੀਂ ਬਹੁਤ ਚੰਗੇ ਦੋਸਤ ਹੋ।",
+    "GOOD HOME": "ਘਰ ਬਹੁਤ ਸੋਹਣਾ ਹੈ।",
+    "LOVE HOME": "ਮੈਨੂੰ ਆਪਣੇ ਘਰ ਨਾਲ ਬਹੁਤ ਪਿਆਰ ਹੈ।",
+    "NAME FRIEND": "ਤੁਹਾਡਾ ਨਾਮ ਕੀ ਹੈ, ਦੋਸਤ?",
+    "HELLO NAME": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਮੇਰਾ ਨਾਮ..."
+  }
+}

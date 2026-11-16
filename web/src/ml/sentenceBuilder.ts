@@ -1,6 +1,8 @@
-// src/ml/sentenceBuilder.ts — Sign-to-Text Grammar & Sentence Builder
-// Clearly distinguishes raw sign-by-sign gloss sequences from natural-language English translations.
-// Restricts vocabulary strictly to the exact 20 target words.
+// src/ml/sentenceBuilder.ts — Multilingual Sign-to-Text Grammar & Sentence Builder
+// Maps recognized sign sequences to natural language across all 10 supported Indian languages,
+// backed by language-neutral 20-word gloss vocabulary and linguistic lexicons.
+
+import { getLoadedLexicon, SupportedLocale } from '../data/lexicons';
 
 export interface SentenceTranslationResult {
   rawGlosses: string[];
@@ -9,6 +11,8 @@ export interface SentenceTranslationResult {
   language: 'ISL' | 'ASL';
   glossDisplay: string;
   naturalSentence: string;
+  englishSentence: string;
+  targetLocale: string;
   ruleApplied: string;
 }
 
@@ -41,7 +45,7 @@ export function normalizeGloss(gloss: string): string {
   if (!gloss) return '';
   const trimmed = gloss.trim().toUpperCase();
   if (trimmed === 'ISL' || trimmed === 'ASL') {
-    return ''; // Fix: Prevent raw language identifiers from appearing as a gloss
+    return '';
   }
   const stripped = trimmed.replace(/^(ISL_|ASL_)/, '').trim();
   if (stripped === 'ISL' || stripped === 'ASL') {
@@ -57,271 +61,21 @@ export function extractLanguage(gloss: string, fallback: 'ISL' | 'ASL' = 'ISL'):
   return fallback;
 }
 
-// Convert gloss ID to human readable word
-export function glossToWord(gloss: string): string {
+// Convert gloss ID to human readable word in chosen locale (defaults to English)
+export function glossToWord(gloss: string, locale: string = 'en'): string {
   const norm = normalizeGloss(gloss);
-  switch (norm) {
-    case 'HELLO':
-      return 'Hello';
-    case 'THANK_YOU':
-      return 'thank you';
-    case 'PLEASE':
-      return 'please';
-    case 'SORRY':
-      return 'sorry';
-    case 'YES':
-      return 'yes';
-    case 'NO':
-      return 'no';
-    case 'GOODBYE':
-      return 'goodbye';
-    case 'GOOD':
-      return 'good';
-    case 'BAD':
-      return 'bad';
-    case 'HOW_ARE_YOU':
-      return 'how are you';
-    case 'HELP':
-      return 'help';
-    case 'STOP':
-      return 'stop';
-    case 'EAT':
-      return 'eat';
-    case 'DRINK':
-      return 'drink';
-    case 'WATER':
-      return 'water';
-    case 'FOOD':
-      return 'food';
-    case 'HOME':
-      return 'home';
-    case 'FRIEND':
-      return 'friend';
-    case 'NAME':
-      return 'name';
-    case 'LOVE':
-      return 'love';
-    default:
-      return norm ? norm.toLowerCase().replace(/_/g, ' ') : '';
+  if (!norm) return '';
+  const lex = getLoadedLexicon(locale as SupportedLocale);
+  if (lex.glosses && lex.glosses[norm]?.main) {
+    return lex.glosses[norm].main;
   }
+  const enLex = getLoadedLexicon('en');
+  return enLex.glosses[norm]?.main || norm.toLowerCase().replace(/_/g, ' ');
 }
 
 /**
- * High-priority multi-sign phrase grammar patterns.
- * Composed strictly using the 20 target vocabulary words.
- */
-const SENTENCE_GRAMMAR_RULES: Record<string, string> = {
-  // Single Signs (standalone confirmations)
-  'HELLO': 'Hello!',
-  'THANK_YOU': 'Thank you!',
-  'PLEASE': 'Please.',
-  'SORRY': 'Sorry.',
-  'YES': 'Yes.',
-  'NO': 'No.',
-  'GOODBYE': 'Goodbye!',
-  'GOOD': 'Good.',
-  'BAD': 'Bad.',
-  'HOW_ARE_YOU': 'How are you?',
-  'HELP': 'Help!',
-  'STOP': 'Stop.',
-  'EAT': 'Eat.',
-  'DRINK': 'Drink.',
-  'WATER': 'Water, please.',
-  'FOOD': 'Food, please.',
-  'HOME': 'Home.',
-  'FRIEND': 'Friend.',
-  'NAME': 'Name.',
-  'LOVE': 'Love.',
-
-  // Conversational Multi-Sign Phrases
-  'HELLO HOW_ARE_YOU': 'Hello, how are you?',
-  'HOW_ARE_YOU GOOD': 'How are you? I am good.',
-  'HOW_ARE_YOU BAD': 'How are you? I am not feeling good.',
-  'GOOD THANK_YOU': 'Good, thank you!',
-  'THANK_YOU FRIEND': 'Thank you, my friend!',
-  'HELLO FRIEND': 'Hello, my friend!',
-  'GOODBYE FRIEND': 'Goodbye, my friend!',
-  'HELLO GOODBYE': 'Hello and goodbye!',
-  'SORRY FRIEND': 'Sorry, my friend.',
-  'PLEASE HELP': 'Please, help me!',
-  'HELP PLEASE': 'Help, please!',
-  'PLEASE STOP': 'Please stop.',
-  'STOP PLEASE': 'Stop, please.',
-  'SORRY PLEASE': 'Sorry, please forgive me.',
-  'YES PLEASE': 'Yes, please.',
-  'NO THANK_YOU': 'No, thank you.',
-  'YES THANK_YOU': 'Yes, thank you!',
-  'YES GOOD': 'Yes, that is good.',
-  'NO BAD': 'No, that is bad.',
-  'PLEASE WATER': 'Please, I need water.',
-  'PLEASE FOOD': 'Please, I need food.',
-  'EAT FOOD': 'Eat food.',
-  'DRINK WATER': 'Drink water.',
-  'FOOD EAT': 'Eat food.',
-  'WATER DRINK': 'Drink water.',
-  'GOOD FOOD': 'The food is good.',
-  'BAD FOOD': 'The food is bad.',
-  'FRIEND HELP': 'Friend, please help!',
-  'HELP FRIEND': 'Help my friend!',
-  'FRIEND LOVE': 'Much love to my friend!',
-  'LOVE FRIEND': 'Love my friend!',
-  'GOOD FRIEND': 'You are a good friend.',
-  'GOOD HOME': 'Good home.',
-  'LOVE HOME': 'I love home.',
-  'NAME FRIEND': 'What is your name, my friend?',
-  'HELLO NAME': 'Hello, my name is...',
-};
-
-const MULTILINGUAL_GRAMMAR_RULES: Record<string, Record<string, string>> = {
-  hi: {
-    HELLO: 'नमस्ते!',
-    THANK_YOU: 'धन्यवाद!',
-    PLEASE: 'कृपया।',
-    SORRY: 'माफ़ कीजिए।',
-    YES: 'हाँ।',
-    NO: 'नहीं।',
-    GOODBYE: 'अलविदा!',
-    GOOD: 'अच्छा।',
-    BAD: 'बुरा।',
-    HOW_ARE_YOU: 'आप कैसे हैं?',
-    HELP: 'मदद कीजिए!',
-    STOP: 'रुकिए।',
-    EAT: 'खाइए।',
-    DRINK: 'पीजिए।',
-    WATER: 'पानी, कृपया।',
-    FOOD: 'खाना, कृपया।',
-    HOME: 'घर।',
-    FRIEND: 'दोस्त।',
-    NAME: 'नाम।',
-    LOVE: 'प्यार।',
-    'HELLO HOW_ARE_YOU': 'नमस्ते, आप कैसे हैं?',
-    'HOW_ARE_YOU GOOD': 'आप कैसे हैं? मैं ठीक हूँ।',
-    'HOW_ARE_YOU BAD': 'आप कैसे हैं? मैं ठीक नहीं हूँ।',
-    'GOOD THANK_YOU': 'अच्छा, धन्यवाद!',
-    'THANK_YOU FRIEND': 'धन्यवाद, मेरे दोस्त!',
-    'HELLO FRIEND': 'नमस्ते, मेरे दोस्त!',
-    'GOODBYE FRIEND': 'अलविदा, मेरे दोस्त!',
-    'SORRY FRIEND': 'माफ़ करना, मेरे दोस्त।',
-    'PLEASE HELP': 'कृपया मेरी मदद कीजिए!',
-    'HELP PLEASE': 'मदद कीजिए, कृपया!',
-    'PLEASE STOP': 'कृपया रुकिए।',
-    'STOP PLEASE': 'रुकिए, कृपया।',
-    'YES PLEASE': 'हाँ, कृपया।',
-    'NO THANK_YOU': 'नहीं, धन्यवाद।',
-    'YES THANK_YOU': 'हाँ, धन्यवाद!',
-    'PLEASE WATER': 'कृपया मुझे पानी चाहिए।',
-    'PLEASE FOOD': 'कृपया मुझे खाना चाहिए।',
-    'EAT FOOD': 'खाना खाओ।',
-    'FOOD EAT': 'खाना खाओ।',
-    'DRINK WATER': 'पानी पियो।',
-    'WATER DRINK': 'पानी पियो।',
-    'GOOD FOOD': 'खाना अच्छा है।',
-    'BAD FOOD': 'खाना खराब है।',
-    'FRIEND HELP': 'दोस्त, कृपया मदद करो!',
-    'HELP FRIEND': 'दोस्त की मदद करो!',
-    'FRIEND LOVE': 'दोस्त से बहुत प्यार!',
-    'LOVE FRIEND': 'दोस्त से प्यार है!',
-    'GOOD FRIEND': 'तुम अच्छे दोस्त हो।',
-    'NAME FRIEND': 'तुम्हारा नाम क्या है, दोस्त?',
-    'HELLO NAME': 'नमस्ते, मेरा नाम...',
-  },
-  bn: {
-    HELLO: 'নমস্কার!',
-    THANK_YOU: 'ধন্যবাদ!',
-    PLEASE: 'দয়া করে।',
-    SORRY: 'দুঃখিত।',
-    YES: 'হ্যাঁ।',
-    NO: 'না।',
-    GOODBYE: 'বিদায়!',
-    GOOD: 'ভালো।',
-    BAD: 'খারাপ।',
-    HOW_ARE_YOU: 'কেমন আছেন?',
-    HELP: 'সাহায্য করুন!',
-    STOP: 'থামুন।',
-    EAT: 'খান।',
-    DRINK: 'পান করুন।',
-    WATER: 'জল, দয়া করে।',
-    FOOD: 'খাবার, দয়া করে।',
-    HOME: 'বাড়ি।',
-    FRIEND: 'বন্ধু।',
-    NAME: 'নাম।',
-    LOVE: 'ভালোবাসা।',
-    'HELLO HOW_ARE_YOU': 'নমস্কার, কেমন আছেন?',
-    'PLEASE HELP': 'দয়া করে সাহায্য করুন!',
-    'HELP PLEASE': 'সাহায্য করুন, দয়া করে!',
-    'THANK_YOU FRIEND': 'ধন্যবাদ, আমার বন্ধু!',
-    'HELLO FRIEND': 'নমস্কার, বন্ধু!',
-    'EAT FOOD': 'খাবার খান।',
-    'DRINK WATER': 'জল পান করুন।',
-    'WATER DRINK': 'জল পান করুন।',
-    'FOOD EAT': 'খাবার খান।',
-  },
-  mr: {
-    HELLO: 'नमस्कार!',
-    THANK_YOU: 'धन्यवाद!',
-    PLEASE: 'कृपया।',
-    SORRY: 'माफ करा।',
-    YES: 'होय।',
-    NO: 'नाही।',
-    GOODBYE: 'निरोप!',
-    GOOD: 'चांगले।',
-    BAD: 'वाईट।',
-    HOW_ARE_YOU: 'कसे आहात?',
-    HELP: 'मदत करा!',
-    STOP: 'थांबा।',
-    EAT: 'खा।',
-    DRINK: 'प्या।',
-    WATER: 'पाणी, कृपया।',
-    FOOD: 'अन्न, कृपया।',
-    HOME: 'घर।',
-    FRIEND: 'मित्र।',
-    NAME: 'नाव।',
-    LOVE: 'प्रेम।',
-    'HELLO HOW_ARE_YOU': 'नमस्कार, कसे आहात?',
-    'PLEASE HELP': 'कृपया मदत करा!',
-    'HELP PLEASE': 'मदत करा, कृपया!',
-    'THANK_YOU FRIEND': 'धन्यवाद, मित्रा!',
-    'HELLO FRIEND': 'नमस्कार, मित्रा!',
-    'EAT FOOD': 'अन्न खा।',
-    'DRINK WATER': 'पाणी प्या।',
-  },
-  ta: {
-    HELLO: 'வணக்கம்!',
-    THANK_YOU: 'நன்றி!',
-    PLEASE: 'தயவுசெய்து।',
-    SORRY: 'மன்னிக்கவும்।',
-    YES: 'ஆம்।',
-    NO: 'இல்லை।',
-    GOODBYE: 'வருகிறேன்!',
-    GOOD: 'நல்லது।',
-    BAD: 'கெட்டது।',
-    HOW_ARE_YOU: 'எப்படி இருக்கிறீர்கள்?',
-    HELP: 'உதவி செய்யுங்கள்!',
-    STOP: 'நிறுத்துங்கள்।',
-    EAT: 'சாப்பிடுங்கள்।',
-    DRINK: 'குடியுங்கள்।',
-    WATER: 'தண்ணீர், தயவுசெய்து।',
-    FOOD: 'உணவு, தயவுசெய்து।',
-    HOME: 'வீடு।',
-    FRIEND: 'நண்பர்।',
-    NAME: 'பெயர்।',
-    LOVE: 'அன்பு।',
-    'HELLO HOW_ARE_YOU': 'வணக்கம், எப்படி இருக்கிறீர்கள்?',
-    'PLEASE HELP': 'தயவுசெய்து உதவி செய்யுங்கள்!',
-    'HELP PLEASE': 'உதவி செய்யுங்கள், தயவுசெய்து!',
-    'THANK_YOU FRIEND': 'நன்றி, நண்பரே!',
-    'HELLO FRIEND': 'வணக்கம், நண்பரே!',
-    'EAT FOOD': 'உணவு சாப்பிடுங்கள்।',
-    'DRINK WATER': 'தண்ணீர் குடியுங்கள்।',
-  },
-};
-
-/**
- * Builds a natural sentence from recognized sign language glosses.
- * Enforces grammatical agreement, inserts necessary copula/articles,
- * deduplicates consecutive raw glosses, filters out language tags,
- * and restricts predictions strictly to the 20 target vocabulary signs.
- * Supports output translation into the selected interface language.
+ * Builds a natural sentence from recognized sign language glosses for all 10 supported languages.
+ * Provides both the primary sentence in `targetLocale` and the `englishSentence` reference.
  */
 export function buildSentenceFromGlosses(
   glosses: string[],
@@ -336,6 +90,8 @@ export function buildSentenceFromGlosses(
       language: activeLanguage,
       glossDisplay: '',
       naturalSentence: '',
+      englishSentence: '',
+      targetLocale,
       ruleApplied: 'empty',
     };
   }
@@ -358,6 +114,8 @@ export function buildSentenceFromGlosses(
       language: detectedLanguage,
       glossDisplay: '',
       naturalSentence: '',
+      englishSentence: '',
+      targetLocale,
       ruleApplied: 'none_valid',
     };
   }
@@ -371,67 +129,53 @@ export function buildSentenceFromGlosses(
   }
 
   const glossDisplay = distinctGlosses.join(' • ');
-
-  // 1. Direct rule match on distinct sequence
   const distinctKey = distinctGlosses.join(' ');
-  const multiRule = MULTILINGUAL_GRAMMAR_RULES[targetLocale];
-  if (multiRule && multiRule[distinctKey]) {
-    return {
-      rawGlosses,
-      cleanGlosses,
-      distinctGlosses,
-      language: detectedLanguage,
-      glossDisplay,
-      naturalSentence: multiRule[distinctKey],
-      ruleApplied: `multilingual_${targetLocale}`,
-    };
-  }
-
-  if (SENTENCE_GRAMMAR_RULES[distinctKey]) {
-    return {
-      rawGlosses,
-      cleanGlosses,
-      distinctGlosses,
-      language: detectedLanguage,
-      glossDisplay,
-      naturalSentence: SENTENCE_GRAMMAR_RULES[distinctKey],
-      ruleApplied: 'exact_phrase_rule',
-    };
-  }
-
-  // 2. Direct rule match on full sequence
   const fullKey = cleanGlosses.join(' ');
-  if (multiRule && multiRule[fullKey]) {
-    return {
-      rawGlosses,
-      cleanGlosses,
-      distinctGlosses,
-      language: detectedLanguage,
-      glossDisplay,
-      naturalSentence: multiRule[fullKey],
-      ruleApplied: `multilingual_${targetLocale}`,
-    };
+
+  // 1. Build English sentence first (as reference)
+  const enLex = getLoadedLexicon('en');
+  let englishSentence =
+    enLex.sentenceTemplates[distinctKey] ||
+    enLex.sentenceTemplates[fullKey] ||
+    '';
+
+  if (!englishSentence) {
+    const enWords = distinctGlosses.map((g) => glossToWord(g, 'en')).filter(Boolean);
+    englishSentence = enWords.join(' ');
+    if (englishSentence.length > 0) {
+      englishSentence = englishSentence.charAt(0).toUpperCase() + englishSentence.slice(1);
+      if (!englishSentence.endsWith('.') && !englishSentence.endsWith('!') && !englishSentence.endsWith('?')) {
+        englishSentence += '.';
+      }
+    }
   }
 
-  if (SENTENCE_GRAMMAR_RULES[fullKey]) {
-    return {
-      rawGlosses,
-      cleanGlosses,
-      distinctGlosses,
-      language: detectedLanguage,
-      glossDisplay,
-      naturalSentence: SENTENCE_GRAMMAR_RULES[fullKey],
-      ruleApplied: 'exact_phrase_rule',
-    };
-  }
+  // 2. Build target locale sentence
+  const targetLex = getLoadedLexicon(targetLocale as SupportedLocale);
+  let naturalSentence = '';
+  let ruleApplied = 'synthesized_fallback';
 
-  // 3. Fallback: synthesize readable English from the 20 words
-  const words = distinctGlosses.map(glossToWord).filter(Boolean);
-  let sentence = words.join(' ');
-  if (sentence.length > 0) {
-    sentence = sentence.charAt(0).toUpperCase() + sentence.slice(1);
-    if (!sentence.endsWith('.') && !sentence.endsWith('!') && !sentence.endsWith('?')) {
-      sentence += '.';
+  if (targetLex.sentenceTemplates[distinctKey]) {
+    naturalSentence = targetLex.sentenceTemplates[distinctKey];
+    ruleApplied = `lexicon_template_${targetLex.locale}`;
+  } else if (targetLex.sentenceTemplates[fullKey]) {
+    naturalSentence = targetLex.sentenceTemplates[fullKey];
+    ruleApplied = `lexicon_template_${targetLex.locale}`;
+  } else if (targetLocale === 'en') {
+    naturalSentence = englishSentence;
+    ruleApplied = 'english_rule';
+  } else {
+    // Synthesize grammatically from the target lexicon's word stems
+    const words = distinctGlosses.map((g) => {
+      return targetLex.glosses[g]?.main || glossToWord(g, 'en');
+    }).filter(Boolean);
+
+    naturalSentence = words.join(' ');
+    if (naturalSentence.length > 0) {
+      const endPunct = targetLex.punctuation?.sentenceEnd || '.';
+      if (!naturalSentence.endsWith(endPunct) && !naturalSentence.endsWith('!') && !naturalSentence.endsWith('?')) {
+        naturalSentence += endPunct;
+      }
     }
   }
 
@@ -441,7 +185,9 @@ export function buildSentenceFromGlosses(
     distinctGlosses,
     language: detectedLanguage,
     glossDisplay,
-    naturalSentence: sentence,
-    ruleApplied: 'synthesized_fallback',
+    naturalSentence,
+    englishSentence,
+    targetLocale,
+    ruleApplied,
   };
 }

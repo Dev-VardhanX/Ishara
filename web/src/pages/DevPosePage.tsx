@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
 import { Activity, Cpu, Box, Bot, CheckCircle2 } from 'lucide-react';
+import { useLocaleStore } from '../store/useLocaleStore';
 
 export const DevPosePage: React.FC = () => {
+  const { t } = useLocaleStore();
   const [modelStatus, setModelStatus] = useState<'idle' | 'ready' | 'running'>('ready');
   const [landmarksCount] = useState(75);
   const [fps] = useState(30);
 
+  useEffect(() => {
+    document.title = `${t('dev.title')} — Ishara`;
+  }, [t]);
+
   return (
     <div className="space-y-6">
       <Header
-        title="Developer Pose & Rig Inspector"
-        subtitle="Test MediaPipe vision landmarks, tensor pipelines ([1, 64, 225]), and Three.js/VRM clips"
+        title={t('dev.title')}
+        subtitle={t('dev.inspectorSubtitle')}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -20,26 +26,26 @@ export const DevPosePage: React.FC = () => {
           <div className="clay-card p-6 space-y-4">
             <h3 className="text-xs font-black uppercase text-[#6E7387] tracking-wider flex items-center gap-2">
               <Cpu className="w-4 h-4 text-[#7C9CFF]" />
-              <span>Vision & Inference Engine</span>
+              <span>{t('dev.visionEngine')}</span>
             </h3>
 
             <div className="space-y-3 text-xs">
               <div className="flex justify-between p-2.5 rounded-xl bg-white/60 border border-slate-200/50">
-                <span className="font-bold text-[#6E7387]">Model Runtime</span>
-                <span className="font-black text-[#2B2D42]">MediaPipe Tasks Web</span>
+                <span className="font-bold text-[#6E7387]">{t('dev.modelRuntime')}</span>
+                <span className="font-black text-[#2B2D42]">{t('dev.mediaPipeTasksWeb') || 'MediaPipe Tasks Web'}</span>
               </div>
               <div className="flex justify-between p-2.5 rounded-xl bg-white/60 border border-slate-200/50">
-                <span className="font-bold text-[#6E7387]">Tensor Input Shape</span>
-                <span className="font-black text-[#7C9CFF] font-mono">[1, 64, 225] float32</span>
+                <span className="font-bold text-[#6E7387]">{t('dev.tensorShape')}</span>
+                <span className="font-black text-[#7C9CFF] font-mono">{t('dev.tensorShapeValue') || '[1, 64, 225] float32'}</span>
               </div>
               <div className="flex justify-between p-2.5 rounded-xl bg-white/60 border border-slate-200/50">
-                <span className="font-bold text-[#6E7387]">Active Landmarks</span>
+                <span className="font-bold text-[#6E7387]">{t('dev.activeLandmarks')}</span>
                 <span className="font-black text-emerald-600 font-mono">
-                  {landmarksCount} (33 Pose + 42 Hands)
+                  {landmarksCount} {t('dev.poseHandsCount') || '(33 Pose + 42 Hands)'}
                 </span>
               </div>
               <div className="flex justify-between p-2.5 rounded-xl bg-white/60 border border-slate-200/50">
-                <span className="font-bold text-[#6E7387]">Target Frame Rate</span>
+                <span className="font-bold text-[#6E7387]">{t('dev.targetFps')}</span>
                 <span className="font-black text-[#2B2D42]">{fps} FPS</span>
               </div>
             </div>
@@ -53,7 +59,7 @@ export const DevPosePage: React.FC = () => {
                 }`}
               >
                 <Activity className="w-4 h-4" />
-                <span>{modelStatus === 'running' ? 'Stop Pose Stream' : 'Run Live Landmark Stream'}</span>
+                <span>{modelStatus === 'running' ? t('dev.stopStream') : t('dev.runStream')}</span>
               </button>
             </div>
           </div>
@@ -61,18 +67,18 @@ export const DevPosePage: React.FC = () => {
           <div className="clay-card p-6 space-y-3">
             <h3 className="text-xs font-black uppercase text-[#6E7387] tracking-wider flex items-center gap-2">
               <Box className="w-4 h-4 text-[#D4A5FF]" />
-              <span>Avatar 3D Rig (Three.js + VRM)</span>
+              <span>{t('dev.avatarRig')}</span>
             </h3>
             <p className="text-xs font-semibold text-[#6E7387]">
-              Rig format: VRM 1.0 / glTF 2.0 with complete humanoid finger skeleton.
+              {t('dev.rigSubtitle')}
             </p>
             <div className="p-3 rounded-xl bg-white/60 text-xs font-mono text-[#2B2D42] space-y-1">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Default Rest Pose: Verified</span>
+                <span>{t('dev.restPoseVerified')}</span>
               </div>
-              <div>Root Translation: Locked [0, 0, 0]</div>
-              <div>Finger Bones: 14 per hand</div>
+              <div>{t('dev.rootTranslationLocked')}</div>
+              <div>{t('dev.fingerBonesCount')}</div>
             </div>
           </div>
         </div>
@@ -82,10 +88,10 @@ export const DevPosePage: React.FC = () => {
           <div>
             <div className="flex items-center justify-between pb-4 border-b border-slate-200/60">
               <span className="text-xs font-black uppercase text-[#6E7387]">
-                Landmark Mesh Visualizer (3D Viewport)
+                {t('dev.meshVisualizer')}
               </span>
               <span className="px-3 py-1 rounded-full bg-[#E5F8E2] text-xs font-extrabold text-[#65B75D]">
-                Pipeline Synchronized
+                {t('dev.pipelineSync')}
               </span>
             </div>
 
@@ -101,9 +107,9 @@ export const DevPosePage: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-white/90">Landmark Point Cloud Ready</p>
+                  <p className="text-xs font-bold text-white/90">{t('dev.pointCloudReady')}</p>
                   <p className="text-[10px] text-white/60 font-mono mt-0.5">
-                    Order: Pose (33) &rarr; Left Hand (21) &rarr; Right Hand (21)
+                    {t('dev.landmarkOrder')}
                   </p>
                 </div>
               </div>
@@ -111,8 +117,8 @@ export const DevPosePage: React.FC = () => {
           </div>
 
           <div className="pt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#6E7387] font-semibold border-t border-slate-200/60">
-            <span>Normalized relative to shoulder midpoint</span>
-            <span className="font-mono text-[#7C9CFF]">CONTRACT: docs/contracts/model-contract.md</span>
+            <span>{t('dev.normalizedNote')}</span>
+            <span className="font-mono text-[#7C9CFF]">{t('dev.contractLabel')}</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLocaleStore } from '../store/useLocaleStore';
 import { HandMetal } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -9,6 +10,7 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
+  const { t } = useLocaleStore();
   const location = useLocation();
 
   if (loading) {
@@ -19,9 +21,9 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
             <HandMetal className="w-8 h-8 animate-bounce" />
           </div>
           <div>
-            <h3 className="text-base font-extrabold text-[#2B2D42]">Loading Ishara</h3>
+            <h3 className="text-base font-extrabold text-[#2B2D42]">{t('login.loadingIshara')}</h3>
             <p className="text-xs font-semibold text-[#6E7387] mt-1">
-              Restoring your translation session...
+              {t('login.restoringSession')}
             </p>
           </div>
         </div>

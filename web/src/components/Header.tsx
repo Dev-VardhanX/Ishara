@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Wifi, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { WifiOff, AlertTriangle } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { SegmentedControl } from './SegmentedControl';
 import { LocaleSelector } from './LocaleSelector';
@@ -17,7 +17,6 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
   const [isOnline, setIsOnline] = useState<boolean>(
     typeof navigator !== 'undefined' ? navigator.onLine : true
   );
-  const [offlineReady, setOfflineReady] = useState<boolean>(false);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -25,18 +24,6 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
-    // Check service worker / cache support
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      if (navigator.serviceWorker.controller) {
-        setOfflineReady(true);
-      }
-      navigator.serviceWorker.ready
-        .then(() => {
-          setOfflineReady(true);
-        })
-        .catch(() => {});
-    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -48,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
     <header className="pb-6 select-none">
       {/* Mobile Top App Bar (shown only on phones) */}
       <div className="md:hidden flex items-center justify-between pb-4 mb-4 border-b border-slate-200/50 flex-wrap gap-2">
-        <NavLink to="/" className="flex items-center clay-focus rounded-xl" title="Ishara Home">
+        <NavLink to="/" className="flex items-center clay-focus rounded-xl" title={t('header.homeTitle')}>
           <IsharaLogo size="sm" showWordmark={true} />
         </NavLink>
 
@@ -90,6 +77,17 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
         </div>
 
         <div className="flex items-center gap-2.5 self-end sm:self-auto flex-wrap">
+          {/* Offline Warning (Only shown when internet disconnects) */}
+          {!isOnline && (
+            <div
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-300 text-xs font-bold text-amber-800 shadow-sm animate-pulse"
+              title={t('header.offline')}
+            >
+              <WifiOff className="w-3.5 h-3.5 text-amber-600" />
+              <span>{t('header.offline')}</span>
+            </div>
+          )}
+
           {/* Interface Language Picker */}
           <LocaleSelector />
 
@@ -104,36 +102,7 @@ export const Header: React.FC<HeaderProps> = ({ title, subtitle, badge }) => {
             <span>SOS</span>
           </NavLink>
 
-          {/* Offline Ready Badge (Service Worker Cached) */}
-          {offlineReady && (
-            <div
-              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#E5F8E2] border border-[#A8E6A1]/60 text-xs font-bold text-[#2D7A4F] shadow-sm animate-fade-in"
-              title="Application shell, models & emergency tools are cached for offline access"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>{t('header.offlineReady')}</span>
-            </div>
-          )}
-
-          {/* Offline / Online live indicator */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 border border-slate-200/50 text-xs font-bold text-[#2B2D42] shadow-sm">
-            <span
-              className={`w-2.5 h-2.5 rounded-full ${
-                isOnline
-                  ? 'bg-[#A8E6A1] ring-2 ring-emerald-300/40 animate-pulse'
-                  : 'bg-amber-400 ring-2 ring-amber-300/40'
-              }`}
-            ></span>
-            <span>{isOnline ? t('header.online') : t('header.offline')}</span>
-          </div>
-
-          {/* Sync indicator */}
-          <div className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/70 border border-slate-200/50 text-xs font-bold text-[#6E7387] shadow-sm">
-            <Wifi className="w-3.5 h-3.5 text-[#7C9CFF]" />
-            <span>SYNC ON</span>
-          </div>
-
-          {/* Top-Right ISL | ASL SegmentedControl (Sign Language selection) */}
+          {/* Sign Language selection (ISL | ASL) */}
           <SegmentedControl />
         </div>
       </div>

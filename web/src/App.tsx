@@ -5,6 +5,7 @@ import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/AppLayout';
 import { IsharaLogo } from './components/IsharaLogo';
+import { t } from './store/useLocaleStore';
 
 // Code-split pages so Three.js, MediaPipe, etc. load only when visited
 const LandingPage = lazy(() => import('./pages/LandingPage').then((m) => ({ default: m.LandingPage })));
@@ -21,7 +22,7 @@ const EmergencyPage = lazy(() => import('./pages/EmergencyPage').then((m) => ({ 
 
 // Accessible, claymorphic loading skeleton during dynamic route import
 const PageFallback: React.FC = () => (
-  <div className="min-h-screen bg-[#E9EEF7] flex items-center justify-center p-6 select-none" role="status" aria-label="Loading page">
+  <div className="min-h-screen bg-[#E9EEF7] flex items-center justify-center p-6 select-none" role="status" aria-label={t('common.loadingPage')}>
     <div className="clay-card p-8 flex flex-col items-center gap-3.5 bg-[#E9EEF7] border border-white/60">
       <IsharaLogo size="lg" animate={true} showWordmark={true} />
     </div>
