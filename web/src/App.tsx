@@ -16,6 +16,8 @@ const VoiceToSignPage = lazy(() => import('./pages/VoiceToSignPage').then((m) =>
 const LearnPage = lazy(() => import('./pages/LearnPage').then((m) => ({ default: m.LearnPage })));
 const HistoryPage = lazy(() => import('./pages/HistoryPage').then((m) => ({ default: m.HistoryPage })));
 const DevPosePage = lazy(() => import('./pages/DevPosePage').then((m) => ({ default: m.DevPosePage })));
+const SignRecorderPage = lazy(() => import('./pages/SignRecorderPage').then((m) => ({ default: m.SignRecorderPage })));
+const AvatarDemoPage = lazy(() => import('./pages/AvatarDemoPage').then((m) => ({ default: m.AvatarDemoPage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const EmergencyPage = lazy(() => import('./pages/EmergencyPage').then((m) => ({ default: m.EmergencyPage })));
@@ -54,7 +56,15 @@ export const App: React.FC = () => {
                 <Route path="/voice-to-sign" element={<VoiceToSignPage />} />
                 <Route path="/learn" element={<LearnPage />} />
                 <Route path="/history" element={<HistoryPage />} />
-                {/* Dev Route: Redirect to / in production */}
+                {/* Dev Routes: Hidden from normal user navigation */}
+                <Route
+                  path="/dev/sign-recorder"
+                  element={isProd ? <Navigate to="/" replace /> : <SignRecorderPage />}
+                />
+                <Route
+                  path="/dev/avatar-demo"
+                  element={isProd ? <Navigate to="/" replace /> : <AvatarDemoPage />}
+                />
                 <Route
                   path="/dev/*"
                   element={isProd ? <Navigate to="/" replace /> : <DevPosePage />}

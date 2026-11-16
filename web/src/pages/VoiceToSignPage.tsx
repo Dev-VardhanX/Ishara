@@ -354,11 +354,10 @@ export const VoiceToSignPage: React.FC = () => {
                   key={s}
                   type="button"
                   onClick={() => setSpeed(s)}
-                  className={`px-3 py-1 rounded-full text-xs font-black transition-all clay-focus ${
-                    speed === s
-                      ? 'bg-[#7C9CFF] text-white shadow-clay-raised-sm'
-                      : 'text-[#6E7387] hover:text-[#2B2D42]'
-                  }`}
+                  className={`px-3 py-1 rounded-full text-xs font-black transition-all clay-focus ${speed === s
+                    ? 'bg-[#7C9CFF] text-white shadow-clay-raised-sm'
+                    : 'text-[#6E7387] hover:text-[#2B2D42]'
+                    }`}
                 >
                   {s}x
                 </button>
@@ -403,8 +402,15 @@ export const VoiceToSignPage: React.FC = () => {
         <div className="relative">
           <AvatarStage
             currentGloss={currentGloss}
+            glosses={tokens.map((t) => t.gloss).filter(Boolean) as string[]}
             speed={speed}
             playing={playing}
+            onSpeedChange={setSpeed}
+            onTogglePlay={() => setPlaying(!playing)}
+            onReplay={() => {
+              setCurrentIndex(0);
+              setPlaying(true);
+            }}
           />
 
           {/* Bottom Floating Bar inside stage: Caption Chip & Playback Controls */}
@@ -434,13 +440,12 @@ export const VoiceToSignPage: React.FC = () => {
                           setCurrentIndex(idx);
                           setPlaying(false);
                         }}
-                        className={`cursor-pointer px-1.5 py-0.5 rounded-lg transition-all ${
-                          isCurrent
-                            ? 'bg-[#7C9CFF] text-white font-black shadow-sm scale-105 ring-2 ring-white/50'
-                            : !token.hasSign
+                        className={`cursor-pointer px-1.5 py-0.5 rounded-lg transition-all ${isCurrent
+                          ? 'bg-[#7C9CFF] text-white font-black shadow-sm scale-105 ring-2 ring-white/50'
+                          : !token.hasSign
                             ? 'bg-[#FF8A8A]/30 text-white/90 border border-[#FF8A8A]/50 hover:bg-[#FF8A8A]/40'
                             : 'text-white/80 hover:text-white hover:bg-white/10'
-                        }`}
+                          }`}
                         title={token.gloss ? t('voiceToSign.signTooltip', { gloss: token.gloss }) : t('voiceToSign.notInVocabTooltip', { text: token.originalText })}
                       >
                         {token.originalText}
@@ -540,11 +545,10 @@ export const VoiceToSignPage: React.FC = () => {
             <button
               type="button"
               onClick={toggleSpeechRecognition}
-              className={`p-3.5 rounded-clay transition-all clay-focus flex items-center justify-center ${
-                isListening
-                  ? 'bg-[#FF8A8A] text-white shadow-clay-pressed animate-pulse ring-2 ring-red-400'
-                  : 'bg-[#7C9CFF] text-white shadow-clay-raised hover:brightness-105'
-              }`}
+              className={`p-3.5 rounded-clay transition-all clay-focus flex items-center justify-center ${isListening
+                ? 'bg-[#FF8A8A] text-white shadow-clay-pressed animate-pulse ring-2 ring-red-400'
+                : 'bg-[#7C9CFF] text-white shadow-clay-raised hover:brightness-105'
+                }`}
               title={isListening ? t('voiceToSign.micListening') : t('voiceToSign.micClick')}
             >
               {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
