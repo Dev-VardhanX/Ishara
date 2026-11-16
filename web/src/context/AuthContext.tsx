@@ -1,6 +1,9 @@
 // src/context/AuthContext.tsx — Unified Supabase Authentication & Profile Session
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { formatAuthError } from '../lib/authErrors';
+
+export { formatAuthError };
 
 export interface User {
   id: string;
@@ -32,43 +35,6 @@ export interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'ishara_auth_session';
-
-/**
- * Format raw Supabase auth errors into clear, friendly human sentences
- */
-export const formatAuthError = (err: any): string => {
-  if (!err) return 'An error occurred. Please try again.';
-  const msg = typeof err === 'string' ? err : err.message || '';
-  const lower = msg.toLowerCase();
-
-  if (
-    lower.includes('invalid login credentials') ||
-    lower.includes('invalid_grant') ||
-    lower.includes('invalid username or password')
-  ) {
-    return 'Invalid email or password. Please verify your credentials.';
-  }
-  if (lower.includes('email not confirmed')) {
-    return 'Your email has not been confirmed yet. Please check your inbox for the confirmation link.';
-  }
-  if (
-    lower.includes('rate limit') ||
-    lower.includes('too many requests') ||
-    lower.includes('over_email_send_rate_limit')
-  ) {
-    return 'Too many attempts. Please wait a moment before trying again.';
-  }
-  if (lower.includes('user already registered') || lower.includes('already exists')) {
-    return 'An account with this email already exists. Please sign in instead.';
-  }
-  if (lower.includes('password should be at least')) {
-    return 'Password must be at least 6 characters long.';
-  }
-  if (lower.includes('network') || lower.includes('fetch')) {
-    return 'Network connection issue. Operating in offline local mode.';
-  }
-  return msg || 'Authentication error. Please try again.';
-};
 
 /**
  * Ensures user profile exists in public.profiles table and retrieves real name/lang
@@ -153,7 +119,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               setSession({ user: appUser, token: data.session.access_token });
             }
           } else {
-            // Check fallback local session if unconfigured/offline
+            // Check fallback local session or auto-initialize mock user
+            const isExplicitlyLoggedOut = localStorage.getItem('ishara_explicit_logout') === 'true';
             const stored = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
             if (stored && isMounted) {
               try {
@@ -163,6 +130,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               } catch (e) {
                 localStorage.removeItem(STORAGE_KEY);
               }
+            } else if (!isExplicitlyLoggedOut && isMounted) {
+              const defaultUser: User = {
+                id: 'mock-user-1',
+                email: 'ananya@ishara.ai',
+                name: 'Ananya Sharma',
+                preferredLang: 'hi',
+                isMock: true,
+              };
+              const defaultSession: Session = {
+                user: defaultUser,
+                token: 'mock_token_demo',
+              };
+              setUser(defaultUser);
+              setSession(defaultSession);
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSession));
             }
           }
 
@@ -198,6 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           };
         } else {
           // Offline mock auth restoration
+          const isExplicitlyLoggedOut = localStorage.getItem('ishara_explicit_logout') === 'true';
           const stored = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
           if (stored && isMounted) {
             try {
@@ -208,6 +191,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               localStorage.removeItem(STORAGE_KEY);
               sessionStorage.removeItem(STORAGE_KEY);
             }
+          } else if (!isExplicitlyLoggedOut && isMounted) {
+            // Auto-provide rich mock user for immediate hackathon exploration per AGENTS.md rule 1
+            const defaultUser: User = {
+              id: 'mock-user-1',
+              email: 'ananya@ishara.ai',
+              name: 'Ananya Sharma',
+              preferredLang: 'hi',
+              isMock: true,
+            };
+            const defaultSession: Session = {
+              user: defaultUser,
+              token: 'mock_token_demo',
+            };
+            setUser(defaultUser);
+            setSession(defaultSession);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultSession));
           }
         }
       } catch (err) {
@@ -232,6 +231,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     password: string,
     keepMeSignedIn: boolean = true
   ): Promise<{ error?: string }> => {
+    localStorage.removeItem('ishara_explicit_logout');
     setLoading(true);
     try {
       if (isSupabaseConfigured && supabase) {
@@ -384,6 +384,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       localStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem('ishara_explicit_logout', 'true');
       setUser(null);
       setSession(null);
     }

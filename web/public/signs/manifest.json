@@ -1,5 +1,42 @@
 {
-  "version": 1,
-  "updatedAt": "2026-11-16T00:00:00.000Z",
-  "signs": {}
+  "version": 2,
+  "updatedAt": "2026-11-16T13:07:31.798Z",
+  "signs": {
+    "EAT": {
+      "file": "EAT.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    },
+    "DRINK": {
+      "file": "DRINK.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    },
+    "HELLO": {
+      "file": "HELLO.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    },
+    "STOP": {
+      "file": "STOP.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    },
+    "YES": {
+      "file": "YES.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    },
+    "GOOD": {
+      "file": "GOOD.json",
+      "language": "ISL",
+      "verified": false,
+      "author": "Ishara Hand-Authored Demo"
+    }
+  }
 }

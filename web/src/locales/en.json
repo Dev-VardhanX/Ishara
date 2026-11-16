@@ -34,7 +34,8 @@
     "enSecondary": "EN: \"{text}\"",
     "videoPrivate": "Video never leaves your device",
     "frameGuide": "Frame your hands and upper body",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "homeTitle": "Ishara Home"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -184,7 +185,14 @@
     "privacyPolicy": "Privacy Policy",
     "contactUs": "Contact Us",
     "stayConnected": "Stay Connected",
-    "copyright": "© 2026 Ishara AI. Built with love for a more inclusive world."
+    "copyright": "© 2026 Ishara AI. Built with love for a more inclusive world.",
+    "avatarAlt": "Ishara 3D sign language avatar",
+    "twitterTitle": "Twitter / X",
+    "instagramTitle": "Instagram",
+    "instagramAria": "Instagram",
+    "linkedinTitle": "LinkedIn",
+    "linkedinAria": "LinkedIn",
+    "linkedinIcon": "in"
   },
   "login": {
     "welcomeBack": "Welcome Back",

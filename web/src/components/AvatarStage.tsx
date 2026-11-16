@@ -8,7 +8,6 @@ import {
   Palette,
   FlipHorizontal,
   StepForward,
-  AlertTriangle,
 } from 'lucide-react';
 import { SignIcon } from './SignIcon';
 import { SIGN_VOCABULARY } from '../ml';
@@ -20,22 +19,28 @@ import { loadSignClip } from '../avatar/clipStore';
 
 interface AvatarStageProps {
   currentGloss?: string | null;
+  currentWord?: string | null;
   glosses?: string[];
   speed?: number;
   playing?: boolean;
   onSpeedChange?: (speed: number) => void;
   onTogglePlay?: () => void;
   onReplay?: () => void;
+  onSignIndexChange?: (index: number, sign: string) => void;
+  onSequenceFinished?: () => void;
 }
 
 export const AvatarStage: React.FC<AvatarStageProps> = ({
   currentGloss,
+  currentWord,
   glosses = [],
   speed = 1,
   playing = true,
   onSpeedChange,
   onTogglePlay,
   onReplay,
+  onSignIndexChange,
+  onSequenceFinished,
 }) => {
   const { t } = useLocaleStore();
   const avatarRef = useRef<SignAvatarHandle>(null);
@@ -106,14 +111,6 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
             <span>3D Sign Avatar</span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />
           </div>
-
-          {/* Unverified Badge if clip is not verified */}
-          {!isVerified && (
-            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-[10px] font-black uppercase shadow-xs animate-fade-in">
-              <AlertTriangle className="w-3 h-3 text-amber-600" />
-              <span>Not verified yet</span>
-            </div>
-          )}
         </div>
 
         {/* Viewport Action Controls */}
@@ -195,8 +192,14 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
               skinTone={skinTone}
               mirrored={mirrored}
               stepByStep={stepByStep}
-              onSignStarted={(sign) => setActiveSign(sign)}
-              onSequenceFinished={() => setActiveSign(null)}
+              onSignStarted={(sign, index) => {
+                setActiveSign(sign);
+                onSignIndexChange?.(index, sign);
+              }}
+              onSequenceFinished={() => {
+                setActiveSign(null);
+                onSequenceFinished?.();
+              }}
               onWebGLFallback={() => setWebglFailed(true)}
             />
           </div>
@@ -237,10 +240,10 @@ export const AvatarStage: React.FC<AvatarStageProps> = ({
 
       {/* Viewport Bottom Floating Status & Controls */}
       <div className="z-10 flex items-center justify-between border-t border-slate-200/50 pt-3 flex-wrap gap-2 text-xs">
-        {/* Active Gloss Badge */}
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] font-black uppercase text-[#6E7387] tracking-wider">
-            {normalizedGloss ? t('signToVoice.activeGlosses') : 'NEUTRAL_REST'}
+        {/* Active Gloss Badge & Word in Selected Language */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[11px] font-black uppercase text-[#6E7387] tracking-wider">
+            {currentWord || (localizedWord && localizedWord !== `signs.${normalizedGloss}.word` ? localizedWord : (normalizedGloss ? t('signToVoice.activeGlosses') : 'NEUTRAL_REST'))}
           </span>
           <span className="px-2.5 py-0.5 rounded-lg bg-white/90 font-mono font-black text-[#2B2D42] text-xs shadow-xs border border-slate-100">
             {normalizedGloss || 'REST'}

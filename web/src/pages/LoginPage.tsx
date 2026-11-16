@@ -342,6 +342,19 @@ export const LoginPage: React.FC = () => {
                 <span>{isSignUp ? t('login.createAccountBtn') : t('login.signInBtn')}</span>
               )}
             </button>
+
+            {/* Quick Demo Access */}
+            <button
+              type="button"
+              onClick={async () => {
+                await login('ananya@ishara.ai', 'password123', true);
+                navigate(from, { replace: true });
+              }}
+              className="w-full py-2.5 rounded-2xl bg-white/80 hover:bg-white text-[#7C9CFF] border border-[#7C9CFF]/40 text-xs font-black shadow-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-[#7C9CFF]" />
+              <span>Explore in Guest / Demo Mode</span>
+            </button>
           </form>
 
           {/* Toggle between Sign In and Sign Up */}

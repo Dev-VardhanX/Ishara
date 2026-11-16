@@ -13,11 +13,12 @@ import {
   SignClip,
   BoneName,
   QuatTuple,
+  ArmPoseData,
+  NEUTRAL_POSE_JOINTS,
 } from './types';
 import { ClayAvatarRig } from './ClayAvatarRig';
 import {
   loadSignClip,
-  NEUTRAL_POSE_JOINTS,
   createBuiltInWaveClip,
 } from './clipStore';
 import { slerpJoints } from './kinematics';
@@ -41,6 +42,8 @@ export interface SignAvatarProps {
   onSignStarted?: (sign: string, index: number) => void;
   onSequenceFinished?: () => void;
   onWebGLFallback?: () => void;
+  showGhostMarker?: boolean;
+  onArmTelemetry?: (stats: { avgError: number; minFaceDist: number }) => void;
   className?: string;
 }
 
@@ -59,6 +62,8 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
       onSignStarted,
       onSequenceFinished,
       onWebGLFallback,
+      showGhostMarker = false,
+      onArmTelemetry,
       className = '',
     },
     ref
@@ -68,10 +73,17 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
 
     // State for UI overlay warnings
     const [missingNotice, setMissingNotice] = useState<string | null>(null);
+    const [armDataMissing, setArmDataMissing] = useState<boolean>(false);
     const [currentClipMeta, setCurrentClipMeta] = useState<{
       signId: string;
       verified: boolean;
     } | null>(null);
+
+    const ghostMarkerRightRef = useRef<THREE.Mesh | null>(null);
+    const showGhostMarkerRef = useRef(showGhostMarker);
+    showGhostMarkerRef.current = showGhostMarker;
+    const onArmTelemetryRef = useRef(onArmTelemetry);
+    onArmTelemetryRef.current = onArmTelemetry;
 
     // Sequence playback state
     const signIndexRef = useRef<number>(0);
@@ -136,6 +148,10 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
           signId: previewClip.signId,
           verified: previewClip.verified,
         });
+        const hasArm = Boolean(
+          previewClip.hasArmData || previewClip.frames.some((f) => f.rightArm || f.leftArm)
+        );
+        setArmDataMissing(!hasArm);
         setMissingNotice(null);
       }
     }, [previewClip]);
@@ -198,6 +214,8 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
             signId: clip.signId,
             verified: clip.verified,
           });
+          const hasArm = Boolean(clip.hasArmData || clip.frames.some(f => f.rightArm || f.leftArm));
+          setArmDataMissing(!hasArm);
           setMissingNotice(null);
         } else {
           // Missing clip rule: display "sign not recorded yet" and skip cleanly after 1.2s
@@ -311,6 +329,18 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
       rimLight.position.set(0, 2, -2);
       scene.add(rimLight);
 
+      // 3D Ghost target marker for arm tracking visual feedback
+      const ghostGeo = new THREE.SphereGeometry(0.024, 16, 16);
+      const ghostMat = new THREE.MeshBasicMaterial({
+        color: 0xff6b81,
+        transparent: true,
+        opacity: 0.65,
+      });
+      const ghostMarker = new THREE.Mesh(ghostGeo, ghostMat);
+      ghostMarker.visible = false;
+      scene.add(ghostMarker);
+      ghostMarkerRightRef.current = ghostMarker;
+
       // Create procedural clay avatar rig
       const rig = new ClayAvatarRig(skinTone);
       rig.setExpression(expression);
@@ -386,7 +416,111 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
               jointPose = slerpJoints(prevEndJointsRef.current, jointPose, blendFactor);
             }
 
-            rig.applyPose(jointPose);
+            rig.applyPose(jointPose, 0.95);
+
+            // Arm IK targets: interpolate left & right arm
+            let interpRightArm: ArmPoseData | undefined = undefined;
+            if (fA.rightArm && fB.rightArm) {
+              const elbowA = fA.rightArm.elbow || [0.22, -0.05, 0.1];
+              const elbowB = fB.rightArm.elbow || [0.22, -0.05, 0.1];
+              interpRightArm = {
+                wrist: [
+                  fA.rightArm.wrist[0] + (fB.rightArm.wrist[0] - fA.rightArm.wrist[0]) * factor,
+                  fA.rightArm.wrist[1] + (fB.rightArm.wrist[1] - fA.rightArm.wrist[1]) * factor,
+                  fA.rightArm.wrist[2] + (fB.rightArm.wrist[2] - fA.rightArm.wrist[2]) * factor,
+                ],
+                elbow: [
+                  elbowA[0] + (elbowB[0] - elbowA[0]) * factor,
+                  elbowA[1] + (elbowB[1] - elbowA[1]) * factor,
+                  elbowA[2] + (elbowB[2] - elbowA[2]) * factor,
+                ],
+                wristToMouth: fA.rightArm.wristToMouth && fB.rightArm.wristToMouth ? [
+                  fA.rightArm.wristToMouth[0] + (fB.rightArm.wristToMouth[0] - fA.rightArm.wristToMouth[0]) * factor,
+                  fA.rightArm.wristToMouth[1] + (fB.rightArm.wristToMouth[1] - fA.rightArm.wristToMouth[1]) * factor,
+                  fA.rightArm.wristToMouth[2] + (fB.rightArm.wristToMouth[2] - fA.rightArm.wristToMouth[2]) * factor,
+                ] : fA.rightArm.wristToMouth ?? fB.rightArm.wristToMouth,
+                wristToNose: fA.rightArm.wristToNose && fB.rightArm.wristToNose ? [
+                  fA.rightArm.wristToNose[0] + (fB.rightArm.wristToNose[0] - fA.rightArm.wristToNose[0]) * factor,
+                  fA.rightArm.wristToNose[1] + (fB.rightArm.wristToNose[1] - fA.rightArm.wristToNose[1]) * factor,
+                  fA.rightArm.wristToNose[2] + (fB.rightArm.wristToNose[2] - fA.rightArm.wristToNose[2]) * factor,
+                ] : fA.rightArm.wristToNose ?? fB.rightArm.wristToNose,
+                isFaceAnchored: fA.rightArm.isFaceAnchored || fB.rightArm.isFaceAnchored,
+              };
+            } else if (fA.rightArm) {
+              interpRightArm = fA.rightArm;
+            } else if (fB.rightArm) {
+              interpRightArm = fB.rightArm;
+            }
+
+            let interpLeftArm: ArmPoseData | undefined = undefined;
+            if (fA.leftArm && fB.leftArm) {
+              const elbowA = fA.leftArm.elbow || [-0.22, -0.05, 0.1];
+              const elbowB = fB.leftArm.elbow || [-0.22, -0.05, 0.1];
+              interpLeftArm = {
+                wrist: [
+                  fA.leftArm.wrist[0] + (fB.leftArm.wrist[0] - fA.leftArm.wrist[0]) * factor,
+                  fA.leftArm.wrist[1] + (fB.leftArm.wrist[1] - fA.leftArm.wrist[1]) * factor,
+                  fA.leftArm.wrist[2] + (fB.leftArm.wrist[2] - fA.leftArm.wrist[2]) * factor,
+                ],
+                elbow: [
+                  elbowA[0] + (elbowB[0] - elbowA[0]) * factor,
+                  elbowA[1] + (elbowB[1] - elbowA[1]) * factor,
+                  elbowA[2] + (elbowB[2] - elbowA[2]) * factor,
+                ],
+                wristToMouth: fA.leftArm.wristToMouth && fB.leftArm.wristToMouth ? [
+                  fA.leftArm.wristToMouth[0] + (fB.leftArm.wristToMouth[0] - fA.leftArm.wristToMouth[0]) * factor,
+                  fA.leftArm.wristToMouth[1] + (fB.leftArm.wristToMouth[1] - fA.leftArm.wristToMouth[1]) * factor,
+                  fA.leftArm.wristToMouth[2] + (fB.leftArm.wristToMouth[2] - fA.leftArm.wristToMouth[2]) * factor,
+                ] : fA.leftArm.wristToMouth ?? fB.leftArm.wristToMouth,
+                wristToNose: fA.leftArm.wristToNose && fB.leftArm.wristToNose ? [
+                  fA.leftArm.wristToNose[0] + (fB.leftArm.wristToNose[0] - fA.leftArm.wristToNose[0]) * factor,
+                  fA.leftArm.wristToNose[1] + (fB.leftArm.wristToNose[1] - fA.leftArm.wristToNose[1]) * factor,
+                  fA.leftArm.wristToNose[2] + (fB.leftArm.wristToNose[2] - fA.leftArm.wristToNose[2]) * factor,
+                ] : fA.leftArm.wristToNose ?? fB.leftArm.wristToNose,
+                isFaceAnchored: fA.leftArm.isFaceAnchored || fB.leftArm.isFaceAnchored,
+              };
+            } else if (fA.leftArm) {
+              interpLeftArm = fA.leftArm;
+            } else if (fB.leftArm) {
+              interpLeftArm = fB.leftArm;
+            }
+
+            // Apply Two-Bone analytical IK to the clay avatar arms (1.0 = exact analytical solution)
+            rig.applyArmIK('Right', interpRightArm, currentClip.signId, 1.0);
+            rig.applyArmIK('Left', interpLeftArm, currentClip.signId, 1.0);
+
+            // Update ghost marker for visual feedback if enabled
+            if (ghostMarkerRightRef.current) {
+              if (showGhostMarkerRef.current && interpRightArm) {
+                ghostMarkerRightRef.current.visible = true;
+                const torsoPos = new THREE.Vector3();
+                rig.bones['Torso']?.getWorldPosition(torsoPos);
+                ghostMarkerRightRef.current.position.set(
+                  torsoPos.x + interpRightArm.wrist[0] * (mirrored ? -1 : 1),
+                  torsoPos.y + interpRightArm.wrist[1],
+                  torsoPos.z + interpRightArm.wrist[2]
+                );
+              } else {
+                ghostMarkerRightRef.current.visible = false;
+              }
+            }
+
+            // Report telemetry if callback provided
+            if (onArmTelemetryRef.current && interpRightArm) {
+              const actualWrist = new THREE.Vector3();
+              rig.bones['RightWrist']?.getWorldPosition(actualWrist);
+              const targetPos = new THREE.Vector3(
+                interpRightArm.wrist[0],
+                interpRightArm.wrist[1],
+                interpRightArm.wrist[2]
+              );
+              const errorCm = Math.round(actualWrist.distanceTo(targetPos) * 100);
+              const mouthOffset = interpRightArm.wristToMouth;
+              const faceDistCm = mouthOffset
+                ? Math.round(Math.sqrt(mouthOffset[0] ** 2 + mouthOffset[1] ** 2 + mouthOffset[2] ** 2) * 47)
+                : 30;
+              onArmTelemetryRef.current({ avgError: errorCm, minFaceDist: faceDistCm });
+            }
 
             // Expression track update
             if (fA.expression) {
@@ -413,6 +547,11 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
           // Return smoothly to neutral rest pose
           const rest = NEUTRAL_POSE_JOINTS;
           rig.applyPose(rest);
+          rig.applyArmIK('Right', null);
+          rig.applyArmIK('Left', null);
+          if (ghostMarkerRightRef.current) {
+            ghostMarkerRightRef.current.visible = false;
+          }
         }
 
         renderer.render(scene, camera);
@@ -428,6 +567,8 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
         if (missingTimeoutRef.current) {
           clearTimeout(missingTimeoutRef.current);
         }
+        ghostGeo.dispose();
+        ghostMat.dispose();
         resizeObserver.disconnect();
         rig.dispose();
         renderer.dispose();
@@ -440,6 +581,15 @@ export const SignAvatarCanvas = forwardRef<SignAvatarHandle, SignAvatarProps>(
         className={`relative w-full h-full min-h-[380px] flex items-center justify-center select-none overflow-hidden ${className}`}
       >
         <canvas ref={canvasRef} className="w-full h-full block" />
+
+        {/* Arm Data Missing Warning Overlay */}
+        {armDataMissing && (
+          <div className="absolute top-4 right-4 z-20 pointer-events-none">
+            <span className="px-2.5 py-1 rounded-full bg-slate-200/90 text-slate-600 border border-slate-300 text-[10px] font-bold shadow-sm backdrop-blur">
+              arm data missing
+            </span>
+          </div>
+        )}
 
         {/* Missing Sign Warning Overlay */}
         {missingNotice && (

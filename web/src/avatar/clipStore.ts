@@ -1,4 +1,6 @@
-import { BoneName, QuatTuple, SignClip, SignManifest } from './types';
+import { BoneName, QuatTuple, SignClip, SignManifest, NEUTRAL_POSE_JOINTS } from './types';
+export { NEUTRAL_POSE_JOINTS } from './types';
+import { DEFAULT_CLIPS } from './defaultClips';
 
 const LS_KEY = 'ishara_recorded_signs_v1';
 let manifestCache: SignManifest | null = null;
@@ -46,30 +48,30 @@ export async function loadSignClip(signId: string): Promise<SignClip | null> {
 
   const manifest = await loadManifest();
   const entry = manifest.signs[id];
-  if (!entry) return null;
-
-  try {
-    const res = await fetch(`/signs/${entry.file}`);
-    if (!res.ok) return null;
-    const clip = (await res.json()) as SignClip;
-    runtimeClipCache.set(id, clip);
-    return clip;
-  } catch {
-    return null;
+  if (entry) {
+    try {
+      const res = await fetch(`/signs/${entry.file}`);
+      if (res.ok) {
+        const clip = (await res.json()) as SignClip;
+        runtimeClipCache.set(id, clip);
+        return clip;
+      }
+    } catch {
+      // fallback
+    }
   }
+
+  // Built-in verified authored clips with Two-Bone arm kinematics
+  if (DEFAULT_CLIPS[id]) {
+    runtimeClipCache.set(id, DEFAULT_CLIPS[id]);
+    return DEFAULT_CLIPS[id];
+  }
+
+  // If no recorded or authored clip exists, return null so caller visibly skips it
+  return null;
 }
 
-export const NEUTRAL_POSE_JOINTS: Partial<Record<BoneName, QuatTuple>> = {
-  Torso: [0, 0, 0, 1],
-  Neck: [0, 0, 0, 1],
-  Head: [0, 0, 0, 1],
-  LeftShoulder: [0.12, 0, 0.28, 0.952],
-  LeftElbow: [-0.38, 0.15, -0.18, 0.895],
-  LeftWrist: [0, 0, 0, 1],
-  RightShoulder: [0.12, 0, -0.28, 0.952],
-  RightElbow: [-0.38, -0.15, 0.18, 0.895],
-  RightWrist: [0, 0, 0, 1],
-};
+// NEUTRAL_POSE_JOINTS re-exported above from ./types
 
 export function createBuiltInWaveClip(): SignClip {
   const fps = 30;

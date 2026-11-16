@@ -179,7 +179,10 @@ function parseTokensInternal(
   if (!rawTrimmed) return { tokens: [] };
 
   const { script, detectedLocale } = detectScriptAndLocale(rawTrimmed);
-  const effectiveLocale = (detectedLocale && detectedLocale !== 'en' ? detectedLocale : targetLocale) || 'en';
+  const effectiveLocale =
+    targetLocale && (targetLocale === 'mr' || targetLocale === 'hi') && script === 'Devanagari'
+      ? targetLocale
+      : (detectedLocale && detectedLocale !== 'en' ? detectedLocale : targetLocale) || 'en';
 
   const normalizedInput = normalizeLinguisticText(rawTrimmed);
   const lex = getLoadedLexicon(effectiveLocale);

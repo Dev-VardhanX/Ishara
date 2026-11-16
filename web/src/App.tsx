@@ -4,6 +4,7 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AppLayout } from './components/AppLayout';
+import { AppErrorBoundary } from './components/AppErrorBoundary';
 import { IsharaLogo } from './components/IsharaLogo';
 import { t } from './store/useLocaleStore';
 
@@ -16,8 +17,6 @@ const VoiceToSignPage = lazy(() => import('./pages/VoiceToSignPage').then((m) =>
 const LearnPage = lazy(() => import('./pages/LearnPage').then((m) => ({ default: m.LearnPage })));
 const HistoryPage = lazy(() => import('./pages/HistoryPage').then((m) => ({ default: m.HistoryPage })));
 const DevPosePage = lazy(() => import('./pages/DevPosePage').then((m) => ({ default: m.DevPosePage })));
-const SignRecorderPage = lazy(() => import('./pages/SignRecorderPage').then((m) => ({ default: m.SignRecorderPage })));
-const AvatarDemoPage = lazy(() => import('./pages/AvatarDemoPage').then((m) => ({ default: m.AvatarDemoPage })));
 const SettingsPage = lazy(() => import('./pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
 const EmergencyPage = lazy(() => import('./pages/EmergencyPage').then((m) => ({ default: m.EmergencyPage })));
@@ -32,52 +31,93 @@ const PageFallback: React.FC = () => (
 );
 
 export const App: React.FC = () => {
-  const isProd = import.meta.env.PROD;
-
   return (
     <AuthProvider>
       <ToastProvider>
-        <Suspense fallback={<PageFallback />}>
-          <Routes>
+        <AppErrorBoundary>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
             {/* Public Unauthenticated Views */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
 
-            {/* Emergency Mode: Reachable without login (guest mode) and offline */}
+            {/* Core Application Views Wrapped in App Shell Layout */}
             <Route element={<AppLayout />}>
+              {/* Emergency / SOS Mode */}
               <Route path="/emergency" element={<EmergencyPage />} />
-            </Route>
+              <Route path="/sos" element={<Navigate to="/emergency" replace />} />
 
-            {/* Protected App Routes Wrapped in App Shell Layout */}
-            <Route element={<ProtectedRoute />}>
-              <Route element={<AppLayout />}>
-                <Route path="/dashboard" element={<DashboardPage />} />
-                <Route path="/sign-to-voice" element={<SignToVoicePage />} />
-                <Route path="/voice-to-sign" element={<VoiceToSignPage />} />
-                <Route path="/learn" element={<LearnPage />} />
-                <Route path="/history" element={<HistoryPage />} />
-                {/* Dev Routes: Hidden from normal user navigation */}
-                <Route
-                  path="/dev/sign-recorder"
-                  element={isProd ? <Navigate to="/" replace /> : <SignRecorderPage />}
-                />
-                <Route
-                  path="/dev/avatar-demo"
-                  element={isProd ? <Navigate to="/" replace /> : <AvatarDemoPage />}
-                />
-                <Route
-                  path="/dev/*"
-                  element={isProd ? <Navigate to="/" replace /> : <DevPosePage />}
-                />
-                <Route path="/settings" element={<SettingsPage />} />
-              </Route>
+              {/* Dev & Diagnostic Routes */}
+              <Route path="/dev/pose" element={<DevPosePage />} />
+              <Route path="/dev/*" element={<DevPosePage />} />
+
+              {/* Core Feature Pages */}
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <DashboardPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/sign-to-voice"
+                element={
+                  <ProtectedRoute>
+                    <SignToVoicePage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/voice-to-sign"
+                element={
+                  <ProtectedRoute>
+                    <VoiceToSignPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/learn"
+                element={
+                  <ProtectedRoute>
+                    <LearnPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/history"
+                element={
+                  <ProtectedRoute>
+                    <HistoryPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <ProtectedRoute>
+                    <SettingsPage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Friendly Aliases & Redirects */}
+              <Route path="/translate" element={<Navigate to="/voice-to-sign" replace />} />
+              <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/practice" element={<Navigate to="/learn" replace />} />
+              <Route path="/profile" element={<Navigate to="/settings" replace />} />
+              <Route path="/recorder" element={<Navigate to="/voice-to-sign" replace />} />
+              <Route path="/avatar" element={<Navigate to="/voice-to-sign" replace />} />
+              <Route path="/avatar-demo" element={<Navigate to="/voice-to-sign" replace />} />
+              <Route path="/studio" element={<Navigate to="/voice-to-sign" replace />} />
             </Route>
 
             {/* 404 Not Found in Claymorphism Style */}
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
-      </ToastProvider>
+      </AppErrorBoundary>
+    </ToastProvider>
     </AuthProvider>
   );
 };

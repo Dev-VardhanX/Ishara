@@ -1,5 +1,5 @@
 // Ishara Service Worker — Offline Support for Core App, Emergency Mode, Audio Clips, MediaPipe & 3D Sign Avatar
-const CACHE_NAME = 'ishara-offline-v5';
+const CACHE_NAME = 'ishara-offline-v14';
 
 const PRECACHE_URLS = [
   '/',
@@ -9,9 +9,16 @@ const PRECACHE_URLS = [
   '/manifest.json',
   '/audio/manifest.json',
   '/signs/manifest.json',
+  '/signs/EAT.json',
+  '/signs/DRINK.json',
+  '/signs/HELLO.json',
+  '/signs/STOP.json',
+  '/signs/YES.json',
+  '/signs/GOOD.json',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
   '/models/hand_landmarker.task',
+  '/models/pose_landmarker_lite.task',
   '/models/labels_isl.json',
   '/mediapipe/wasm/vision_wasm_internal.js',
   '/mediapipe/wasm/vision_wasm_internal.wasm',
@@ -55,6 +62,17 @@ self.addEventListener('fetch', (event) => {
 
   // Only handle same-origin or GET requests
   if (event.request.method !== 'GET' || !url.origin.includes(self.location.origin)) {
+    return;
+  }
+
+  // Never intercept development server internal modules
+  if (
+    url.pathname.includes('/@vite') ||
+    url.pathname.includes('/@fs') ||
+    url.pathname.includes('/src/') ||
+    url.pathname.includes('node_modules') ||
+    (url.port === '5173' && event.request.mode === 'navigate')
+  ) {
     return;
   }
 
