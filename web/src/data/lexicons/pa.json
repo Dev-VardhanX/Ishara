@@ -132,6 +132,8 @@
     }
   },
   "phraseRules": [
+    { "phrase": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ", "glosses": ["HELLO"] },
+    { "phrase": "ਹਾਂ ਚੰਗਾ", "glosses": ["YES", "GOOD"] },
     { "phrase": "ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "glosses": ["HELLO", "HOW_ARE_YOU"] },
     { "phrase": "ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ", "glosses": ["HOW_ARE_YOU"] },
     { "phrase": "ਮੈਂ ਠੀਕ ਹਾਂ ਧੰਨਵਾਦ", "glosses": ["GOOD", "THANK_YOU"] },

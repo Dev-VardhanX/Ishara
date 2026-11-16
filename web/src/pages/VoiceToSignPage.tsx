@@ -7,6 +7,7 @@ import { parseTextToGlosses, getTextToGlossDetails, GlossToken, TextToGlossDetai
 import { loadLexicon } from '../data/lexicons';
 import { addRecentConversation } from '../data/store';
 import { useSpeech } from '../lib/speech';
+import { getLocalClips } from '../avatar/clipStore';
 import {
   Mic,
   MicOff,
@@ -24,16 +25,16 @@ import {
 } from 'lucide-react';
 
 const LOCALIZED_EXAMPLES: Record<AppLocale, string[]> = {
-  en: ['Hello, how are you?', 'Thank you very much.', 'Please help me.', 'Goodbye, my friend!', 'Yes, good friend.'],
-  hi: ['नमस्ते, आप कैसे हैं?', 'बहुत धन्यवाद।', 'कृपया मेरी मदद करें।', 'अलविदा मेरे दोस्त!', 'हाँ, अच्छा दोस्त।'],
-  bn: ['নমস্কার, আপনি কেমন আছেন?', 'অনেক ধন্যবাদ।', 'দয়া করে সাহায্য করুন।', 'বিদায় বন্ধু!', 'হ্যাঁ, ভালো বন্ধু।'],
-  mr: ['नमस्कार, तुम्ही कसे आहात?', 'खूप धन्यवाद।', 'कृपया मला मदत करा।', 'निरोप मित्रा!', 'हो, चांगला मित्र।'],
-  ta: ['வணக்கம், நீங்கள் எப்படி இருக்கிறீர்கள்?', 'மிக்க நன்றி.', 'தயவுசெய்து எனக்கு உதவுங்கள்.', 'போய் வருகிறேன் நண்பா!', 'ஆம், நல்ல நண்பன்.'],
-  te: ['నమస్కారం, మీరు ఎలా ఉన్నారు?', 'చాలా ధನ್ಯవాదాలు.', 'దయచేసి నాకు సహాయం చేయండి.', 'వీడ్కోలు స్నేహితుడా!', 'అవును, మంచి స్నేహితుడు.'],
-  gu: ['નમસ્તે, તમે કેમ છો?', 'ખૂબ ખૂબ આભાર.', 'કૃપા કરીને મને મદદ કરો.', 'આવજો મિત્ર!', 'હા, સારો મિત્ર.'],
-  kn: ['ನಮಸ್ಕಾರ, ನೀವು ಹೇಗಿದ್ದೀರಿ?', 'ತುಂಬಾ ಧನ್ಯವಾದಗಳು.', 'ದಯವಿಟ್ಟು ನನಗೆ ಸಹಾಯ ಮಾಡಿ.', 'ವಿದಾಯ ಗೆಳೆಯ!', 'ಹೌದು, ಒಳ್ಳೆಯ ಸ್ನೇಹಿತ.'],
-  ml: ['നമസ്കാരം, സുഖമാണോ?', 'വളരെ നന്ദി.', 'ദയവായി എന്നെ സഹായിക്കൂ.', 'വിട സുഹൃത്തേ!', 'അതെ, നല്ല സുഹൃത്ത്.'],
-  pa: ['ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ, ਤੁਸੀਂ ਕਿਵੇਂ ਹੋ?', 'ਬਹੁਤ ਬਹੁਤ ਧੰਨਵਾਦ।', 'ਕਿਰਪਾ ਕਰਕੇ ਮੇਰੀ ਮਦਦ ਕਰੋ।', 'ਅਲਵਿਦਾ ਮੇਰੇ ਦੋਸਤ!', 'ਹਾਂ, ਚੰਗਾ ਦੋਸਤ।'],
+  en: ['Hello', 'Eat', 'Drink', 'Stop', 'Yes, good'],
+  hi: ['नमस्ते', 'खाना', 'पीना', 'रुकिए', 'हाँ, अच्छा'],
+  bn: ['নমস্কার', 'খাওয়া', 'পান', 'থামুন', 'হ্যাঁ, ভালো'],
+  mr: ['नमस्कार', 'खाणे', 'पिणे', 'थांबा', 'हो, छान'],
+  ta: ['வணக்கம்', 'சாப்பிடு', 'குடி', 'நிறுத்துங்கள்', 'ஆம், நல்லது'],
+  te: ['నమస్కారం', 'తిను', 'తాగు', 'ఆగండి', 'అవును, మంచిది'],
+  gu: ['નમસ્તે', 'ખાવું', 'પીવું', 'ઊભા રહો', 'હા, સારું'],
+  kn: ['ನಮಸ್ಕಾರ', 'ತಿನ್ನು', 'ಕುಡಿ', 'ನಿಲ್ಲಿಸಿ', 'ಹೌದು, ಒಳ್ಳೆಯದು'],
+  ml: ['നമസ്കാരം', 'കഴിക്കുക', 'കുടിക്കുക', 'നിർത്തൂ', 'അതെ, നല്ലത്'],
+  pa: ['ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ', 'ਖਾਓ', 'ਪੀਓ', 'ਰੁਕੋ', 'ਹਾਂ, ਚੰਗਾ'],
 };
 
 export const VoiceToSignPage: React.FC = () => {
@@ -54,7 +55,7 @@ export const VoiceToSignPage: React.FC = () => {
   const activeInputVoiceCode = activeInputMeta.voiceCode;
 
   // State
-  const defaultSentence = 'Hello, how are you today?';
+  const defaultSentence = 'Hello';
   const [inputText, setInputText] = useState(defaultSentence);
   const [parseDetails, setParseDetails] = useState<TextToGlossDetails>(() =>
     getTextToGlossDetails(defaultSentence, language, inputLocale)
@@ -62,7 +63,7 @@ export const VoiceToSignPage: React.FC = () => {
   const [tokens, setTokens] = useState<GlossToken[]>(() => parseDetails.tokens);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [speed, setSpeed] = useState<number>(1.0);
-  const [playing, setPlaying] = useState<boolean>(false);
+  const [playing, setPlaying] = useState<boolean>(true);
 
   // Sync parsing when language or inputLocale changes
   useEffect(() => {
@@ -128,33 +129,14 @@ export const VoiceToSignPage: React.FC = () => {
     }
   };
 
-  // Playback Engine: steps through glosses based on speed (~1.5s per sign at 1x)
-  useEffect(() => {
-    if (!playing || tokens.length === 0) {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-        timerRef.current = null;
-      }
-      return;
-    }
+  // Avatar Stage synchronization handlers
+  const handleSignIndexChange = (idx: number) => {
+    setCurrentIndex(idx);
+  };
 
-    const durationPerSign = Math.round(1500 / speed);
-
-    timerRef.current = window.setTimeout(() => {
-      if (currentIndex < tokens.length - 1) {
-        setCurrentIndex((prev) => prev + 1);
-      } else {
-        // Reached end of phrase
-        setPlaying(false);
-      }
-    }, durationPerSign);
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [playing, currentIndex, tokens, speed]);
+  const handleSequenceFinished = () => {
+    setPlaying(false);
+  };
 
   // Controls
   const handlePrevious = () => {
@@ -191,10 +173,9 @@ export const VoiceToSignPage: React.FC = () => {
 
   const handleSelectExample = (sentence: string) => {
     setInputText(sentence);
-    const parsed = parseTextToGlosses(sentence, language, inputLocale);
-    setTokens(parsed);
     const details = getTextToGlossDetails(sentence, language, inputLocale);
     setParseDetails(details);
+    setTokens(details.tokens);
     setCurrentIndex(0);
     setPlaying(true);
 
@@ -211,12 +192,12 @@ export const VoiceToSignPage: React.FC = () => {
           locale: inputLocale,
           originalText: sentence,
           englishText: details.englishOrderText,
-          glosses: parsed.map((t) => t.gloss).filter(Boolean) as string[],
+          glosses: details.tokens.map((t) => t.gloss).filter(Boolean) as string[],
         },
         {
           direction: 'voice_to_sign',
           text: sentence,
-          translatedText: parsed.map((t) => t.gloss).filter(Boolean).join(' '),
+          translatedText: details.tokens.map((t) => t.gloss).filter(Boolean).join(' '),
           emotion: 'neutral',
         }
       );
@@ -255,10 +236,12 @@ export const VoiceToSignPage: React.FC = () => {
         setIsListening(true);
       };
 
+      let lastTranscript = '';
       recognition.onresult = (event: any) => {
         const transcript = Array.from(event.results)
           .map((result: any) => result[0].transcript)
           .join('');
+        lastTranscript = transcript;
         setInputText(transcript);
       };
 
@@ -272,6 +255,14 @@ export const VoiceToSignPage: React.FC = () => {
 
       recognition.onend = () => {
         setIsListening(false);
+        const textToUse = lastTranscript.trim() || inputText.trim();
+        if (textToUse) {
+          const details = getTextToGlossDetails(textToUse, language, inputLocale);
+          setParseDetails(details);
+          setTokens(details.tokens);
+          setCurrentIndex(0);
+          setPlaying(true);
+        }
       };
 
       recognitionRef.current = recognition;
@@ -402,6 +393,7 @@ export const VoiceToSignPage: React.FC = () => {
         <div className="relative">
           <AvatarStage
             currentGloss={currentGloss}
+            currentWord={currentToken?.originalText}
             glosses={tokens.map((t) => t.gloss).filter(Boolean) as string[]}
             speed={speed}
             playing={playing}
@@ -411,6 +403,8 @@ export const VoiceToSignPage: React.FC = () => {
               setCurrentIndex(0);
               setPlaying(true);
             }}
+            onSignIndexChange={handleSignIndexChange}
+            onSequenceFinished={handleSequenceFinished}
           />
 
           {/* Bottom Floating Bar inside stage: Caption Chip & Playback Controls */}
@@ -512,6 +506,76 @@ export const VoiceToSignPage: React.FC = () => {
                 <Volume2 className="w-4 h-4" />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Gloss Sequence (ISL Word Order) under the Avatar */}
+        <div className="clay-card p-4 space-y-2.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-black uppercase text-[#6E7387] tracking-wider">
+                {language === 'ISL' ? 'ISL Gloss Sequence' : 'ASL Gloss Sequence'}
+              </span>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#E0E7FF] text-[#2B2D42] text-[10px] font-black">
+                {tokens.filter((t) => t.gloss).length} signs
+              </span>
+            </div>
+            {language === 'ISL' && parseDetails.islOrderText && (
+              <span className="text-xs font-semibold text-[#6E7387]">
+                Word Order: <strong className="text-[#2B2D42]">{parseDetails.islOrderText}</strong>
+              </span>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {tokens.length > 0 ? (
+              tokens.map((token, idx) => {
+                const isCurrent = idx === currentIndex;
+                const localClips = getLocalClips();
+                const hasClip =
+                  token.gloss &&
+                  (['EAT', 'DRINK', 'HELLO', 'STOP', 'YES', 'GOOD'].includes(token.gloss) ||
+                    Boolean(localClips[token.gloss]));
+
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setCurrentIndex(idx);
+                      setPlaying(true);
+                    }}
+                    className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isCurrent
+                        ? 'bg-[#7C9CFF] text-white shadow-clay-raised scale-105 ring-2 ring-blue-300'
+                        : hasClip
+                        ? 'bg-white/90 text-[#2B2D42] hover:bg-white shadow-xs border border-slate-200'
+                        : 'bg-amber-50/90 text-amber-900 border border-amber-200'
+                    }`}
+                  >
+                    <span>{token.originalText}</span>
+                    {token.gloss ? (
+                      <span
+                        className={`text-[10px] font-mono font-black px-1.5 py-0.5 rounded ${
+                          isCurrent ? 'bg-white/30 text-white' : 'bg-slate-100 text-[#6E7387]'
+                        }`}
+                      >
+                        [{token.gloss}]
+                      </span>
+                    ) : null}
+                    {!hasClip && (
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-200 text-amber-950">
+                        Sign not recorded yet
+                      </span>
+                    )}
+                  </button>
+                );
+              })
+            ) : (
+              <span className="text-xs text-[#6E7387] italic">
+                Enter or speak a phrase above to see the animated sign sequence.
+              </span>
+            )}
           </div>
         </div>
       </div>

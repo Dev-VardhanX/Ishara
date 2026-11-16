@@ -1,26 +1,30 @@
 // src/data/lexicons/index.ts — Central Lexicon Registry, Script Detector & Linguistic Normalizer
 import { LanguageLexicon, SupportedLocale } from './types';
 import enLexicon from './en.json';
+import hiLexicon from './hi.json';
+import bnLexicon from './bn.json';
+import mrLexicon from './mr.json';
+import taLexicon from './ta.json';
+import teLexicon from './te.json';
+import guLexicon from './gu.json';
+import knLexicon from './kn.json';
+import mlLexicon from './ml.json';
+import paLexicon from './pa.json';
 
 export * from './types';
 
-// In-memory cache of dynamically loaded lexicons
+// Pre-warmed in-memory cache of all 10 Indic lexicons for instantaneous zero-latency parsing
 const loadedLexicons: Record<string, LanguageLexicon> = {
   en: enLexicon as unknown as LanguageLexicon,
-};
-
-// Dynamic chunk loaders for lazy-loading to keep the initial JS bundle tiny
-const lexiconLoaders: Record<SupportedLocale, () => Promise<{ default: LanguageLexicon }>> = {
-  en: () => Promise.resolve({ default: enLexicon as unknown as LanguageLexicon }),
-  hi: () => import('./hi.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  bn: () => import('./bn.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  mr: () => import('./mr.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  ta: () => import('./ta.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  te: () => import('./te.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  gu: () => import('./gu.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  kn: () => import('./kn.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  ml: () => import('./ml.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
-  pa: () => import('./pa.json').then((m) => ({ default: m.default as unknown as LanguageLexicon })),
+  hi: hiLexicon as unknown as LanguageLexicon,
+  bn: bnLexicon as unknown as LanguageLexicon,
+  mr: mrLexicon as unknown as LanguageLexicon,
+  ta: taLexicon as unknown as LanguageLexicon,
+  te: teLexicon as unknown as LanguageLexicon,
+  gu: guLexicon as unknown as LanguageLexicon,
+  kn: knLexicon as unknown as LanguageLexicon,
+  ml: mlLexicon as unknown as LanguageLexicon,
+  pa: paLexicon as unknown as LanguageLexicon,
 };
 
 /**
@@ -28,24 +32,7 @@ const lexiconLoaders: Record<SupportedLocale, () => Promise<{ default: LanguageL
  */
 export async function loadLexicon(locale: SupportedLocale | string): Promise<LanguageLexicon> {
   const norm = (locale || 'en').toLowerCase().split('-')[0] as SupportedLocale;
-  if (loadedLexicons[norm]) {
-    return loadedLexicons[norm];
-  }
-
-  const loader = lexiconLoaders[norm];
-  if (!loader) {
-    return loadedLexicons.en;
-  }
-
-  try {
-    const mod = await loader();
-    const data = mod.default || mod;
-    loadedLexicons[norm] = data;
-    return data;
-  } catch (err) {
-    console.warn(`[Lexicon] Failed to load lexicon for '${norm}', falling back to English:`, err);
-    return loadedLexicons.en;
-  }
+  return loadedLexicons[norm] || loadedLexicons.en;
 }
 
 /**

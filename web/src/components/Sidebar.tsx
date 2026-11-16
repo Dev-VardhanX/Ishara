@@ -9,7 +9,6 @@ import {
   Settings as SettingsIcon,
   LogOut,
   ChevronRight,
-  Sparkles,
   AlertTriangle,
 } from 'lucide-react';
 import { useLanguageStore } from '../store/useLanguageStore';

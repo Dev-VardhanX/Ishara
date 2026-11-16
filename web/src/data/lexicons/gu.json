@@ -13,146 +13,517 @@
     "HELLO": {
       "gloss": "HELLO",
       "main": "નમસ્તે",
-      "alternatives": ["હેલો", "નમસ્કાર", "કેમ છો", "જય શ્રી કૃષ્ણ", "જય જિનેન્દ્ર"],
-      "romanized": ["namaste", "namaskar", "hello", "kem cho", "jai shri krishna"]
+      "alternatives": [
+        "હેલો",
+        "નમસ્કાર",
+        "કેમ છો",
+        "જય શ્રી કૃષ્ણ",
+        "જય જિનેન્દ્ર"
+      ],
+      "romanized": [
+        "namaste",
+        "namaskar",
+        "hello",
+        "kem cho",
+        "jai shri krishna"
+      ]
     },
     "THANK_YOU": {
       "gloss": "THANK_YOU",
       "main": "આભાર",
-      "alternatives": ["ધન્યવાદ", "ખૂબ આભાર", "થેંક યુ", "મોટો આભાર", "દિલથી આભાર"],
-      "romanized": ["aabhar", "dhanyavaad", "thank you", "khoob aabhar"]
+      "alternatives": [
+        "ધન્યવાદ",
+        "ખૂબ આભાર",
+        "થેંક યુ",
+        "મોટો આભાર",
+        "દિલથી આભાર"
+      ],
+      "romanized": [
+        "aabhar",
+        "dhanyavaad",
+        "thank you",
+        "khoob aabhar"
+      ]
     },
     "PLEASE": {
       "gloss": "PLEASE",
       "main": "કૃપા કરીને",
-      "alternatives": ["પ્લીઝ", "મહેરબાની કરીને", "જરા", "વિનંતી", "નમ્ર વિનંતી"],
-      "romanized": ["krupa karine", "please", "maherbani karine", "vinanti"]
+      "alternatives": [
+        "પ્લીઝ",
+        "મહેરબાની કરીને",
+        "જરા",
+        "વિનંતી",
+        "નમ્ર વિનંતી"
+      ],
+      "romanized": [
+        "krupa karine",
+        "please",
+        "maherbani karine",
+        "vinanti"
+      ]
     },
     "SORRY": {
       "gloss": "SORRY",
       "main": "માફ કરશો",
-      "alternatives": ["સોરી", "ક્ષમા", "માફી", "દિલગીર", "માફ કરજો"],
-      "romanized": ["maaf karsho", "sorry", "kshama", "maafi", "dilgir"]
+      "alternatives": [
+        "સોરી",
+        "ક્ષમા",
+        "માફી",
+        "દિલગીર",
+        "માફ કરજો"
+      ],
+      "romanized": [
+        "maaf karsho",
+        "sorry",
+        "kshama",
+        "maafi",
+        "dilgir"
+      ]
     },
     "GOODBYE": {
       "gloss": "GOODBYE",
       "main": "આવજો",
-      "alternatives": ["બાય", "ફરી મળીશું", "ટાટા", "જાય", "પછી મળીએ"],
-      "romanized": ["aavjo", "bye", "fari malishu", "tata", "avjo"]
+      "alternatives": [
+        "બાય",
+        "ફરી મળીશું",
+        "ટાટા",
+        "જાય",
+        "પછી મળીએ"
+      ],
+      "romanized": [
+        "aavjo",
+        "bye",
+        "fari malishu",
+        "tata",
+        "avjo"
+      ]
     },
     "HOW_ARE_YOU": {
       "gloss": "HOW_ARE_YOU",
       "main": "તમે કેમ છો",
-      "alternatives": ["કેમ છો", "મજામાં", "કેવું ચાલે છે", "શું ખબર છે", "બધું બરાબર"],
-      "romanized": ["tame kem cho", "kem cho", "majama", "kevu chale che"]
+      "alternatives": [
+        "કેમ છો",
+        "મજામાં",
+        "કેવું ચાલે છે",
+        "શું ખબર છે",
+        "બધું બરાબર"
+      ],
+      "romanized": [
+        "tame kem cho",
+        "kem cho",
+        "majama",
+        "kevu chale che"
+      ]
     },
     "YES": {
       "gloss": "YES",
       "main": "હા",
-      "alternatives": ["હાજી", "ચોક્કસ", "બરાબર", "હાસ્તો", "અવશ્ય"],
-      "romanized": ["haa", "haji", "chokkas", "barabar", "haasto"]
+      "alternatives": [
+        "હાજી",
+        "ચોક્કસ",
+        "બરાબર",
+        "હાસ્તો",
+        "અવશ્ય"
+      ],
+      "romanized": [
+        "haa",
+        "haji",
+        "chokkas",
+        "barabar",
+        "haasto"
+      ]
     },
     "NO": {
       "gloss": "NO",
       "main": "ના",
-      "alternatives": ["નાજી", "નથી", "નહિ", "બિલકુલ ના", "કદાપિ નહિ"],
-      "romanized": ["naa", "naji", "nathi", "nahi", "na"]
+      "alternatives": [
+        "નાજી",
+        "નથી",
+        "નહિ",
+        "બિલકુલ ના",
+        "કદાપિ નહિ"
+      ],
+      "romanized": [
+        "naa",
+        "naji",
+        "nathi",
+        "nahi",
+        "na"
+      ]
     },
     "GOOD": {
       "gloss": "GOOD",
       "main": "સારું",
-      "alternatives": ["સરસ", "ઉત્તમ", "બહુ સારું", "ઠીક", "સરસ મજાનું"],
-      "romanized": ["saaru", "saras", "uttam", "theek", "sarum"]
+      "alternatives": [
+        "સરસ",
+        "ઉત્તમ",
+        "બહુ સારું",
+        "ઠીક",
+        "સરસ મજાનું"
+      ],
+      "romanized": [
+        "saaru",
+        "saras",
+        "uttam",
+        "theek",
+        "sarum"
+      ]
     },
     "BAD": {
       "gloss": "BAD",
       "main": "ખરાબ",
-      "alternatives": ["બગડેલું", "ખોટું", "નકામું", "બીમાર", "યોગ્ય નથી"],
-      "romanized": ["kharab", "bagadelu", "khotu", "nakamu"]
+      "alternatives": [
+        "બગડેલું",
+        "ખોટું",
+        "નકામું",
+        "બીમાર",
+        "યોગ્ય નથી"
+      ],
+      "romanized": [
+        "kharab",
+        "bagadelu",
+        "khotu",
+        "nakamu"
+      ]
     },
     "HELP": {
       "gloss": "HELP",
       "main": "મદદ",
-      "alternatives": ["મદદ કરો", "સહાય", "હેલ્પ", "બચાવો", "મદદ જોઈએ છે"],
-      "romanized": ["madad", "madad karo", "sahay", "help", "bachavo"]
+      "alternatives": [
+        "મદદ કરો",
+        "સહાય",
+        "હેલ્પ",
+        "બચાવો",
+        "મદદ જોઈએ છે"
+      ],
+      "romanized": [
+        "madad",
+        "madad karo",
+        "sahay",
+        "help",
+        "bachavo"
+      ]
     },
     "STOP": {
       "gloss": "STOP",
       "main": "ઊભા રહો",
-      "alternatives": ["રોકો", "ઊભા", "થાંભો", "બસ", "અટકો"],
-      "romanized": ["ubha raho", "roko", "ubha", "thambho", "bas"]
+      "alternatives": [
+        "રોકો",
+        "ઊભા",
+        "થાંભો",
+        "બસ",
+        "અટકો"
+      ],
+      "romanized": [
+        "ubha raho",
+        "roko",
+        "ubha",
+        "thambho",
+        "bas"
+      ]
     },
     "EAT": {
       "gloss": "EAT",
       "main": "ખાઓ",
-      "alternatives": ["ખાવું", "જમો", "જમવું", "આહાર", "જમી લો"],
-      "romanized": ["khao", "khavu", "jamo", "jamvu", "kha"]
+      "alternatives": [
+        "ખાવું",
+        "જમો",
+        "જમવું",
+        "આહાર",
+        "જમી લો"
+      ],
+      "romanized": [
+        "khao",
+        "khavu",
+        "jamo",
+        "jamvu",
+        "kha"
+      ]
     },
     "DRINK": {
       "gloss": "DRINK",
       "main": "પીઓ",
-      "alternatives": ["પીવું", "પાણી પીઓ", "પીવો", "ઘૂંટડો", "પી લો"],
-      "romanized": ["peeo", "peevu", "pani peeo", "peevo"]
+      "alternatives": [
+        "પીવું",
+        "પાણી પીઓ",
+        "પીવો",
+        "ઘૂંટડો",
+        "પી લો"
+      ],
+      "romanized": [
+        "peeo",
+        "peevu",
+        "pani peeo",
+        "peevo"
+      ]
     },
     "WATER": {
       "gloss": "WATER",
       "main": "પાણી",
-      "alternatives": ["જળ", "પીવાનું પાણી", "ઠંડુ પાણી", "વોટર", "મીઠું પાણી"],
-      "romanized": ["paani", "pani", "jal", "water"]
+      "alternatives": [
+        "જળ",
+        "પીવાનું પાણી",
+        "ઠંડુ પાણી",
+        "વોટર",
+        "મીઠું પાણી"
+      ],
+      "romanized": [
+        "paani",
+        "pani",
+        "jal",
+        "water"
+      ]
     },
     "FOOD": {
       "gloss": "FOOD",
       "main": "ખોરાક",
-      "alternatives": ["ખાવાનું", "ભોજન", "જમણવાર", "રોટલી", "શાક"],
-      "romanized": ["khorak", "khavanu", "bhojan", "jaman", "rotli"]
+      "alternatives": [
+        "ખાવાનું",
+        "ભોજન",
+        "જમણવાર",
+        "રોટલી",
+        "શાક"
+      ],
+      "romanized": [
+        "khorak",
+        "khavanu",
+        "bhojan",
+        "jaman",
+        "rotli"
+      ]
     },
     "HOME": {
       "gloss": "HOME",
       "main": "ઘર",
-      "alternatives": ["મકાન", "રહેઠાણ", "ગૃહ", "ઓરડો", "ઘરે"],
-      "romanized": ["ghar", "makaan", "gruh", "nivas", "ghare"]
+      "alternatives": [
+        "મકાન",
+        "રહેઠાણ",
+        "ગૃહ",
+        "ઓરડો",
+        "ઘરે"
+      ],
+      "romanized": [
+        "ghar",
+        "makaan",
+        "gruh",
+        "nivas",
+        "ghare"
+      ]
     },
     "FRIEND": {
       "gloss": "FRIEND",
       "main": "મિત્ર",
-      "alternatives": ["દોસ્ત", "ભાઈબંધ", "સખી", "યાર", "સાથીદાર"],
-      "romanized": ["mitra", "dost", "bhaibandh", "yaar", "sakhi"]
+      "alternatives": [
+        "દોસ્ત",
+        "ભાઈબંધ",
+        "સખી",
+        "યાર",
+        "સાથીદાર"
+      ],
+      "romanized": [
+        "mitra",
+        "dost",
+        "bhaibandh",
+        "yaar",
+        "sakhi"
+      ]
     },
     "NAME": {
       "gloss": "NAME",
       "main": "નામ",
-      "alternatives": ["તમારું નામ", "મારું નામ", "નામ શું", "ઓળખ", "નામકરણ"],
-      "romanized": ["naam", "tamaru naam", "maru naam", "olakh"]
+      "alternatives": [
+        "તમારું નામ",
+        "મારું નામ",
+        "નામ શું",
+        "ઓળખ",
+        "નામકરણ"
+      ],
+      "romanized": [
+        "naam",
+        "tamaru naam",
+        "maru naam",
+        "olakh"
+      ]
     },
     "LOVE": {
       "gloss": "LOVE",
       "main": "પ્રેમ",
-      "alternatives": ["વહાલ", "સ્નેહ", "લાગણી", "મમતા", "પ્રીત"],
-      "romanized": ["prem", "vahal", "sneha", "lagani", "prit"]
+      "alternatives": [
+        "વહાલ",
+        "સ્નેહ",
+        "લાગણી",
+        "મમતા",
+        "પ્રીત"
+      ],
+      "romanized": [
+        "prem",
+        "vahal",
+        "sneha",
+        "lagani",
+        "prit"
+      ]
     }
   },
   "phraseRules": [
-    { "phrase": "નમસ્તે તમે કેમ છો", "glosses": ["HELLO", "HOW_ARE_YOU"] },
-    { "phrase": "તમે કેમ છો", "glosses": ["HOW_ARE_YOU"] },
-    { "phrase": "હું મજામાં છું આભાર", "glosses": ["GOOD", "THANK_YOU"] },
-    { "phrase": "કૃપા કરીને મદદ કરો", "glosses": ["PLEASE", "HELP"] },
-    { "phrase": "મદદ કરો કૃપા કરીને", "glosses": ["HELP", "PLEASE"] },
-    { "phrase": "આભાર મારા મિત્ર", "glosses": ["THANK_YOU", "FRIEND"] },
-    { "phrase": "નમસ્તે મારા દોસ્ત", "glosses": ["HELLO", "FRIEND"] },
-    { "phrase": "આવજો મારા મિત્ર", "glosses": ["GOODBYE", "FRIEND"] },
-    { "phrase": "મને પાણી જોઈએ છે", "glosses": ["PLEASE", "WATER"] },
-    { "phrase": "કૃપા કરીને પાણી આપો", "glosses": ["PLEASE", "WATER"] },
-    { "phrase": "મને ખોરાક જોઈએ છે", "glosses": ["PLEASE", "FOOD"] },
-    { "phrase": "તમારું નામ શું છે", "glosses": ["NAME", "FRIEND"] },
-    { "phrase": "તારું નામ શું છે દોસ્ત", "glosses": ["NAME", "FRIEND"] },
-    { "phrase": "ખોરાક ખાઓ", "glosses": ["EAT", "FOOD"] },
-    { "phrase": "પાણી પીઓ", "glosses": ["DRINK", "WATER"] },
-    { "phrase": "કૃપા કરીને ઊભા રહો", "glosses": ["PLEASE", "STOP"] },
-    { "phrase": "હા કૃપા કરીને", "glosses": ["YES", "PLEASE"] },
-    { "phrase": "ના આભાર", "glosses": ["NO", "THANK_YOU"] },
-    { "phrase": "માફ કરશો મારા મિત્ર", "glosses": ["SORRY", "FRIEND"] },
-    { "phrase": "ખોરાક સારો છે", "glosses": ["GOOD", "FOOD"] },
-    { "phrase": "ખોરાક ખરાબ છે", "glosses": ["BAD", "FOOD"] }
+    {
+      "phrase": "ઊભા રહો",
+      "glosses": [
+        "STOP"
+      ]
+    },
+    {
+      "phrase": "હા સારું",
+      "glosses": [
+        "YES",
+        "GOOD"
+      ]
+    },
+    {
+      "phrase": "નમસ્તે તમે કેમ છો",
+      "glosses": [
+        "HELLO",
+        "HOW_ARE_YOU"
+      ]
+    },
+    {
+      "phrase": "તમે કેમ છો",
+      "glosses": [
+        "HOW_ARE_YOU"
+      ]
+    },
+    {
+      "phrase": "હું મજામાં છું આભાર",
+      "glosses": [
+        "GOOD",
+        "THANK_YOU"
+      ]
+    },
+    {
+      "phrase": "કૃપા કરીને મદદ કરો",
+      "glosses": [
+        "PLEASE",
+        "HELP"
+      ]
+    },
+    {
+      "phrase": "મદદ કરો કૃપા કરીને",
+      "glosses": [
+        "HELP",
+        "PLEASE"
+      ]
+    },
+    {
+      "phrase": "આભાર મારા મિત્ર",
+      "glosses": [
+        "THANK_YOU",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "નમસ્તે મારા દોસ્ત",
+      "glosses": [
+        "HELLO",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "આવજો મારા મિત્ર",
+      "glosses": [
+        "GOODBYE",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "મને પાણી જોઈએ છે",
+      "glosses": [
+        "PLEASE",
+        "WATER"
+      ]
+    },
+    {
+      "phrase": "કૃપા કરીને પાણી આપો",
+      "glosses": [
+        "PLEASE",
+        "WATER"
+      ]
+    },
+    {
+      "phrase": "મને ખોરાક જોઈએ છે",
+      "glosses": [
+        "PLEASE",
+        "FOOD"
+      ]
+    },
+    {
+      "phrase": "તમારું નામ શું છે",
+      "glosses": [
+        "NAME",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "તારું નામ શું છે દોસ્ત",
+      "glosses": [
+        "NAME",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "ખોરાક ખાઓ",
+      "glosses": [
+        "EAT",
+        "FOOD"
+      ]
+    },
+    {
+      "phrase": "પાણી પીઓ",
+      "glosses": [
+        "DRINK",
+        "WATER"
+      ]
+    },
+    {
+      "phrase": "કૃપા કરીને ઊભા રહો",
+      "glosses": [
+        "PLEASE",
+        "STOP"
+      ]
+    },
+    {
+      "phrase": "હા કૃપા કરીને",
+      "glosses": [
+        "YES",
+        "PLEASE"
+      ]
+    },
+    {
+      "phrase": "ના આભાર",
+      "glosses": [
+        "NO",
+        "THANK_YOU"
+      ]
+    },
+    {
+      "phrase": "માફ કરશો મારા મિત્ર",
+      "glosses": [
+        "SORRY",
+        "FRIEND"
+      ]
+    },
+    {
+      "phrase": "ખોરાક સારો છે",
+      "glosses": [
+        "GOOD",
+        "FOOD"
+      ]
+    },
+    {
+      "phrase": "ખોરાક ખરાબ છે",
+      "glosses": [
+        "BAD",
+        "FOOD"
+      ]
+    }
   ],
   "grammarWords": {
     "શું": "what",

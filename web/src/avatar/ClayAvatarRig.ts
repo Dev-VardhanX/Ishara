@@ -7,8 +7,10 @@ import {
   QuatTuple,
   SkinToneId,
   SKIN_TONES,
+  ArmPoseData,
+  NEUTRAL_POSE_JOINTS,
 } from './types';
-import { NEUTRAL_POSE_JOINTS } from './clipStore';
+import { solveTwoBoneIK } from './kinematics';
 
 const PALETTE = {
   hoodieLavender: 0xb8a4f8,   // Soft pastel periwinkle-lavender hoodie from reference
@@ -581,6 +583,142 @@ export class ClayAvatarRig {
         dst.quaternion.copy(src.quaternion);
       }
     }
+  }
+
+  /**
+   * Two-Bone IK Solver with Pole Vector and Face-Anchor Targeting
+   */
+  public applyArmIK(
+    side: 'Left' | 'Right',
+    armData?: ArmPoseData | null,
+    signId?: string,
+    slerpAlpha = 1.0
+  ): { target: THREE.Vector3; actual: THREE.Vector3 } {
+    const dir = side === 'Left' ? 1 : -1;
+    const shoulderBone = this.bones[`${side}Shoulder` as BoneName];
+    const elbowBone = this.bones[`${side}Elbow` as BoneName];
+    const wristBone = this.bones[`${side}Wrist` as BoneName];
+    if (!shoulderBone || !elbowBone || !wristBone) {
+      return { target: new THREE.Vector3(), actual: new THREE.Vector3() };
+    }
+
+    if (!armData) {
+      const restShoulder = this.restQuats[`${side}Shoulder` as BoneName] || new THREE.Quaternion();
+      const restElbow = this.restQuats[`${side}Elbow` as BoneName] || new THREE.Quaternion();
+      shoulderBone.quaternion.slerp(restShoulder, Math.min(1, slerpAlpha * 0.4));
+      elbowBone.quaternion.slerp(restElbow, Math.min(1, slerpAlpha * 0.4));
+      shoulderBone.updateMatrixWorld(true);
+      const actual = new THREE.Vector3();
+      wristBone.getWorldPosition(actual);
+      return { target: actual, actual };
+    }
+
+    const shoulderPos = new THREE.Vector3(dir * 0.235, 0.35, 0);
+    const upperArmLen = 0.23;
+    const foreArmLen = 0.22;
+    const S_avatar = 0.47;
+
+    // 1. Initial body-frame target in avatar space (dir = -1 for Right arm, +1 for Left)
+    let tx = dir * Math.abs(armData.wrist[0]) * S_avatar;
+    let ty = 0.35 + armData.wrist[1] * S_avatar;
+    let tz = armData.wrist[2] * S_avatar;
+
+    // 2. Face Anchoring logic (only applied when isFaceAnchored is true on contact frames)
+    if (armData.isFaceAnchored) {
+      const upperSign = signId ? signId.toUpperCase().trim() : '';
+      const isMouthSign = upperSign === 'EAT' || upperSign === 'FOOD' || upperSign === 'WATER' || upperSign === 'DRINK';
+      const isForeheadSign = upperSign === 'HELLO';
+      const isChinSign = upperSign === 'THANK_YOU';
+
+      if (isMouthSign) {
+        const mouthTarget = new THREE.Vector3(dir * 0.04, 0.62, 0.21);
+        if (armData.wristToMouth) {
+          mouthTarget.x += armData.wristToMouth[0] * S_avatar * 0.6;
+          mouthTarget.y += armData.wristToMouth[1] * S_avatar * 0.6;
+          mouthTarget.z += armData.wristToMouth[2] * S_avatar * 0.6;
+        }
+        tx = tx * 0.2 + mouthTarget.x * 0.8;
+        ty = ty * 0.2 + mouthTarget.y * 0.8;
+        tz = tz * 0.2 + mouthTarget.z * 0.8;
+      } else if (isForeheadSign) {
+        // In HELLO, hand is beside the head at side of temple/ear with elbow rotated out to side
+        const templeTarget = new THREE.Vector3(dir * 0.35, 0.60, 0.05);
+        if (armData.wristToNose) {
+          templeTarget.x += armData.wristToNose[0] * S_avatar * 0.6;
+          templeTarget.y += armData.wristToNose[1] * S_avatar * 0.6;
+          templeTarget.z += armData.wristToNose[2] * S_avatar * 0.6;
+        }
+        tx = tx * 0.3 + templeTarget.x * 0.7;
+        ty = ty * 0.3 + templeTarget.y * 0.7;
+        tz = tz * 0.3 + templeTarget.z * 0.7;
+      } else if (isChinSign) {
+        const chinTarget = new THREE.Vector3(dir * 0.03, 0.56, 0.21);
+        if (armData.wristToMouth) {
+          chinTarget.x += armData.wristToMouth[0] * S_avatar * 0.6;
+          chinTarget.y += armData.wristToMouth[1] * S_avatar * 0.6;
+          chinTarget.z += armData.wristToMouth[2] * S_avatar * 0.6;
+        }
+        tx = tx * 0.2 + chinTarget.x * 0.8;
+        ty = ty * 0.2 + chinTarget.y * 0.8;
+        tz = tz * 0.2 + chinTarget.z * 0.8;
+      } else if (armData.wristToMouth) {
+        const dMouth = Math.sqrt(armData.wristToMouth[0] ** 2 + armData.wristToMouth[1] ** 2 + armData.wristToMouth[2] ** 2);
+        if (dMouth < 0.48) {
+          const weight = Math.max(0, 1 - dMouth / 0.48) * 0.8;
+          const mouthAnchor = new THREE.Vector3(
+            armData.wristToMouth[0] * S_avatar,
+            0.625 + armData.wristToMouth[1] * S_avatar,
+            0.21 + armData.wristToMouth[2] * S_avatar
+          );
+          tx = tx * (1 - weight) + mouthAnchor.x * weight;
+          ty = ty * (1 - weight) + mouthAnchor.y * weight;
+          tz = tz * (1 - weight) + mouthAnchor.z * weight;
+        }
+      }
+    }
+
+    // 3. Collision Push-Out (Head sphere + Torso capsule)
+    const headDx = tx;
+    const headDy = ty - 0.64;
+    const headDistSq2D = headDx * headDx + headDy * headDy;
+    if (headDistSq2D < 0.21 * 0.21) {
+      const minZ = 0.04 + Math.sqrt(Math.max(0.001, 0.22 * 0.22 - headDistSq2D));
+      tz = Math.max(tz, minZ);
+    }
+    if (ty < 0.45 && Math.abs(tx) < 0.22 && tz < 0.15) {
+      tz = 0.16;
+    }
+
+    const wristTarget = new THREE.Vector3(tx, ty, tz);
+
+    const poleHint = new THREE.Vector3(
+      dir * Math.max(0.55, Math.abs(armData.elbow[0])) * S_avatar,
+      0.35 + armData.elbow[1] * S_avatar,
+      Math.max(0.08, armData.elbow[2] * S_avatar)
+    );
+
+    const { shoulderQuat, elbowQuat } = solveTwoBoneIK(
+      shoulderPos,
+      wristTarget,
+      poleHint,
+      upperArmLen,
+      foreArmLen,
+      side
+    );
+
+    if (slerpAlpha >= 1) {
+      shoulderBone.quaternion.copy(shoulderQuat);
+      elbowBone.quaternion.copy(elbowQuat);
+    } else {
+      shoulderBone.quaternion.slerp(shoulderQuat, slerpAlpha);
+      elbowBone.quaternion.slerp(elbowQuat, slerpAlpha);
+    }
+
+    shoulderBone.updateMatrixWorld(true);
+    const actualWrist = new THREE.Vector3();
+    wristBone.getWorldPosition(actualWrist);
+
+    return { target: wristTarget, actual: actualWrist };
   }
 
   public dispose(): void {

@@ -132,6 +132,7 @@
     }
   },
   "phraseRules": [
+    { "phrase": "हो छान", "glosses": ["YES", "GOOD"] },
     { "phrase": "नमस्कार कसे आहात", "glosses": ["HELLO", "HOW_ARE_YOU"] },
     { "phrase": "कसे आहात", "glosses": ["HOW_ARE_YOU"] },
     { "phrase": "मी ठीक आहे धन्यवाद", "glosses": ["GOOD", "THANK_YOU"] },

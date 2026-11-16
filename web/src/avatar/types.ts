@@ -32,10 +32,32 @@ export type BoneName =
 
 export type QuatTuple = [number, number, number, number];
 
+export const NEUTRAL_POSE_JOINTS: Partial<Record<BoneName, QuatTuple>> = {
+  Torso: [0, 0, 0, 1],
+  Neck: [0, 0, 0, 1],
+  Head: [0, 0, 0, 1],
+  LeftShoulder: [0.12, 0, 0.28, 0.952],
+  LeftElbow: [-0.38, 0.15, -0.18, 0.895],
+  LeftWrist: [0, 0, 0, 1],
+  RightShoulder: [0.12, 0, -0.28, 0.952],
+  RightElbow: [-0.38, -0.15, 0.18, 0.895],
+  RightWrist: [0, 0, 0, 1],
+};
+
+export interface ArmPoseData {
+  wrist: [number, number, number]; // [x, y, z] in body-frame shoulder-width units
+  elbow: [number, number, number]; // [x, y, z] pole hint in body-frame shoulder-width units
+  wristToMouth?: [number, number, number];
+  wristToNose?: [number, number, number];
+  isFaceAnchored?: boolean;
+}
+
 export interface SignFrame {
   t: number;
   joints: Partial<Record<BoneName, QuatTuple>>;
   expression?: AvatarExpression;
+  leftArm?: ArmPoseData;
+  rightArm?: ArmPoseData;
 }
 
 export interface SignClip {
@@ -46,6 +68,8 @@ export interface SignClip {
   author: string;
   verified: boolean;
   recordedAt: string;
+  hasArmData?: boolean;
+  isAuthored?: boolean;
   expressionTrack?: Array<{ t: number; expression: AvatarExpression }>;
   frames: SignFrame[];
 }
