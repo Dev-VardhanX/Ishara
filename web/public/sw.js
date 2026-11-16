@@ -1,5 +1,5 @@
-// Ishara Service Worker — Offline Support for Core App, Emergency Mode, Audio Clips & MediaPipe
-const CACHE_NAME = 'ishara-offline-v4';
+// Ishara Service Worker — Offline Support for Core App, Emergency Mode, Audio Clips, MediaPipe & 3D Sign Avatar
+const CACHE_NAME = 'ishara-offline-v5';
 
 const PRECACHE_URLS = [
   '/',
@@ -8,6 +8,7 @@ const PRECACHE_URLS = [
   '/logo.svg',
   '/manifest.json',
   '/audio/manifest.json',
+  '/signs/manifest.json',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
   '/models/hand_landmarker.task',
@@ -72,7 +73,8 @@ self.addEventListener('fetch', (event) => {
     url.pathname.includes('/models/') ||
     url.pathname.includes('/mediapipe/') ||
     url.pathname.includes('/assets/') ||
-    url.pathname.includes('/audio/')
+    url.pathname.includes('/audio/') ||
+    url.pathname.includes('/signs/')
   ) {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {

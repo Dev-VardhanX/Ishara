@@ -336,6 +336,49 @@ Simply import the GitHub repository into your Vercel dashboard and click **Deplo
 
 ---
 
+## 🎬 3D Sign Clip Format & Community Recorder
+
+Ishara uses an offline, lightweight 3D skeletal animation clip format based on bone quaternion keyframes recorded directly through local MediaPipe hand and pose tracking.
+
+### 1. Clip JSON Schema (`SignClip`)
+
+Each sign is stored as a standalone JSON file (e.g., `web/public/signs/HELLO.json`) matching the following TypeScript interface:
+
+```typescript
+export interface SignClip {
+  signId: string;       // Uppercase gloss identifier (e.g., "HELLO", "THANK_YOU")
+  language: 'ISL' | 'ASL';
+  fps: 30;              // Uniform 30 frames per second
+  duration: number;     // Total clip length in seconds
+  author: string;       // Contributor handle or organization
+  verified: boolean;    // Must be verified by a certified Deaf/ISL instructor
+  recordedAt: string;   // ISO 8601 timestamp
+  frames: Array<{
+    t: number;          // Timestamp in seconds (0.000, 0.033, 0.067, ...)
+    joints: Partial<Record<BoneName, [x: number, y: number, z: number, w: number]>>;
+    expression?: 'neutral' | 'happy' | 'questioning' | 'sad';
+  }>;
+}
+```
+
+### 2. Steps to Record & Contribute New Signs
+
+1. Open `/dev/sign-recorder` in your browser.
+2. Grant webcam access. Ensure good front lighting, clear background, and both hands fully visible.
+3. Select the target sign from the 20-gloss dropdown (or type a custom sign).
+4. Tap **Record Sign** (a 3-second countdown will start). Perform the sign with clean start and end poses.
+5. Tap **Stop Recording**. The recorder automatically trims static dead frames, applies exponential SLERP low-pass filtering, and resamples to fixed 30 fps.
+6. Preview the animation immediately in the side-by-side 3D avatar window.
+7. Click **Export Clip** to download `<SIGN_ID>.json`.
+8. Place `<SIGN_ID>.json` into `web/public/signs/` and click **Export Manifest** to update `web/public/signs/manifest.json`.
+
+### 3. Strict Honesty & Community Verification
+- **No Procedural Fake Signs**: Ishara never synthesizes or invents signs mathematically. All real signs must originate from real human recordings.
+- **Verification Rule**: Unverified clips default to `"verified": false` and display a clear `"Not verified yet"` badge under the avatar in Voice-to-Sign mode.
+- **Fallback**: Signs without a recorded clip display a clean `"sign not recorded yet"` notice and skip cleanly after holding neutral rest pose.
+
+---
+
 ## 🛡️ Truth in Advertising & Hackathon Scope
 
 In alignment with project ethics and standards:
